@@ -45,7 +45,10 @@ Before submitting a PR please make sure to:
    ```
    yapf --style google file.py -i
    ```
-   to ensure the coding styles are maintained.
+   to ensure the coding styles are maintained. Alternatively run the script `yapf_formatting.sh` under `dev_tools` to yapft all files automatically:
+   ```
+   ./dev_tools/yapf_formatting.sh
+   ```
 3. Consider using pylint to help in the debug process. From the repo folder run
    ```
    pylint stacking bin
