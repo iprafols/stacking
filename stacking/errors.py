@@ -21,6 +21,11 @@ class ReaderError(Exception):
     """
 
 
+class SpectrumError(Exception):
+    """
+        Exceptions occurred in class Spectrum
+    """
+
 class StackerError(Exception):
     """
         Exceptions occurred in class Stacker or its childs
