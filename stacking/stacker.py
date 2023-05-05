@@ -2,6 +2,8 @@
 
 from stacking.errors import StackerError
 
+required_options = []
+
 
 class Stacker:
     """Abstract class to define the normalizer skeleton

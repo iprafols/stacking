@@ -108,3 +108,16 @@ class StackingInterface:
         end_time = time.time()
         self.logger.info("Time spent stacking data: %f seconds",
                          end_time - start_time)
+
+    def write_results(self):
+        """ Write results to disc"""
+        start_time = time.time()
+        self.logger.info("Writing results")
+
+        writer_type, writer_arguments = self.config.writer
+        writer = writer_type(writer_arguments)
+        writer.write_results()
+
+        end_time = time.time()
+        self.logger.info("Time spent writing results: %f seconds",
+                         end_time - start_time)

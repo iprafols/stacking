@@ -28,6 +28,9 @@ def main(args):
     # stack spectra
     interface.stack_spectra()
 
+    # save results
+    interface.write_results()
+
     end_time = time.time()
     module_logger.info("Total time elapsed: %f seconds", end_time - start_time)
     module_logger.info("Done")

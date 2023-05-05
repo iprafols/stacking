@@ -2,6 +2,9 @@
 
 from stacking.errors import ReaderError
 
+accepted_options = ["input directory"]
+required_options = ["input directory"]
+
 
 class Reader:
     """Abstract class to define the readers skeleton

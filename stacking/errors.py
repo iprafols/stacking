@@ -26,6 +26,7 @@ class SpectrumError(Exception):
         Exceptions occurred in class Spectrum
     """
 
+
 class StackerError(Exception):
     """
         Exceptions occurred in class Stacker or its childs
@@ -35,6 +36,12 @@ class StackerError(Exception):
 class StackingError(Exception):
     """
         General exceptions ocurred in the package Stacking
+    """
+
+
+class WriterError(Exception):
+    """
+        Exceptions occurred in class Writer or its childs
     """
 
 

@@ -14,7 +14,8 @@ from stacking.logging_utils import setup_logger
 from stacking.normalizer import Normalizer
 from stacking.reader import Reader
 from stacking.stacker import Stacker
-from stacking.utils import class_from_string
+from stacking.utils import class_from_string, attribute_from_string
+from stacking.writer import Writer
 
 try:
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +29,7 @@ accepted_general_options = [
     "out dir", "num processors"
 ]
 
-accepted_section_options = ["type", "module name"]
+accepted_section_options = ["type"]
 
 default_config = {
     "general": {
@@ -87,12 +88,12 @@ class Config:
     Number of processors to use for multiprocessing-enabled tasks (will be passed
     downstream to relevant classes like e.g. ExpectedFlux or Data)
 
-    out_dir: str
+    output_directory: str
     Name of the directory where the deltas will be saved
 
     overwrite: bool
     If True, overwrite a previous run in the saved in the same output
-    directory. Does not have any effect if the folder `out_dir` does not
+    directory. Does not have any effect if the folder `output_directory` does not
     exist.
 
     reader: (class, configparser.SectionProxy)
@@ -133,7 +134,7 @@ class Config:
         self.logging_level_console = None
         self.logging_level_file = None
         self.num_processors = None
-        self.out_dir = None
+        self.output_directory = None
         self.__format_general_section()
 
         # other sections
@@ -141,6 +142,7 @@ class Config:
         self.normalizer = self.__format_section("normalizer", "normalizers",
                                                 Normalizer)
         self.stacker = self.__format_section("stacker", "stackers", Stacker)
+        self.writer = self.__select_writer()
 
         # initialize folders where data will be saved
         self.initialize_folders()
@@ -177,28 +179,24 @@ class Config:
         ConfigError if the config file is not correct
         """
         if section_name not in self.config:
-            raise ConfigError("Missing section [data]")
-        section = self.config["section_name"]
+            raise ConfigError(f"Missing section [{section_name}]")
+        section = self.config[section_name]
 
         # first load the data class
         name = section.get("type")
         if name is None:
             raise ConfigError(f"In section [{section_name}], variable 'type' "
                               "is required")
-        module_name = section.get("module name")
         try:
-            (loaded_type, default_args,
-             accepted_options) = class_from_string(name, module_name,
-                                                   modules_folder)
+            (loaded_type, default_args, accepted_options,
+             required_options) = class_from_string(name, modules_folder)
         except ImportError as error:
-            raise ConfigError(
-                f"Error loading class {name}, "
-                f"module {module_name} could not be loaded") from error
+            raise ConfigError(f"Error loading class {name}, "
+                              f"module could not be loaded") from error
         except AttributeError as error:
             raise ConfigError(
                 f"Error loading class {name}, "
-                f"module {module_name} did not contain requested class"
-            ) from error
+                f"module did not contain requested class") from error
 
         if not issubclass(loaded_type, check_type):
             raise ConfigError(
@@ -218,13 +216,23 @@ class Config:
         # add num processors if necesssary
         if "num processors" in accepted_options and "num processors" not in section:
             section["num processors"] = str(self.num_processors)
+        # add output directory if necesssary
+        if "output directory" in accepted_options and "output directory" not in section:
+            section["output directory"] = str(self.output_directory)
 
         # update the section adding the default choices when necessary
         for key, value in default_args.items():
             if key not in section:
                 section[key] = str(value)
 
-        # finally add the information to self.data
+        # check that required options are passed
+        for key in required_options:
+            if key not in section:
+                raise ConfigError(
+                    f"Missing required option '{key}' in section [{section_name}]. "
+                    "Please review the configuration file. Note that the required "
+                    "options might change depending on the class being loaded.")
+
         return (loaded_type, section)
 
     def __format_general_section(self):
@@ -247,11 +255,12 @@ class Config:
                                   f"Found: '{key}'. Accepted options are "
                                   f"{accepted_general_options}")
 
-        self.out_dir = section.get("out dir")
-        if self.out_dir is None:
-            raise ConfigError("Missing variable 'out dir' in section [general]")
-        if not self.out_dir.endswith("/"):
-            self.out_dir += "/"
+        self.output_directory = section.get("output directory")
+        if self.output_directory is None:
+            raise ConfigError(
+                "Missing variable 'output directory' in section [general]")
+        if not self.output_directory.endswith("/"):
+            self.output_directory += "/"
 
         self.overwrite = section.getboolean("overwrite")
         # this should never be true as the general section is loaded in the
@@ -269,7 +278,7 @@ class Config:
             raise ConfigError(
                 "Variable 'log' in section [general] should not incude folders. "
                 f"Found: {self.log}")
-        self.log = self.out_dir + "Log/" + self.log
+        self.log = self.output_directory + "Log/" + self.log
         section["log"] = self.log
 
         self.logging_level_console = section.get("logging level console")
@@ -316,6 +325,47 @@ class Config:
                     self.config[section][key] = value.replace(
                         value[:pos], os.getenv(value[1:pos]))
 
+    def __select_writer(self):
+        """Select the appropriate writer
+
+        Return
+        ------
+        loaded_type: class
+        The loaded class
+
+        section: configparser.SectionProxy
+        Parsed options to initialize loaded class
+
+        Raise
+        -----
+        ConfigError if the config file is not correct
+        """
+        stacker_type, _ = self.stacker
+        stacker_module = stacker_type.__module__
+
+        # find writer associated with the selected Stacker
+        try:
+            associated_writer = attribute_from_string("associated_writer",
+                                                      stacker_module)
+        except AttributeError as error:
+            raise ConfigError(
+                "Error finding writer associated with selected Stacker, "
+                f"missing attribute 'associated_writer' in module {stacker_module} "
+            ) from error
+
+        # add writer type
+        if "output" not in self.config:
+            raise ConfigError("Missing section [output]")
+        section = self.config["output"]
+        if "type" in section:
+            raise ConfigError(
+                "Section [output] does not accept argument 'type'. "
+                "This should be defined in the 'associated_writer' attribute "
+                "of the selected Stacker")
+        self.config["output"]["type"] = associated_writer
+
+        return self.__format_section("output", "writers", Writer)
+
     def initialize_folders(self):
         """Initialize output folders
 
@@ -324,28 +374,28 @@ class Config:
         ConfigError if the output path was already used and the
         overwrite is not selected
         """
-        if not os.path.exists(f"{self.out_dir}/.config.ini"):
-            os.makedirs(self.out_dir, exist_ok=True)
-            os.makedirs(self.out_dir + "stack/", exist_ok=True)
-            os.makedirs(self.out_dir + "log/", exist_ok=True)
+        if not os.path.exists(f"{self.output_directory}/.config.ini"):
+            os.makedirs(self.output_directory, exist_ok=True)
+            os.makedirs(self.output_directory + "stack/", exist_ok=True)
+            os.makedirs(self.output_directory + "log/", exist_ok=True)
             self.write_config()
         elif self.overwrite:
-            os.makedirs(self.out_dir + "stack/", exist_ok=True)
-            os.makedirs(self.out_dir + "log/", exist_ok=True)
+            os.makedirs(self.output_directory + "stack/", exist_ok=True)
+            os.makedirs(self.output_directory + "log/", exist_ok=True)
             self.write_config()
         else:
             raise ConfigError("Specified folder contains a previous run. "
                               "Pass overwrite option in configuration file "
                               "in order to ignore the previous run or "
                               "change the output path variable to point "
-                              f"elsewhere. Folder: {self.out_dir}")
+                              f"elsewhere. Folder: {self.output_directory}")
 
     def write_config(self):
         """This function writes the configuration options for later
         usages. The file is saved under the name .config.ini and in
-        the self.out_dir folder
+        the self.output_directory folder
         """
-        outname = f"{self.out_dir}/.config.ini"
+        outname = f"{self.output_directory}/.config.ini"
         if os.path.exists(outname):
             newname = f"{outname}.{os.path.getmtime(outname)}"
             os.rename(outname, newname)
