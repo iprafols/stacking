@@ -94,6 +94,7 @@ class Config:
     Class should be a child of Reader and the SectionProxy should contain a
     configuration section with the parameters necessary to initialize it
     """
+
     def __init__(self, filename):
         """Initializes class instance
 
@@ -128,8 +129,8 @@ class Config:
 
         # other sections
         self.reader = self.__format_section("reader", "readers", Reader)
-        self.normalizer = self.__format_section(
-            "normalizer", "normalizers", Normalizer)
+        self.normalizer = self.__format_section("normalizer", "normalizers",
+                                                Normalizer)
 
         # initialize folders where data will be saved
         self.initialize_folders()
@@ -176,8 +177,9 @@ class Config:
                               "is required")
         module_name = section.get("module name")
         try:
-            (loaded_type, default_args, accepted_options) = class_from_string(
-                name, module_name, modules_folder)
+            (loaded_type, default_args,
+             accepted_options) = class_from_string(name, module_name,
+                                                   modules_folder)
         except ImportError as error:
             raise ConfigError(
                 f"Error loading class {name}, "

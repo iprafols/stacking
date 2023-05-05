@@ -2,6 +2,7 @@
 
 from stacking.errors import NormalizerError
 
+
 class Normalizer:
     """Abstract class to define the normalizer skeleton
 
@@ -10,6 +11,7 @@ class Normalizer:
     compute_normalisation_factors
     normalize_spectrum
     """
+
     def compute_normalisation_factors(self):
         """ Compute normalization factors
 

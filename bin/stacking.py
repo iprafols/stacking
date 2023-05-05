@@ -8,6 +8,7 @@ from stacking.stacking_interface import StackingInterface
 
 module_logger = logging.getLogger("picca.delta_extraction")
 
+
 def main(args):
     """Compute the stack of a set of spectra"""
     start_time = time.time()
@@ -38,10 +39,8 @@ if __name__ == "__main__":
         'config_file',
         type=str,
         default=None,
-        help=
-        ('Configuration file. To learn about all the available options '
-         'check the configuration tutorial in '
-         'tutorials/configuration_tutorial.ipynb'
-        ))
+        help=('Configuration file. To learn about all the available options '
+              'check the configuration tutorial in '
+              'tutorials/configuration_tutorial.ipynb'))
 
     main(parser.parse_args())

@@ -7,6 +7,7 @@ from stacking.config import Config
 from stacking.errors import StackingError
 from stacking.spectrum import Spectrum
 
+
 class StackingInterface:
     """Interface for the stacking Package
 
@@ -63,13 +64,12 @@ class StackingInterface:
                 self.spectra = pool.map(normalizer.normalize, self.spectra)
         else:
             self.spectra = [
-                normalizer.normalize(spectrum)
-                for spectrum in self.spectra
+                normalizer.normalize(spectrum) for spectrum in self.spectra
             ]
 
         end_time = time.time()
-        self.logger.info(
-            "Time spent normalizing spectra: %f seconds", end_time - start_time)
+        self.logger.info("Time spent normalizing spectra: %f seconds",
+                         end_time - start_time)
 
     def read_data(self):
         """Load spectra to stack. Use the reader specified in the configuration"""
@@ -92,5 +92,5 @@ class StackingInterface:
                 "pattern.")
 
         end_time = time.time()
-        self.logger.info(
-            "Time spent reading data: %f seconds", end_time - start_time)
+        self.logger.info("Time spent reading data: %f seconds",
+                         end_time - start_time)

@@ -2,6 +2,7 @@
 
 from stacking.errors import ReaderError
 
+
 class Reader:
     """Abstract class to define the readers skeleton
 
@@ -18,6 +19,7 @@ class Reader:
     spectra: list of Spectrum
     The read spectra
     """
+
     def __init__(self, config):
         """Initialize class instance"""
         self.spectra = []

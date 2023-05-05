@@ -3,10 +3,10 @@ import logging
 import os
 import sys
 
-
 # define new logger level: PROGRESS
 PROGRESS_LEVEL_NUM = 15
 logging.addLevelName(PROGRESS_LEVEL_NUM, "PROGRESS")
+
 
 def progress(self, message, *args, **kws):
     """Function to log with level PROGRESS"""
@@ -15,11 +15,13 @@ def progress(self, message, *args, **kws):
         # this method will be attached to logging.Logger
         self._log(PROGRESS_LEVEL_NUM, message, args, **kws)
 
+
 logging.Logger.progress = progress
 
 # define new logger level: OK_WARNING
 OK_WARNING_LEVEL_NUM = 31
 logging.addLevelName(OK_WARNING_LEVEL_NUM, "WARNING OK")
+
 
 def ok_warning(self, message, *args, **kws):
     """Function to log with level WARNING OK"""
@@ -27,6 +29,7 @@ def ok_warning(self, message, *args, **kws):
         # pylint: disable-msg=protected-access
         # this method will be attached to logging.Logger
         self._log(OK_WARNING_LEVEL_NUM, message, args, **kws)
+
 
 logging.Logger.ok_warning = ok_warning
 

@@ -5,6 +5,7 @@ import re
 
 from stacking.errors import StackingError
 
+
 def class_from_string(class_name, module_name, modules_folder):
     """Return a class from a string. The class must be saved in a module
     under picca.delta_extraction with the same name as the class but
@@ -59,6 +60,7 @@ def class_from_string(class_name, module_name, modules_folder):
         accepted_options = []
     return class_object, default_args, accepted_options
 
+
 def update_accepted_options(accepted_options, new_options, remove=False):
     """Update the content of the list of accepted options
 
@@ -88,6 +90,7 @@ def update_accepted_options(accepted_options, new_options, remove=False):
         accepted_options = sorted(list(set(accepted_options + new_options)))
 
     return accepted_options
+
 
 def update_default_options(default_options, new_options, force_overwrite=False):
     """Update the content of the list of accepted options
