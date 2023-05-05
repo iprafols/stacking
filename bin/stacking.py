@@ -25,6 +25,9 @@ def main(args):
     # normalize spectra
     interface.normalize_spectra()
 
+    # stack spectra
+    interface.stack_spectra()
+
     end_time = time.time()
     module_logger.info("Total time elapsed: %f seconds", end_time - start_time)
     module_logger.info("Done")

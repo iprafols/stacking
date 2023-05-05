@@ -32,6 +32,7 @@ class StackingInterface:
         self.config = None
         self.num_processors = None
         self.spectra = None
+        self.stacker = None
 
     def load_config(self, config_file):
         """Load the configuration of the run, sets up the print function
@@ -93,4 +94,17 @@ class StackingInterface:
 
         end_time = time.time()
         self.logger.info("Time spent reading data: %f seconds",
+                         end_time - start_time)
+
+    def stack_spectra(self):
+        """ Stack spectra """
+        start_time = time.time()
+        self.logger.info("Stacking data")
+
+        stacker_type, stacker_arguments = self.config.stacker
+        self.stacker = stacker_type(stacker_arguments)
+        self.stacker.stak()
+
+        end_time = time.time()
+        self.logger.info("Time spent stacking data: %f seconds",
                          end_time - start_time)

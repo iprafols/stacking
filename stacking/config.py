@@ -13,6 +13,7 @@ from stacking.errors import ConfigError
 from stacking.logging_utils import setup_logger
 from stacking.normalizer import Normalizer
 from stacking.reader import Reader
+from stacking.stacker import Stacker
 from stacking.utils import class_from_string
 
 try:
@@ -78,6 +79,10 @@ class Config:
     Accepted values are (in order of priority) NOTSET, DEBUG, PROGRESS, INFO,
     WARNING, WARNING_OK, ERROR, CRITICAL.
 
+    normalizer: (class, configparser.SectionProxy)
+    Class should be a child of Normalizer and the SectionProxy should contain a
+    configuration section with the parameters necessary to initialize it
+
     num_processors: int
     Number of processors to use for multiprocessing-enabled tasks (will be passed
     downstream to relevant classes like e.g. ExpectedFlux or Data)
@@ -92,6 +97,10 @@ class Config:
 
     reader: (class, configparser.SectionProxy)
     Class should be a child of Reader and the SectionProxy should contain a
+    configuration section with the parameters necessary to initialize it
+
+    stacker: (class, configparser.SectionProxy)
+    Class should be a child of Stacker and the SectionProxy should contain a
     configuration section with the parameters necessary to initialize it
     """
 
@@ -131,6 +140,7 @@ class Config:
         self.reader = self.__format_section("reader", "readers", Reader)
         self.normalizer = self.__format_section("normalizer", "normalizers",
                                                 Normalizer)
+        self.stacker = self.__format_section("stacker", "stackers", Stacker)
 
         # initialize folders where data will be saved
         self.initialize_folders()

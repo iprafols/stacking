@@ -21,6 +21,12 @@ class ReaderError(Exception):
     """
 
 
+class StackerError(Exception):
+    """
+        Exceptions occurred in class Stacker or its childs
+    """
+
+
 class StackingError(Exception):
     """
         General exceptions ocurred in the package Stacking
