@@ -4,6 +4,7 @@ from stacking.errors import ReaderError
 
 accepted_options = ["input directory"]
 required_options = ["input directory"]
+defaults = {}
 
 
 class Reader:
@@ -26,6 +27,9 @@ class Reader:
     def __init__(self, config):
         """Initialize class instance"""
         self.spectra = []
+        # catalogue should be a table with metadata for each spectrum
+        # ordering should be maintained between spectra and catalogue
+        self.catalogue = None
 
         self.input_directory = None
         self.__parse_config(config)

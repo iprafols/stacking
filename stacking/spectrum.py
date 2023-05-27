@@ -34,7 +34,7 @@ class Spectrum:
     """
     common_wavelength_grid = None
 
-    def __init__(self, flux, ivar, wavelength, metadata):
+    def __init__(self, flux, ivar, wavelength):
         """Initialize class instance
 
         Arguments
@@ -47,14 +47,10 @@ class Spectrum:
 
         wavelength: array of float
         The wavelength array
-
-        metadata: dict
-        Metadata associated to the spectrum
         """
         self.flux = flux
         self.ivar = ivar
         self.wavelength = wavelength
-        self.metadata = metadata
 
         self.normalized_flux = None
 
