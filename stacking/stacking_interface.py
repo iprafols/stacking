@@ -22,8 +22,14 @@ class StackingInterface:
     config: Config
     A Config instance
 
+    logger: logging.Logger
+    Logger object
+    
     num_processors: int
     Number of processors to use in parallelization
+
+    spectra: list of Spectrum
+    List of spectra to stack
     """
 
     def __init__(self):
@@ -32,7 +38,6 @@ class StackingInterface:
         self.config = None
         self.num_processors = None
         self.spectra = None
-        self.stacker = None
 
     def load_config(self, config_file):
         """Load the configuration of the run, sets up the print function
@@ -136,8 +141,8 @@ class StackingInterface:
         self.logger.info("Stacking data")
 
         stacker_type, stacker_arguments = self.config.stacker
-        self.stacker = stacker_type(stacker_arguments)
-        self.stacker.stak()
+        stacker = stacker_type(stacker_arguments)
+        stacker.stak()
 
         end_time = time.time()
         self.logger.info("Time spent stacking data: %f seconds",

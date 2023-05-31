@@ -38,16 +38,31 @@ class MultipleRegionsNornalization(Normalizer):
 
     Attributes
     ----------
+    correction_factors: array of float
+    Correction factors that relate the differnt intervals
+
     interals:  array of (float, float)
     Array containing the selected intervals. Each item must contain
     two floats signaling the starting and ending wavelength of the interval.
     Naturally, the starting wavelength must be smaller than the ending wavelength.
 
+    log_directory: str
+    Directory where log data is saved. Normalization factors will be saved there
+
+    logger: logging.Logger
+    Logger object
+    
     main_interval: int
     Number of main normalizeation interval
 
+    norm_factor: pd.DataFrame
+    Pandas DataFrame with the normalization factors
+
     num_intervals: int
     Number of intervals
+
+    save_format: str
+    Saving format, e.g. 'csv', 'txt', 'fits' or 'fits.gz'
     """
     def __init__(self, config):
         """ Initialize instance """
@@ -137,7 +152,7 @@ class MultipleRegionsNornalization(Normalizer):
             )
 
     def compute_correction_factors(self):
-        """ Compute the correction factor that relates the differnt intervals
+        """ Compute the correction factor that relate the differnt intervals
 
         Raise
         -----
