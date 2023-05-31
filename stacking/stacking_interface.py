@@ -50,7 +50,7 @@ class StackingInterface:
     def normalize_spectra(self):
         """ Normalize spectra """
         start_time = time.time()
-        self.logger.info("Normalizing spectra")
+        self.logger.info("Starting normallization procedure")
 
         normalizer_type, normalizer_arguments = self.config.normalizer
         normalizer = normalizer_type(normalizer_arguments)
@@ -87,7 +87,7 @@ class StackingInterface:
                          end_time_step - start_time_step)
 
         end_time = time.time()
-        self.logger.info("Time spent normalizing spectra: %f seconds",
+        self.logger.info("Time spent in the normalization procedure: %f seconds",
                          end_time - start_time)
 
     def read_data(self):
