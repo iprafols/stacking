@@ -218,7 +218,10 @@ class Config:
             section["num processors"] = str(self.num_processors)
         # add output directory if necesssary
         if "output directory" in accepted_options and "output directory" not in section:
-            section["output directory"] = str(self.output_directory)
+            section["output directory"] = self.output_directory
+        # add log directory if necessary
+        if "log directory" in accepted_options and "log directory" not in section:
+            section["log directory"] = f"{self.output_directory}log/"
 
         # update the section adding the default choices when necessary
         for key, value in default_args.items():

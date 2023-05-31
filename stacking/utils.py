@@ -172,3 +172,23 @@ def update_default_options(default_options, new_options, force_overwrite=False):
             default_options[key] = value
 
     return default_options
+
+def update_required_options(required_options, new_options):
+    """Update the content of the list of required options
+
+    Arguments
+    ---------
+    required_options: list of string
+    The current required options
+
+    new_options: list of string
+    The new options
+
+    Return
+    ------
+    required_options: list of string
+    The updated required options
+    """
+    required_options = sorted(list(set(required_options + new_options)))
+
+    return required_options

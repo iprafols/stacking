@@ -34,11 +34,14 @@ class Spectrum:
     """
     common_wavelength_grid = None
 
-    def __init__(self, flux, ivar, wavelength):
+    def __init__(self, specid, flux, ivar, wavelength):
         """Initialize class instance
 
         Arguments
         ---------
+        specid: int
+        Identifier for the spectrum
+
         flux: array of float
         The flux array
 
@@ -52,7 +55,13 @@ class Spectrum:
         self.ivar = ivar
         self.wavelength = wavelength
 
+        self.flux_common_grid = None
         self.normalized_flux = None
+
+    def rebin(self):
+        """Rebin the flux to the common grid"""
+        sectrum.flux_common_grid = rebin(
+            flux, ivar, wavelength, common_wavelength_grid)
 
     def set_normalized_flux(self, normalized_flux):
         """Set the normalized flux
@@ -69,3 +78,8 @@ class Spectrum:
                 "Spectrum.common_wavelength_grid.size = "
                 f"{Spectrum.common_wavelength_grid.size}")
         self.normalized_flux = normalized_flux
+
+@njit
+def rebin(flux, ivar, wavelength, common_wavelength_grid):
+    # TODO: implement function
+    return np.zeros_like(common_wavelength_grid)

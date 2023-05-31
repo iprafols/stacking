@@ -2,7 +2,9 @@
 
 from stacking.errors import NormalizerError
 
+accepted_options = []
 required_options = []
+defaults = {}
 
 
 class Normalizer:
@@ -14,8 +16,13 @@ class Normalizer:
     normalize_spectrum
     """
 
-    def compute_normalisation_factors(self):
+    def compute_norm_factors(self, spectra):
         """ Compute normalization factors
+
+        Arguments
+        ---------
+        spectra: list of Spectrum
+        The list of spectra
 
         Raise
         -----
@@ -43,3 +50,10 @@ class Normalizer:
         """
         raise NormalizerError(
             "Method 'normalize_spectrum' was not overloaded by child class")
+
+    def save_norm_factors(self):
+        """ Save the normalization factors
+        Default behaviour is not saving and should be overloaded by the
+        child classes if saving is desired
+        """
+        return

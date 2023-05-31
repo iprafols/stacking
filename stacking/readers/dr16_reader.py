@@ -295,6 +295,7 @@ class Dr16Reader(Reader):
         self.logger.progress("Reading %d objects", len(self.catalogue))
 
         for row in self.catalogue:
+            thingid = row["THING_ID"]
             plate = row["PLATE"]
             mjd = row["MJD"]
             fiberid = row["FIBERID"]
@@ -313,7 +314,7 @@ class Dr16Reader(Reader):
             ivar = (np.array(hdul[1]["ivar"][:], dtype=np.float64) *
                     hdul[1]["and_mask"][:] == 0)
 
-            self.spectra.append(Spectrum(flux, ivar, wavelength))
+            self.spectra.append(Spectrum(thingid, flux, ivar, wavelength))
 
     def read_from_spplate(self):
         """Read the spectra and formats its data as Spectrum instances."""
@@ -350,6 +351,7 @@ class Dr16Reader(Reader):
                 array_index = fiberid - 1
                 self.spectra.append(
                     Spectrum(
+                        thingid,
                         flux[array_index],
                         ivar[array_index],
                         wavelength,

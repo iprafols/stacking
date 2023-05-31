@@ -56,9 +56,24 @@ class StackingInterface:
         normalizer = normalizer_type(normalizer_arguments)
 
         # compute normalization factors
-        normalizer.compute_normalisation_factors()
+        start_time_step = time.time()
+        self.logger.progress("Computing normalization factors")
+        normalizer.compute_norm_factors(self.spectra)
+        end_time_step = time.time()
+        self.logger.progress("Time spent computing normalisation factors: %f seconds",
+                         end_time_step - start_time_step)
+
+        # save normalisation factor
+        start_time_step = time.time()
+        self.logger.progress("Saving normalization factors")
+        normalizer.save_norm_factors()
+        end_time_step = time.time()
+        self.logger.progress("Time spent saving normalisation factors: %f seconds",
+                         end_time_step - start_time_step)
 
         # normalize spectra
+        start_time_step = time.time()
+        self.logger.progress("Normalizing")
         if self.num_processors > 1:
             context = multiprocessing.get_context('fork')
             with context.Pool(processes=self.num_processors) as pool:
@@ -67,6 +82,9 @@ class StackingInterface:
             self.spectra = [
                 normalizer.normalize(spectrum) for spectrum in self.spectra
             ]
+        end_time_step = time.time()
+        self.logger.progress("Time spent normalizing: %f seconds",
+                         end_time_step - start_time_step)
 
         end_time = time.time()
         self.logger.info("Time spent normalizing spectra: %f seconds",
@@ -94,6 +112,22 @@ class StackingInterface:
 
         end_time = time.time()
         self.logger.info("Time spent reading data: %f seconds",
+                         end_time - start_time)
+
+    def rebin_data(self):
+        """Rebin data to a common grid"""
+        start_time = time.time()
+
+        # set common grid
+        # TODO: add code here
+
+        # do the actual rebinning
+        # TODO: add parallelization
+        for spectrum in spectra:
+            spectrum.rebin()
+
+        end_time = time.time()
+        self.logger.info("Time spent rebinning data: %f seconds",
                          end_time - start_time)
 
     def stack_spectra(self):
