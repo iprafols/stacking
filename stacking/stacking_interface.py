@@ -24,7 +24,7 @@ class StackingInterface:
 
     logger: logging.Logger
     Logger object
-    
+
     num_processors: int
     Number of processors to use in parallelization
 
@@ -123,13 +123,21 @@ class StackingInterface:
         """Rebin data to a common grid"""
         start_time = time.time()
 
-        # set common grid
-        # TODO: add code here
+        # initialize rebinnes (also sets common grid)
+        rebin = Rebin(self.config.rebin_args)
 
         # do the actual rebinning
-        # TODO: add parallelization
-        for spectrum in spectra:
-            spectrum.rebin()
+        if self.num_processors > 1:
+            context = multiprocessing.get_context('fork')
+            # Pick a large chunk size such that rebin is copied as few times
+            # as possible
+            chunksize = int(len(self.spectra)/self.num_processors/3)
+            chunksize = max(1, chunksize)
+            with context.Pool(processes=self.num_processors) as pool:
+                self.spectra = list(pool.map(
+                    rebin, self.spectra, chunksize=chunksize))
+        else:
+            self.spectra = [rebin(spectrum) for spectrum in spectra]
 
         end_time = time.time()
         self.logger.info("Time spent rebinning data: %f seconds",

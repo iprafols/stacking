@@ -144,6 +144,11 @@ class Config:
         self.stacker = self.__format_section("stacker", "stackers", Stacker)
         self.writer = self.__select_writer()
 
+        # rebinning arguments
+        if "rebin" not in self.config:
+            raise ConfigError(f"Missing section [rebin]")
+        self.rebin_args = self.config["rebin"]
+
         # initialize folders where data will be saved
         self.initialize_folders()
 

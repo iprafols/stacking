@@ -28,7 +28,7 @@ defaults = update_default_options(
         "z min": 0.0,
     })
 
-supported_reading_modes = ["spplate", "spec"]
+SUPPORTED_READING_MODES = ["spplate", "spec"]
 
 
 class Dr16Reader(Reader):
@@ -111,6 +111,7 @@ class Dr16Reader(Reader):
         self.read_drq_catalogue()
 
         # read data
+        # TODO: parallelize this
         if self.read_mode == "spplate":
             self.read_from_spplate()
         elif self.read_mode == "spec":
@@ -149,11 +150,11 @@ class Dr16Reader(Reader):
         self.read_mode = config.get("read mode")
         if self.read_mode is None:
             raise ReaderError("Missing argument 'mode' required by Dr16Reader")
-        if self.read_mode not in supported_reading_modes:
+        if self.read_mode not in SUPPORTED_READING_MODES:
             raise ReaderError(
                 f"Error reading data in Dr16Reader. Mode {self.read_mode} is not "
                 "supported. Supported modes are " +
-                " ".join(supported_reading_modes))
+                " ".join(SUPPORTED_READING_MODES))
 
         if self.best_obs:
             self.spall = None

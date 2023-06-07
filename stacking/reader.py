@@ -25,7 +25,13 @@ class Reader:
     """
 
     def __init__(self, config):
-        """Initialize class instance"""
+        """Initialize class instance
+
+        Arguments
+        ---------
+        config: configparser.SectionProxy
+        Parsed options to initialize class
+        """
         self.spectra = []
         # catalogue should be a table with metadata for each spectrum
         # ordering should be maintained between spectra and catalogue
