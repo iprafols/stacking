@@ -173,6 +173,7 @@ def update_default_options(default_options, new_options, force_overwrite=False):
 
     return default_options
 
+
 def update_required_options(required_options, new_options):
     """Update the content of the list of required options
 

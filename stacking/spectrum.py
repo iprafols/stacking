@@ -29,6 +29,9 @@ class Spectrum:
     normalized_flux: array of float
     The normalized flux. Should be based on the common wavelength grid
 
+    specid: int
+    Identifier of the spectrum
+
     wavelength: array of float
     The wavelength array
     """
@@ -51,6 +54,7 @@ class Spectrum:
         wavelength: array of float
         The wavelength array
         """
+        self.specid = specid
         self.flux = flux
         self.ivar = ivar
         self.wavelength = wavelength
@@ -59,8 +63,30 @@ class Spectrum:
         self.ivar_common_grid = None
         self.normalized_flux = None
 
+    @classmethod
+    def set_common_wavelength_grid(cls, common_wavelength_grid):
+        """ Set the common wavelength grid
+
+        Arguments
+        ---------
+        common_wavelength_grid: array of float
+        The common wavelength grid
+        """
+        cls.common_wavelength_grid = common_wavelength_grid
+
     def set_flux_ivar_common_grid(self, flux_common_grid, ivar_common_grid):
-        """Add the rebinned flux and inverse variance"""
+        """Add the rebinned flux and inverse variance
+
+        Arguments
+        ---------
+        flux_common_grid: array of float
+        The flux in the common grid. Must have the same length as
+        Spectrum.common_wavelength_grid
+
+        ivar_common_grid: array of float
+        The inverse variance in the common grid. Must have the same length as 
+        Spectrum.common_wavelength_grid
+        """
         if flux_common_grid.size != Spectrum.common_wavelength_grid.size:
             raise SpectrumError(
                 "Normalized flux should be based on the common wavelength grid "

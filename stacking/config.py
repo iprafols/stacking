@@ -146,7 +146,7 @@ class Config:
 
         # rebinning arguments
         if "rebin" not in self.config:
-            raise ConfigError(f"Missing section [rebin]")
+            raise ConfigError("Missing section [rebin]")
         self.rebin_args = self.config["rebin"]
 
         # initialize folders where data will be saved

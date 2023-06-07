@@ -5,6 +5,7 @@ import time
 
 from stacking.config import Config
 from stacking.errors import StackingError
+from stacking.rebin import Rebin
 from stacking.spectrum import Spectrum
 
 
@@ -34,7 +35,7 @@ class StackingInterface:
 
     def __init__(self):
         """Initialize class instance"""
-        self.logger = logging.getLogger('picca.delta_extraction.survey.Survey')
+        self.logger = logging.getLogger(__name__)
         self.config = None
         self.num_processors = None
         self.spectra = None
@@ -65,16 +66,18 @@ class StackingInterface:
         self.logger.progress("Computing normalization factors")
         normalizer.compute_norm_factors(self.spectra)
         end_time_step = time.time()
-        self.logger.progress("Time spent computing normalisation factors: %f seconds",
-                         end_time_step - start_time_step)
+        self.logger.progress(
+            "Time spent computing normalisation factors: %f seconds",
+            end_time_step - start_time_step)
 
         # save normalisation factor
         start_time_step = time.time()
         self.logger.progress("Saving normalization factors")
         normalizer.save_norm_factors()
         end_time_step = time.time()
-        self.logger.progress("Time spent saving normalisation factors: %f seconds",
-                         end_time_step - start_time_step)
+        self.logger.progress(
+            "Time spent saving normalisation factors: %f seconds",
+            end_time_step - start_time_step)
 
         # normalize spectra
         start_time_step = time.time()
@@ -89,11 +92,12 @@ class StackingInterface:
             ]
         end_time_step = time.time()
         self.logger.progress("Time spent normalizing: %f seconds",
-                         end_time_step - start_time_step)
+                             end_time_step - start_time_step)
 
         end_time = time.time()
-        self.logger.info("Time spent in the normalization procedure: %f seconds",
-                         end_time - start_time)
+        self.logger.info(
+            "Time spent in the normalization procedure: %f seconds",
+            end_time - start_time)
 
     def read_data(self):
         """Load spectra to stack. Use the reader specified in the configuration"""
@@ -131,13 +135,13 @@ class StackingInterface:
             context = multiprocessing.get_context('fork')
             # Pick a large chunk size such that rebin is copied as few times
             # as possible
-            chunksize = int(len(self.spectra)/self.num_processors/3)
+            chunksize = int(len(self.spectra) / self.num_processors / 3)
             chunksize = max(1, chunksize)
             with context.Pool(processes=self.num_processors) as pool:
-                self.spectra = list(pool.map(
-                    rebin, self.spectra, chunksize=chunksize))
+                self.spectra = list(
+                    pool.map(rebin, self.spectra, chunksize=chunksize))
         else:
-            self.spectra = [rebin(spectrum) for spectrum in spectra]
+            self.spectra = [rebin(spectrum) for spectrum in self.spectra]
 
         end_time = time.time()
         self.logger.info("Time spent rebinning data: %f seconds",

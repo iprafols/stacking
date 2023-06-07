@@ -21,6 +21,12 @@ class ReaderError(Exception):
     """
 
 
+class RebinError(Exception):
+    """
+        Exceptions occurred in class Rebin
+    """
+
+
 class SpectrumError(Exception):
     """
         Exceptions occurred in class Spectrum

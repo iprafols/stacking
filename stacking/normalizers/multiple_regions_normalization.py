@@ -1,5 +1,9 @@
 """ This module define the class MultipleRegionsNornalization that normalizes
 the spectra using multiple regions """
+from datetime import datetime
+import logging
+import multiprocessing
+
 from astropy.io import fits
 from numba import njit
 import numpy as np
@@ -7,24 +11,28 @@ import pandas as pd
 
 from stacking._version import __version__
 from stacking.errors import NormalizerError
-from stacking.normalizer import (
-    Normalizer, defaults, accepted_options, required_options)
-from stacking.utils import (
-    update_accepted_options, update_default_options, update_required_options)
+from stacking.normalizer import (Normalizer, defaults, accepted_options,
+                                 required_options)
+from stacking.utils import (update_accepted_options, update_default_options,
+                            update_required_options)
 
 accepted_options = update_accepted_options(accepted_options, [
-    "intervals", "log directory", "main interval", "save format",
+    "intervals",
+    "log directory",
+    "main interval",
+    "num processors",
+    "save format",
 ])
-required_options = update_required_options(required_options, [
-    "log directory"
-])
-defaults = update_default_options(defaults, {
-    "intervals": "1300 - 1500, 2000 - 2600, 4400 - 4800",
-    "main interval": 1,
-    "save format": "fits.gz",
-})
+required_options = update_required_options(required_options, ["log directory"])
+defaults = update_default_options(
+    defaults, {
+        "intervals": "1300 - 1500, 2000 - 2600, 4400 - 4800",
+        "main interval": 1,
+        "save format": "fits.gz",
+    })
 
 ACCEPTED_SAVE_FORMATS = ["csv", "fits", "fits.gz", "txt"]
+
 
 class MultipleRegionsNornalization(Normalizer):
     """This class is set to circunvent the normalization procedure
@@ -51,7 +59,7 @@ class MultipleRegionsNornalization(Normalizer):
 
     logger: logging.Logger
     Logger object
-    
+
     main_interval: int
     Number of main normalizeation interval
 
@@ -64,6 +72,7 @@ class MultipleRegionsNornalization(Normalizer):
     save_format: str
     Saving format, e.g. 'csv', 'txt', 'fits' or 'fits.gz'
     """
+
     def __init__(self, config):
         """ Initialize instance """
         self.logger = logging.getLogger(__name__)
@@ -78,8 +87,7 @@ class MultipleRegionsNornalization(Normalizer):
 
         # initialize data frame to store normalization factors
         self.norm_factors = None
-        self.correction_factors = np.zeros(
-            self.num_intervals, dtype=float)
+        self.correction_factors = np.zeros(self.num_intervals, dtype=float)
 
     def __parse_config(self, config):
         """Parse the configuration options
@@ -96,27 +104,31 @@ class MultipleRegionsNornalization(Normalizer):
         """
         intervals_str = config.get("intervals")
         if intervals_str is None:
-            raise NormalizerError(
-                "Missing argument 'intervals' required by "
-                "MultipleRegionsNornalization")
+            raise NormalizerError("Missing argument 'intervals' required by "
+                                  "MultipleRegionsNornalization")
         try:
             self.intervals = np.array([
                 (float(interval.split("-")[0]), float(interval.split("-")[1]))
                 for interval in intervals_str.split(",")
             ])
-        except ValueError, IndexError as error:
+        except (ValueError, IndexError) as error:
             raise NormalizerError(
                 "Wrong format for variable 'intervals'. Expected "
                 "'start0 - end0, start1 - end1, ..., startN - endN'"
                 " where startX and endX are positive numbers. Found: "
-                f"{intervals_str}) from error
+                f"{intervals_str}") from error
         for interval in self.intervals:
-            if interval[0] > inteval[1]:
+            if interval[0] > interval[1]:
                 raise NormalizerError(
                     f"Invalid interval found: {interval}. Starting wavelength "
-                    "should be smaller than ending interval"
-                )
+                    "should be smaller than ending interval")
         self.num_intervals = len(self.intervals)
+
+        self.num_processors = config.getint("num processors")
+        if self.num_processors is None:
+            raise NormalizerError(
+                "Missing argument 'num processors' required by "
+                "MultipleRegionsNornalization")
 
         self.log_directory = config.get("log directory")
         if self.log_directory is None:
@@ -142,14 +154,13 @@ class MultipleRegionsNornalization(Normalizer):
 
         self.save_format = config.get("save format")
         if self.save_format is None:
-            raise NormalizerError(
-                "Missing argument 'save format' required by "
-                "MultipleRegionsNornalization")
+            raise NormalizerError("Missing argument 'save format' required by "
+                                  "MultipleRegionsNornalization")
         if self.save_format not in ACCEPTED_SAVE_FORMATS:
             raise NormalizerError(
                 "Invalid save format. Accepted options are '" +
-                " ".format(ACCEPTED_SAVE_FORMATS) + f"' Found: {self.save_format}"
-            )
+                " ".join(ACCEPTED_SAVE_FORMATS) +
+                f"' Found: {self.save_format}")
 
     def compute_correction_factors(self):
         """ Compute the correction factor that relate the differnt intervals
@@ -163,8 +174,8 @@ class MultipleRegionsNornalization(Normalizer):
                 self.correction_factors[index] = 1
             else:
                 aux = self.norm_factors[
-                    ~self.norm_factors[f"norm factor {index}"].isna() &
-                    ~self.norm_factors[f"norm factor {self.main_interval}"].isna()]
+                    ~self.norm_factors[f"norm factor {index}"].isna() & ~self.
+                    norm_factors[f"norm factor {self.main_interval}"].isna()]
                 if aux.shape[0] > 0:
                     self.correction_factors[index] = (
                         aux[f"norm factor {self.main_interval}"].mean() /
@@ -173,8 +184,7 @@ class MultipleRegionsNornalization(Normalizer):
                     raise NormalizerError(
                         "Error computing the correction for normalisation "
                         f"factor interval {index}. No common measurements with "
-                        " the main intervals were found."
-                    )
+                        " the main intervals were found.")
 
     def compute_norm_factors(self, spectra):
         """ Compute the normalization factors
@@ -185,42 +195,42 @@ class MultipleRegionsNornalization(Normalizer):
         The list of spectra
         """
         # first compute individual normalisation factors
-        arguments = []
-        for spectrum in spectra:
-            arguments.append((filename, group))
+        arguments = [(spectrum.flux, spectrum.ivar, spectrum.wavelength,
+                      self.num_intervals, self.intervals)
+                     for spectrum in spectra]
 
         if self.num_processors > 1:
             context = multiprocessing.get_context('fork')
             with context.Pool(processes=self.num_processors) as pool:
-                imap_it = pool.imap(compute_normalisation_factors, arguments)
+                imap_it = pool.imap(compute_norm_factors, arguments)
         else:
             imap_it = [
-                compute_normalisation_factors(*argument)
-                for argument in arguments
+                compute_norm_factors(*argument) for argument in arguments
             ]
 
         # unpack them together in a dataframe
         self.norm_factors = pd.DataFrame.from_dict({
-            key: value
-            for index in range(self.num_intervals)
-            for key, value in zip(
-                [f"norm factor {index}", f"norm S/N {index}", f"num pixels {index}"],
-                [imap_it[0][:][index], imap_it[1][:][index], imap_it[2][:][index]])
+            key: value for index in range(self.num_intervals)
+            for key, value in zip([
+                f"norm factor {index}", f"norm S/N {index}",
+                f"num pixels {index}"
+            ], [
+                imap_it[0][:][index], imap_it[1][:][index], imap_it[2][:][index]
+            ])
         })
         self.norm_factors["specid"] = [spectrum.specid for spectrum in spectra]
 
         # create relations between the main normalisation factor and the secondary
-        self.intervals_corretion_factor()
+        self.compute_correction_factors()
 
         # select final normalisation factor
-        self.norm_factors[[
-            "norm factor", "norm S/N", "chosen interval"
-        ]] = self.norm_factors.apply(
-            select_final_normalisation_factor,
-            axis=1,
-            args=(self.correction_factors),
-            engine="numba",
-        )
+        self.norm_factors[["norm factor", "norm S/N",
+                           "chosen interval"]] = self.norm_factors.apply(
+                               select_final_normalisation_factor,
+                               axis=1,
+                               args=(self.correction_factors),
+                               engine="numba",
+                           )
 
     def normalize_spectrum(self, spectrum):
         """ Set the flux as normalized flux
@@ -235,11 +245,12 @@ class MultipleRegionsNornalization(Normalizer):
         spectrum: Spectrum
         The normalized spectrum
         """
-        norm_factor = self.norm_factors[
-            self.norm_factors["specid"] == spectrum.specid].values[0]
+        norm_factor = self.norm_factors[self.norm_factors["specid"] ==
+                                        spectrum.specid].values[0]
 
         if norm_factor > 0.0:
-            spectrum.set_normalized_flux(spectrum.flux_common_grid/norm_factor)
+            spectrum.set_normalized_flux(spectrum.flux_common_grid /
+                                         norm_factor)
         else:
             spectrum.set_normalized_flux(
                 np.zeros_like(spectrum.flux_common_grid) + np.nan)
@@ -255,11 +266,11 @@ class MultipleRegionsNornalization(Normalizer):
             primary_hdu = fits.PrimaryHDU()
             now = datetime.now()
             primary_hdu.header["COMMENT"] = (
-                f"Normalisation factors computed using class {self.__name__}"
-                f" of code stacking"
-            )
+                f"Normalisation factors computed using class {__name__}"
+                f" of code stacking")
             primary_hdu.header["VERSION"] = (__version__, "Code version")
-            primary_hdu.header["DATETIME"] = (now.strftime("%Y-%m-%dT%H:%M:%S"), "DateTime file created")
+            primary_hdu.header["DATETIME"] = (now.strftime("%Y-%m-%dT%H:%M:%S"),
+                                              "DateTime file created")
 
             # norm factors
             hdu = fits.BinTableHDU(
@@ -272,13 +283,11 @@ class MultipleRegionsNornalization(Normalizer):
                 fits.Column(name="START",
                             format="E",
                             disp="F7.3",
-                            array=self.intervals[:,0]
-                           ),
+                            array=self.intervals[:, 0]),
                 fits.Column(name="END",
-                            format="E"
+                            format="E",
                             disp="F7.3",
-                            array=self.intervals[:,1]
-                           ),
+                            array=self.intervals[:, 1]),
             ]
             hdu2 = fits.BinTableHDU.from_columns(cols, name="NORM_INTERVALS")
 
@@ -336,19 +345,19 @@ def compute_norm_factors(flux, ivar, wavelength, num_intervals, intervals):
     num_pixels = np.zeros(num_intervals, dtype=float)
 
     for index in range(num_intervals):
-        pos = np.argwhere((flux >= intervals[index][0]) &
-                          (flux <= intervals[index][1]) &
-                          (ivar != 0.0))
+        pos = np.argwhere((wavelength >= intervals[index][0]) &
+                          (wavelength <= intervals[index][1]) & (ivar != 0.0))
         num_pixels[index] = pos.size
         if num_pixels[index] == 0:
             norm_factors[index] = np.nan
             norm_sn[index] = np.nan
         else:
-            norm_factors[index] = flux[pos].sum()/num_pixels[index]
-            mean_noise = np.sqrt(np.sum(1.0/ivar[pos])/num_pixels[index])
-            norm_sn[index] = norm_factors[index]/mean_noise
+            norm_factors[index] = flux[pos].sum() / num_pixels[index]
+            mean_noise = np.sqrt(np.sum(1.0 / ivar[pos]) / num_pixels[index])
+            norm_sn[index] = norm_factors[index] / mean_noise
 
     return norm_factors, norm_sn, num_pixels
+
 
 def select_final_normalisation_factor(row, corretion_factors):
     """ Select the final normalisation factor
@@ -366,9 +375,9 @@ def select_final_normalisation_factor(row, corretion_factors):
     Correction factors to correct the chosen normalisation factors
     """
     # select best interval
-    cols = [f"num pixels {index}"
-            for index in range(intervals_corretion_factors.size)]
+    cols = [f"num pixels {index}" for index in range(corretion_factors.size)]
     selected_interval = row[cols].idxmax()
 
-    norm_factor = row[f"norm factor {selected_interval}"] * corretion_factors[selected_interval]
+    norm_factor = row[f"norm factor {selected_interval}"] * corretion_factors[
+        selected_interval]
     return norm_factor, row[f"norm S/N {selected_interval}", selected_interval]

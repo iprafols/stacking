@@ -14,7 +14,8 @@ class NoNormalization(Normalizer):
     compute_normalisation_factors
     normalize_spectrum
     """
-    def __init__(self, config):
+
+    def __init__(self, config):  # pylint: disable=unused-argument
         """ Initialize instance """
         return
 
@@ -41,5 +42,5 @@ class NoNormalization(Normalizer):
         spectrum: Spectrum
         The normalized spectrum
         """
-        spectrum.set_normalized_flux(flux_common_grid)
+        spectrum.set_normalized_flux(spectrum.flux_common_grid)
         return spectrum
