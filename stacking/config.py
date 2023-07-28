@@ -199,11 +199,12 @@ class Config:
             (loaded_type, default_args, accepted_options,
              required_options) = class_from_string(name, modules_folder)
         except ImportError as error:
-            raise ConfigError(f"Error loading class {name}, "
-                              f"module could not be loaded") from error
+            raise ConfigError(
+                f"In section [{section_name}], error loading class {name}, "
+                f"module could not be loaded") from error
         except AttributeError as error:
             raise ConfigError(
-                f"Error loading class {name}, "
+                f"In section [{section_name}], error loading class {name}, "
                 f"module did not contain requested class") from error
 
         if not issubclass(loaded_type, check_type):

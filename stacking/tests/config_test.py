@@ -189,16 +189,38 @@ class ConfigTest(AbstractTest):
             "might change depending on the class being loaded.")
         self.check_error(in_file, expected_message)
 
+        # check 'type' in other sections
+        in_file = f"{THIS_DIR}/data/config_tests/config_missing_type_option.ini"
+        expected_message = (
+            "In section [reader], variable 'type' is required")
+        self.check_error(in_file, expected_message)
+
     def test_config_missing_sections(self):
-        """Check behaviour of config when required sections are missing"""
+        """Check that missing required sections raise errors"""
         sections = ["normalizer", "reader", "stacker"]
         for section in sections:
             in_file = f"{THIS_DIR}/data/config_tests/config_missing_section_{section}.ini"
             expected_message = f"Missing section [{section}]"
             self.check_error(in_file, expected_message)
 
+    def test_config_class_not_found(self):
+        """Check that errors are risen when a class module cannot be found"""
+        # missing module
+        in_file = f"{THIS_DIR}/data/config_tests/config_class_module_not_found.ini"
+        expected_message = (
+            f"In section [rebin], error loading class NotFound, "
+            f"module could not be loaded")
+        self.check_error(in_file, expected_message)
+
+        # missing class
+        in_file = f"{THIS_DIR}/data/config_tests/config_class_not_found.ini"
+        expected_message = (
+            f"In section [rebin], error loading class Utils, "
+            f"module did not contain requested class")
+        self.check_error(in_file, expected_message)
+
     def test_config_no_file(self):
-        """Check behaviour of config when the file is not valid"""
+        """Check that errors are risen when config file is not found"""
         in_file = f"{THIS_DIR}/data/config_tests/non_existent_config_overwrite.ini"
         expected_message = f"Config file not found: {in_file}"
         self.check_error(in_file, expected_message)
