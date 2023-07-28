@@ -20,9 +20,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pylint
     - name: Install stacking
-      run: |
-        pip install gcg
-        pip install -e .
+      run: pip install -e .
     - name: Analysing the code with pylint
       run: |
         pylint stacking/

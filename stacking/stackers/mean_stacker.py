@@ -6,6 +6,7 @@ import numpy as np
 from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
 
+ASSOCIATED_WRITER = "StandardWriter"
 
 class MeanStacker(Stacker):
     """Class to compute the satck using the mean of the different spectra

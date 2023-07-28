@@ -34,7 +34,7 @@ defaults = update_default_options(
 ACCEPTED_SAVE_FORMATS = ["csv", "fits", "fits.gz", "txt"]
 
 
-class MultipleRegionsNornalization(Normalizer):
+class MultipleRegionsNormalization(Normalizer):
     """This class is set to circunvent the normalization procedure
 
     Methods

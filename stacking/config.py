@@ -26,7 +26,7 @@ except InvalidGitRepositoryError:  # pragma: no cover
 
 accepted_general_options = [
     "overwrite", "logging level console", "logging level file", "log",
-    "out dir", "num processors"
+    "output directory", "num processors"
 ]
 
 accepted_section_options = ["type"]
@@ -44,7 +44,8 @@ default_config = {
     "run specs": {
         "git hash": GIT_HASH,
         "timestamp": str(datetime.now()),
-    }
+    },
+    "writer": {},
 }
 
 
@@ -353,7 +354,7 @@ class Config:
 
         # find writer associated with the selected Stacker
         try:
-            associated_writer = attribute_from_string("associated_writer",
+            associated_writer = attribute_from_string("ASSOCIATED_WRITER",
                                                       stacker_module)
         except AttributeError as error:
             raise ConfigError(
@@ -362,17 +363,17 @@ class Config:
             ) from error
 
         # add writer type
-        if "output" not in self.config:
-            raise ConfigError("Missing section [output]")
-        section = self.config["output"]
+        if "writer" not in self.config:
+            raise ConfigError("Missing section [writer]")
+        section = self.config["writer"]
         if "type" in section:
             raise ConfigError(
-                "Section [output] does not accept argument 'type'. "
+                "Section [writer] does not accept argument 'type'. "
                 "This should be defined in the 'associated_writer' attribute "
                 "of the selected Stacker")
-        self.config["output"]["type"] = associated_writer
+        self.config["writer"]["type"] = associated_writer
 
-        return self.__format_section("output", "writers", Writer)
+        return self.__format_section("writer", "writers", Writer)
 
     def initialize_folders(self):
         """Initialize output folders
@@ -382,7 +383,7 @@ class Config:
         ConfigError if the output path was already used and the
         overwrite is not selected
         """
-        if not os.path.exists(f"{self.output_directory}/.config.ini"):
+        if not os.path.exists(f"{self.output_directory}/config.ini"):
             os.makedirs(self.output_directory, exist_ok=True)
             os.makedirs(self.output_directory + "stack/", exist_ok=True)
             os.makedirs(self.output_directory + "log/", exist_ok=True)

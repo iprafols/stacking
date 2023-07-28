@@ -1,4 +1,4 @@
-""" Basic structure for readers """
+""" Basic structure for writers """
 
 from stacking.errors import WriterError
 
