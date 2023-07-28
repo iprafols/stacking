@@ -24,6 +24,6 @@ setup(name="stacking",
     url = "https://github.com/iprafols/stacking",
     author = "Ignasi Pérez-Ràfols",
     author_email = "iprafols@gmail.com",
-    install_requires = ["numpy", "numba", "pandas", "astropy"],
+    install_requires = ["numpy", "numba", "pandas", "astropy", "fitsio"],
     scripts = scripts
     )

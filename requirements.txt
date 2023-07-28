@@ -1,0 +1,7 @@
+numpy>=1.21.5
+numba>=0.55.1
+pandas>=1.4.4
+astropy>=5.1
+fitsio>=1.1.8
+gitpython>=3.1.18
+setuptools>=63.4.1
