@@ -17,11 +17,16 @@ class Reader:
 
     Attributes
     ----------
+    catalogue: astropy.table.Table
+    Metadata associated with the spectra. Ordering should be maintained
+    between spectra and catalogue
+
     input_directory: str
     The input directory
 
     spectra: list of Spectrum
-    The read spectra
+    The read spectra. Ordering should be maintained 
+    between spectra and catalogue
     """
 
     def __init__(self, config):
