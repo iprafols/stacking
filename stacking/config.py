@@ -383,7 +383,7 @@ class Config:
         ConfigError if the output path was already used and the
         overwrite is not selected
         """
-        if not os.path.exists(f"{self.output_directory}/config.ini"):
+        if not os.path.exists(f"{self.output_directory}/.config.ini"):
             os.makedirs(self.output_directory, exist_ok=True)
             os.makedirs(self.output_directory + "stack/", exist_ok=True)
             os.makedirs(self.output_directory + "log/", exist_ok=True)

@@ -122,8 +122,8 @@ class ConfigTest(AbstractTest):
         Load a config file and then print it
         """
         in_file = f"{THIS_DIR}/data/config_tests/config_overwrite.ini"
-        out_file = f"{THIS_DIR}/results/config_tests/config.ini"
-        test_file = f"{THIS_DIR}/data/config_tests/config_full.ini"
+        out_file = f"{THIS_DIR}/results/config_tests/.config.ini"
+        test_file = f"{THIS_DIR}/data/config_tests/.config.ini"
 
         config = Config(in_file)
         config.write_config()
