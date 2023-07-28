@@ -208,15 +208,15 @@ class ConfigTest(AbstractTest):
         # missing module
         in_file = f"{THIS_DIR}/data/config_tests/config_class_module_not_found.ini"
         expected_message = (
-            f"In section [rebin], error loading class NotFound, "
-            f"module could not be loaded")
+            "In section [rebin], error loading class NotFound, "
+            "module could not be loaded")
         self.check_error(in_file, expected_message)
 
         # missing class
         in_file = f"{THIS_DIR}/data/config_tests/config_class_not_found.ini"
         expected_message = (
-            f"In section [rebin], error loading class Utils, "
-            f"module did not contain requested class")
+            "In section [rebin], error loading class Utils, "
+            "module did not contain requested class")
         self.check_error(in_file, expected_message)
 
     def test_config_no_file(self):
