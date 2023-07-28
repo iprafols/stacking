@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get -y install libbz2-dev
         python -m pip install --upgrade pip
-        pip install wheel pytest pytest-cov coveralls
+        pip install wheel pylint
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Install stacking
       run: pip install -e .

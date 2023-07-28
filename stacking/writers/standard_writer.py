@@ -1,6 +1,4 @@
 """ This module defines the class StandardWriter to write the stack results"""
-import logging
-import numpy as np
 
 from stacking.writer import Writer
 

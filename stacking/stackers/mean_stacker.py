@@ -8,6 +8,7 @@ from stacking.stacker import Stacker
 
 ASSOCIATED_WRITER = "StandardWriter"
 
+
 class MeanStacker(Stacker):
     """Class to compute the satck using the mean of the different spectra
 
