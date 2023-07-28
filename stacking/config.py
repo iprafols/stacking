@@ -13,6 +13,7 @@ from stacking.errors import ConfigError
 from stacking.logging_utils import setup_logger
 from stacking.normalizer import Normalizer
 from stacking.reader import Reader
+from stacking.rebin import Rebin
 from stacking.stacker import Stacker
 from stacking.utils import class_from_string, attribute_from_string
 from stacking.writer import Writer
@@ -40,6 +41,9 @@ default_config = {
         "logging level console": "PROGRESS",
         "logging level file": "PROGRESS",
         "num processors": 0,
+    },
+    "rebin": {
+        "type": "Rebin",
     },
     "run specs": {
         "git hash": GIT_HASH,
@@ -146,9 +150,7 @@ class Config:
         self.writer = self.__select_writer()
 
         # rebinning arguments
-        if "rebin" not in self.config:
-            raise ConfigError("Missing section [rebin]")
-        self.rebin_args = self.config["rebin"]
+        _, self.rebin_args = self.__format_section("rebin", ".", Rebin)
 
         # initialize folders where data will be saved
         self.initialize_folders()

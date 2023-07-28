@@ -3,8 +3,11 @@ import os
 import unittest
 from configparser import ConfigParser
 
-from stacking.config import Config
+import numpy as np
+
+from stacking.config import Config, accepted_general_options, accepted_section_options
 from stacking.errors import ConfigError
+from stacking.readers.dr16_reader import accepted_options
 from stacking.tests.abstract_test import AbstractTest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -142,12 +145,61 @@ class ConfigTest(AbstractTest):
         in_file = f"{THIS_DIR}/data/config_tests/config_overwrite.ini"
         config = Config(in_file)
 
+    def test_config_check_defaults_overwrite(self):
+        """ Test that default values are not overwriting passed values"""
+        in_file = f"{THIS_DIR}/data/config_tests/config_check_defaults_overwrite.ini"
+        config = Config(in_file)
+
+        # check that default values do not overwrite passed values
+        self.assertTrue(np.isclose(config.reader[1].getfloat("z max"), 5.0))
+
         # check that out dir has an ending /
         self.assertTrue(config.output_directory.endswith("/"))
 
+    def test_config_invalid_options(self):
+        """Check that passing invalid options raise errors """
+        # check general section
+        in_file = f"{THIS_DIR}/data/config_tests/config_invalid_general_options.ini"
+        expected_message = (
+            "Unrecognised option in section [general]. Found: 'invalid'. "
+            f"Accepted options are {accepted_general_options}")
+        self.check_error(in_file, expected_message)
+
+        # check other sections
+        in_file = f"{THIS_DIR}/data/config_tests/config_invalid_options.ini"
+        expected_message = (
+            "Unrecognised option in section [reader]. Found: 'invalid'. "
+            f"Accepted options are {accepted_options + accepted_section_options}"
+        )
+        self.check_error(in_file, expected_message)
+
+    def test_config_missing_options(self):
+        """Check that missing required options raise errors """
+        # check general section
+        in_file = f"{THIS_DIR}/data/config_tests/config_missing_general_options.ini"
+        expected_message = (
+            "Missing variable 'output directory' in section [general]")
+        self.check_error(in_file, expected_message)
+
+        # check other sections
+        in_file = f"{THIS_DIR}/data/config_tests/config_missing_options.ini"
+        expected_message = (
+            "Missing required option 'input directory' in section [reader]. "
+            "Please review the configuration file. Note that the required options "
+            "might change depending on the class being loaded.")
+        self.check_error(in_file, expected_message)
+
+    def test_config_missing_sections(self):
+        """Check behaviour of config when required sections are missing"""
+        sections = ["normalizer", "reader", "stacker"]
+        for section in sections:
+            in_file = f"{THIS_DIR}/data/config_tests/config_missing_section_{section}.ini"
+            expected_message = f"Missing section [{section}]"
+            self.check_error(in_file, expected_message)
+
     def test_config_no_file(self):
         """Check behaviour of config when the file is not valid"""
-        in_file = f"{THIS_DIR}/data/non_existent_config_overwrite.ini"
+        in_file = f"{THIS_DIR}/data/config_tests/non_existent_config_overwrite.ini"
         expected_message = f"Config file not found: {in_file}"
         self.check_error(in_file, expected_message)
 

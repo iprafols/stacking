@@ -72,7 +72,10 @@ def class_from_string(class_name, modules_folder):
     AttributeError if class cannot be found
     """
     module_name = re.sub('(?<!^)(?=[A-Z])', '_', class_name).lower()
-    module_name = f"stacking.{modules_folder}.{module_name.lower()}"
+    if modules_folder == ".":
+        module_name = f"stacking.{module_name.lower()}"
+    else:
+        module_name = f"stacking.{modules_folder}.{module_name.lower()}"
 
     # load module
     module_object = importlib.import_module(module_name)
@@ -80,17 +83,17 @@ def class_from_string(class_name, modules_folder):
     class_object = getattr(module_object, class_name)
     # get the dictionary with the default arguments
     try:
-        default_args = getattr(module_object, "defaults")
+        default_args = getattr(module_object, "defaults").copy()
     except AttributeError:
         default_args = {}
     # get the list with the valid options
     try:
-        accepted_options = getattr(module_object, "accepted_options")
+        accepted_options = getattr(module_object, "accepted_options").copy()
     except AttributeError:
         accepted_options = []
     # get the list with the required options
     try:
-        required_options = getattr(module_object, "required_options")
+        required_options = getattr(module_object, "required_options").copy()
     except AttributeError:
         required_options = []
     return class_object, default_args, accepted_options, required_options
