@@ -9,16 +9,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.9
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         sudo apt-get -y install libbz2-dev
         python -m pip install --upgrade pip
+        pip install wheel pytest pytest-cov coveralls
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install pylint
     - name: Install stacking
       run: pip install -e .
     - name: Analysing the code with pylint
