@@ -1,12 +1,7 @@
 # stacking
-
-.. image:: https://github.com/iprafols/stacking/actions/workflows/pylint.yml
-    :target: https://github.com/iprafols/stacking/actions/workflows/pylint.yml
-
-.. image:: https://github.com/iprafols/stacking/actions/workflows/pytest.yml
-    :target: https://github.com/iprafols/stacking/actions/workflows/pytest.yml
-
+[![Python Package](https://github.com/iprafols/stacking/actions/workflows/pythin_package.yml?branch=main)]
 [![Coverage Status](https://coveralls.io/repos/github/iprafols/stacking/badge.svg?branch=main)](https://coveralls.io/github/iprafols/stacking?branch=main)
+[![Pylint](https://github.com/iprafols/stacking/actions/workflows/pylint.yml?branch=main)]
 
 Package to perform spectral stacking
 
