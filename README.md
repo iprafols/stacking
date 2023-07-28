@@ -1,4 +1,6 @@
 # stacking
+[![Coverage Status](https://coveralls.io/repos/github/iprafols/stacking/badge.svg?branch=main)](https://coveralls.io/github/iprafols/stacking?branch=main)
+
 Package to perform spectral stacking
 
 ## Installation
