@@ -1,4 +1,11 @@
 # stacking
+
+.. image:: https://github.com/iprafols/stacking/actions/workflows/pylint.yml
+    :target: https://github.com/iprafols/stacking/actions/workflows/pylint.yml
+
+.. image:: https://github.com/iprafols/stacking/actions/workflows/pytest.yml
+    :target: https://github.com/iprafols/stacking/actions/workflows/pytest.yml
+
 [![Coverage Status](https://coveralls.io/repos/github/iprafols/stacking/badge.svg?branch=main)](https://coveralls.io/github/iprafols/stacking?branch=main)
 
 Package to perform spectral stacking
