@@ -198,7 +198,7 @@ class ConfigTest(AbstractTest):
 
         # check 'type' in other sections
         in_file = f"{THIS_DIR}/data/config_tests/config_missing_type_option.ini"
-        expected_message = ("In section [reader], variable 'type' is required")
+        expected_message = "In section [reader], variable 'type' is required"
         self.check_error(in_file, expected_message)
 
     def test_config_missing_sections(self):
