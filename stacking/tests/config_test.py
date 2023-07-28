@@ -165,6 +165,13 @@ class ConfigTest(AbstractTest):
             f"Accepted options are {accepted_general_options}")
         self.check_error(in_file, expected_message)
 
+        # check 'log' in general section
+        in_file = f"{THIS_DIR}/data/config_tests/config_invalid_general_option_log.ini"
+        expected_message = (
+            "Variable 'log' in section [general] should not incude folders. "
+            "Found: /this/is/not/valid")
+        self.check_error(in_file, expected_message)
+
         # check other sections
         in_file = f"{THIS_DIR}/data/config_tests/config_invalid_options.ini"
         expected_message = (
@@ -191,8 +198,7 @@ class ConfigTest(AbstractTest):
 
         # check 'type' in other sections
         in_file = f"{THIS_DIR}/data/config_tests/config_missing_type_option.ini"
-        expected_message = (
-            "In section [reader], variable 'type' is required")
+        expected_message = ("In section [reader], variable 'type' is required")
         self.check_error(in_file, expected_message)
 
     def test_config_missing_sections(self):
@@ -207,16 +213,14 @@ class ConfigTest(AbstractTest):
         """Check that errors are risen when a class module cannot be found"""
         # missing module
         in_file = f"{THIS_DIR}/data/config_tests/config_class_module_not_found.ini"
-        expected_message = (
-            "In section [rebin], error loading class NotFound, "
-            "module could not be loaded")
+        expected_message = ("In section [rebin], error loading class NotFound, "
+                            "module could not be loaded")
         self.check_error(in_file, expected_message)
 
         # missing class
         in_file = f"{THIS_DIR}/data/config_tests/config_class_not_found.ini"
-        expected_message = (
-            "In section [rebin], error loading class Utils, "
-            "module did not contain requested class")
+        expected_message = ("In section [rebin], error loading class Utils, "
+                            "module did not contain requested class")
         self.check_error(in_file, expected_message)
 
     def test_config_no_file(self):
