@@ -54,14 +54,6 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    # the following bit will save results tests as an artifact if [ci save] has been in the commit msg
-    - name: Archive test results
-      if: ${{ failure() }}
-      uses: actions/upload-artifact@v1
-      with:
-        name: test-results_v${{ matrix.python-version }}
-        path: /tmp/last_run
-
     - name: Coveralls
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

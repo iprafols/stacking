@@ -287,7 +287,7 @@ class Config:
             raise ConfigError(
                 "Variable 'log' in section [general] should not incude folders. "
                 f"Found: {self.log}")
-        self.log = self.output_directory + "Log/" + self.log
+        self.log = self.output_directory + "log/" + self.log
         section["log"] = self.log
 
         self.logging_level_console = section.get("logging level console")
