@@ -1,7 +1,8 @@
 """This file contains an abstract class to define functions common to all tests"""
-import unittest
+from configparser import ConfigParser
 import os
 import re
+import unittest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,6 +27,36 @@ class AbstractTest(unittest.TestCase):
         """
         if not os.path.exists(f"{THIS_DIR}/results/"):
             os.makedirs(f"{THIS_DIR}/results/")
+
+    def check_missing_options(self, options_and_values, test_class, error_type):
+        """Check that errors are raised when required options are missing
+
+        Arguments
+        ---------
+        options_and_values: list of tuples
+        The tuples on the list are pairs of (option, value). They are added to
+        the initializing config file iteratively and thus should be sorted
+
+        test_class: class
+        Class to be tested
+
+        error_type: class
+        Expected error type
+        """
+        config = ConfigParser()
+        config.read_dict({"test": {}})
+
+        for option, value in options_and_values:
+            # check that the error is raised
+            expected_message = (
+                f"Missing argument '{option}' required by {test_class.__name__}"
+            )
+            with self.assertRaises(error_type) as context_manager:
+                test_class(config["test"])
+            self.compare_error_message(context_manager, expected_message)
+
+            # add the option to test the next option
+            config["test"][option] = value
 
     def compare_error_message(self,
                               context_manager,
