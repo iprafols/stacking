@@ -1,7 +1,7 @@
 """This file contains configuration tests"""
+from configparser import ConfigParser
 import os
 import unittest
-from configparser import ConfigParser
 
 import numpy as np
 
@@ -20,7 +20,16 @@ class ConfigTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
+    check_error
+    compare_config
     test_config
+    test_config_check_defaults_overwrite
+    test_config_class_not_found
+    test_config_invalid_options
+    test_config_missing_options
+    test_config_missing_sections
+    test_config_no_file
+    test_config_undefined_environment_variable
     """
 
     def check_error(self, in_file, expected_message, startswith=False):
@@ -156,6 +165,20 @@ class ConfigTest(AbstractTest):
         # check that out dir has an ending /
         self.assertTrue(config.output_directory.endswith("/"))
 
+    def test_config_class_not_found(self):
+        """Check that errors are risen when a class module cannot be found"""
+        # missing module
+        in_file = f"{THIS_DIR}/data/config_tests/config_class_module_not_found.ini"
+        expected_message = ("In section [rebin], error loading class NotFound, "
+                            "module could not be loaded")
+        self.check_error(in_file, expected_message)
+
+        # missing class
+        in_file = f"{THIS_DIR}/data/config_tests/config_class_not_found.ini"
+        expected_message = ("In section [rebin], error loading class Utils, "
+                            "module did not contain requested class")
+        self.check_error(in_file, expected_message)
+
     def test_config_invalid_options(self):
         """Check that passing invalid options raise errors """
         # check general section
@@ -208,20 +231,6 @@ class ConfigTest(AbstractTest):
             in_file = f"{THIS_DIR}/data/config_tests/config_missing_section_{section}.ini"
             expected_message = f"Missing section [{section}]"
             self.check_error(in_file, expected_message)
-
-    def test_config_class_not_found(self):
-        """Check that errors are risen when a class module cannot be found"""
-        # missing module
-        in_file = f"{THIS_DIR}/data/config_tests/config_class_module_not_found.ini"
-        expected_message = ("In section [rebin], error loading class NotFound, "
-                            "module could not be loaded")
-        self.check_error(in_file, expected_message)
-
-        # missing class
-        in_file = f"{THIS_DIR}/data/config_tests/config_class_not_found.ini"
-        expected_message = ("In section [rebin], error loading class Utils, "
-                            "module did not contain requested class")
-        self.check_error(in_file, expected_message)
 
     def test_config_no_file(self):
         """Check that errors are risen when config file is not found"""
