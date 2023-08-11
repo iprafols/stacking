@@ -4,6 +4,8 @@ import os
 import re
 import unittest
 
+from stacking.logging_utils import setup_logger
+
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -25,8 +27,12 @@ class AbstractTest(unittest.TestCase):
         if it does not.
         Also make sure that Forest and Pk1dForest class variables are reset
         """
+        # setup results folder
         if not os.path.exists(f"{THIS_DIR}/results/"):
             os.makedirs(f"{THIS_DIR}/results/")
+
+        # setup logger
+        setup_logger()
 
     def check_missing_options(self, options_and_values, test_class, error_type):
         """Check that errors are raised when required options are missing

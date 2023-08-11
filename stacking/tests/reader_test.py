@@ -5,10 +5,18 @@ import unittest
 
 from stacking.errors import ReaderError
 from stacking.reader import Reader
+from stacking.readers.dr16_reader import Dr16Reader
+from stacking.readers.dr16_reader import defaults as defaults_dr16_reader
+from stacking.spectrum import Spectrum
 from stacking.tests.abstract_test import AbstractTest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
+
+DR16_READER_KWARGS = {
+    "drq catalogue": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
+    "input directory": f"{THIS_DIR}/data",
+}
 
 
 class ReaderTest(AbstractTest):
@@ -19,6 +27,58 @@ class ReaderTest(AbstractTest):
     (see AbstractTest in stacking/tests/abstract_test.py)
     test_config
     """
+
+    def test_dr16_reader_spec(self):
+        """Test SdssData when run in spec mode"""
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({"mode": "spec"})
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        reader = Dr16Reader(config["reader"])
+        spectra = reader.read_data()
+
+        self.assertTrue(len(reader.catalogue) == 79)
+        self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(
+            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+
+    def test_dr16_reader_spplate(self):
+        """Tests Dr16Reader when run in spplate mode"""
+        # using default  value for 'mode'
+        config = ConfigParser()
+        config.read_dict({"reader": DR16_READER_KWARGS})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        reader = Dr16Reader(config["reader"])
+        spectra = reader.read_data()
+
+        self.assertTrue(len(reader.catalogue) == 79)
+        self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(
+            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+
+        # specifying 'mode'
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({"mode": "spplate"})
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        reader = Dr16Reader(config["reader"])
+        spectra = reader.read_data()
+
+        self.assertTrue(len(reader.catalogue) == 79)
+        self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(
+            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 
     def test_reader(self):
         """Test the abstract reader"""

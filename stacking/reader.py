@@ -25,7 +25,7 @@ class Reader:
     The input directory
 
     spectra: list of Spectrum
-    The read spectra. Ordering should be maintained 
+    The read spectra. Ordering should be maintained
     between spectra and catalogue
     """
 
@@ -64,6 +64,11 @@ class Reader:
 
     def read_data(self):
         """Read the data
+
+        Return
+        ------
+        spectra: list of Spectrum
+        The list of spectra
 
         Raise
         -----

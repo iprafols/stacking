@@ -9,14 +9,15 @@ import fitsio
 from astropy.table import Table, join
 
 from stacking.errors import ReaderError
-from stacking.reader import (  # pylint: disable=unused-import
-    Reader, defaults, accepted_options, required_options)
+from stacking.reader import (Reader, defaults, accepted_options,
+                             required_options)
 from stacking.spectrum import Spectrum
-from stacking.utils import update_accepted_options, update_default_options
+from stacking.utils import (update_accepted_options, update_default_options,
+                            update_required_options)
 
 accepted_options = update_accepted_options(accepted_options, [
-    "best obs", "drq catalogue", "input directory", "keep BAL",
-    "max Balnicity Index", "read mode", "spAll", "z min", "z max"
+    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index", "read mode",
+    "spAll", "z min", "z max"
 ])
 
 defaults = update_default_options(
@@ -27,6 +28,10 @@ defaults = update_default_options(
         "z max": 10.0,
         "z min": 0.0,
     })
+
+required_options = update_required_options(required_options, [
+    "drq catalogue",
+])
 
 SUPPORTED_READING_MODES = ["spplate", "spec"]
 
@@ -106,16 +111,9 @@ class Dr16Reader(Reader):
         self.z_min = None
         self.__parse_config(config)
 
-        # load DRQ Catalogue
+        # data structure
         self.catalogue = None
-        self.read_drq_catalogue()
-
-        # read data
-        # TODO: parallelize this
-        if self.read_mode == "spplate":
-            self.read_from_spplate()
-        elif self.read_mode == "spec":
-            self.read_from_spec()
+        self.spectra = []
 
     def __parse_config(self, config):
         """Parse the configuration options
@@ -203,6 +201,26 @@ class Dr16Reader(Reader):
         if self.z_max is None:
             raise ReaderError("Missing argument 'z max' required by Dr16Reader")
 
+    def read_data(self):
+        """Read the data
+
+        Return
+        ------
+        spectra: list of Spectrum
+        The list of spectra
+        """
+        # load DRQ Catalogue
+        self.catalogue = self.read_drq_catalogue()
+
+        # read data
+        # TODO: parallelize this
+        if self.read_mode == "spplate":
+            self.read_from_spplate()
+        elif self.read_mode == "spec":
+            self.read_from_spec()
+
+        return self.spectra
+
     def read_drq_catalogue(self):
         """Read the DRQ Catalogue
 
@@ -258,8 +276,7 @@ class Dr16Reader(Reader):
         ## BAL visual
         if not self.keep_bal and self.max_balnicity_index is None:
             if 'BAL_FLAG_VI' in catalogue.colnames:
-                self.bal_flag = catalogue['BAL_FLAG_VI']
-                keep_rows &= self.bal_flag == 0
+                keep_rows &= catalogue['BAL_FLAG_VI'] == 0
                 self.logger.progress(
                     "and BAL_FLAG_VI == 0  : nb object in cat = %d",
                     np.sum(keep_rows))
