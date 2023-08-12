@@ -147,11 +147,12 @@ class Dr16Reader(Reader):
 
         self.read_mode = config.get("read mode")
         if self.read_mode is None:
-            raise ReaderError("Missing argument 'mode' required by Dr16Reader")
+            raise ReaderError(
+                "Missing argument 'read mode' required by Dr16Reader")
         if self.read_mode not in SUPPORTED_READING_MODES:
             raise ReaderError(
-                f"Error reading data in Dr16Reader. Mode {self.read_mode} is not "
-                "supported. Supported modes are " +
+                f"Error reading data in Dr16Reader. Read mode {self.read_mode} is not "
+                "supported. Supported reading modes are " +
                 " ".join(SUPPORTED_READING_MODES))
 
         if self.best_obs:
@@ -193,13 +194,13 @@ class Dr16Reader(Reader):
                 self.logger.ok_warning(
                     "'spAll' file found. Contining with normal execution")
 
-        self.z_min = config.getfloat("z min")
-        if self.z_min is None:
-            raise ReaderError("Missing argument 'z min' required by Dr16Reader")
-
         self.z_max = config.getfloat("z max")
         if self.z_max is None:
             raise ReaderError("Missing argument 'z max' required by Dr16Reader")
+
+        self.z_min = config.getfloat("z min")
+        if self.z_min is None:
+            raise ReaderError("Missing argument 'z min' required by Dr16Reader")
 
     def read_data(self):
         """Read the data

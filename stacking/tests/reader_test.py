@@ -28,6 +28,22 @@ class ReaderTest(AbstractTest):
     test_config
     """
 
+    def test_dr16_reader_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("input directory", f"{THIS_DIR}/data/"),
+            ("best obs", "False"),
+            ("drq catalogue",
+             f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
+            ("keep BAL", "False"),
+            ("read mode", "spplate"),
+            ("z max", "10.0"),
+            ("z min", "0.0"),
+        ]
+
+        self.check_missing_options(options_and_values, Dr16Reader, ReaderError,
+                                   Reader)
+
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
         config = ConfigParser()
