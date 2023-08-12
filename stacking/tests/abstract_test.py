@@ -4,7 +4,7 @@ import os
 import re
 import unittest
 
-from stacking.logging_utils import setup_logger
+from stacking.logging_utils import setup_logger, reset_logger
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,9 +23,9 @@ class AbstractTest(unittest.TestCase):
 
     def setUp(self):
         """ Actions done at test startup
-        Check that the results folder exists and create it
+        - Check that the results folder exists and create it
         if it does not.
-        Also make sure that Forest and Pk1dForest class variables are reset
+        - Setup logger
         """
         # setup results folder
         if not os.path.exists(f"{THIS_DIR}/results/"):
@@ -33,6 +33,12 @@ class AbstractTest(unittest.TestCase):
 
         # setup logger
         setup_logger()
+
+    def tearDown(self):
+        """ Actions done at test end
+        - Reset logger
+        """
+        reset_logger()
 
     def check_missing_options(self,
                               options_and_values,

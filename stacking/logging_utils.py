@@ -33,7 +33,17 @@ def ok_warning(self, message, *args, **kws):
 
 logging.Logger.ok_warning = ok_warning
 
-
+def reset_logger():
+    """This function reset the stacking logger by closing
+    and removing its handlers.
+    """
+    logger = logging.getLogger("stacking")
+    handlers = logger.handlers
+    for handler in handlers[::-1]:
+        handler.close()
+        logger.removeHandler(handler)
+    logger.addHandler(logging.NullHandler())
+    
 def setup_logger(logging_level_console=logging.DEBUG,
                  log_file=None,
                  logging_level_file=logging.DEBUG):
@@ -59,6 +69,8 @@ def setup_logger(logging_level_console=logging.DEBUG,
     if isinstance(logging_level_console, str):
         if logging_level_console.upper() == "PROGRESS":
             logging_level_console = PROGRESS_LEVEL_NUM
+        elif logging_level_console.upper() == "WARNING_OK":
+            logging_level_console = OK_WARNING_LEVEL_NUM
         else:
             logging_level_console = getattr(logging,
                                             logging_level_console.upper())
@@ -66,11 +78,12 @@ def setup_logger(logging_level_console=logging.DEBUG,
     if isinstance(logging_level_file, str):
         if logging_level_file.upper() == "PROGRESS":
             logging_level_file = PROGRESS_LEVEL_NUM
+        elif logging_level_file.upper() == "WARNING_OK":
+            logging_level_file = OK_WARNING_LEVEL_NUM
         else:
             logging_level_file = getattr(logging, logging_level_file.upper())
 
-    logger = logging.getLogger("picca.delta_extraction")
-    logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger("stacking")
 
     # logging formatter
     formatter = logging.Formatter('[%(levelname)s]: %(message)s')

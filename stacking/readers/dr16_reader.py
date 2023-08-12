@@ -212,6 +212,9 @@ class Dr16Reader(Reader):
         """
         # load DRQ Catalogue
         self.catalogue = self.read_drq_catalogue()
+        # if using multiple observations load the information from spAll file
+        if not self.best_obs:
+            self.read_spall()
 
         # read data
         # TODO: parallelize this

@@ -48,7 +48,7 @@ class ReaderTest(AbstractTest):
         """Test SdssData when run in spec mode"""
         config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
-        reader_kwargs.update({"mode": "spec"})
+        reader_kwargs.update({"read mode": "spec"})
         config.read_dict({"reader": reader_kwargs})
         for key, value in defaults_dr16_reader.items():
             if key not in config["reader"]:
@@ -56,8 +56,9 @@ class ReaderTest(AbstractTest):
         reader = Dr16Reader(config["reader"])
         spectra = reader.read_data()
 
-        self.assertTrue(len(reader.catalogue) == 79)
+        self.assertTrue(len(reader.catalogue) == 93)
         self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(reader.read_mode == "spec")
         self.assertTrue(len(spectra) == 79)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
@@ -73,9 +74,10 @@ class ReaderTest(AbstractTest):
         reader = Dr16Reader(config["reader"])
         spectra = reader.read_data()
 
-        self.assertTrue(len(reader.catalogue) == 79)
-        self.assertTrue(len(reader.spectra) == 79)
-        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(len(reader.catalogue) == 93)
+        self.assertTrue(len(reader.spectra) == 93)
+        self.assertTrue(reader.read_mode == "spplate")
+        self.assertTrue(len(spectra) == 93)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 
@@ -90,9 +92,10 @@ class ReaderTest(AbstractTest):
         reader = Dr16Reader(config["reader"])
         spectra = reader.read_data()
 
-        self.assertTrue(len(reader.catalogue) == 79)
-        self.assertTrue(len(reader.spectra) == 79)
-        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(len(reader.catalogue) == 93)
+        self.assertTrue(len(reader.spectra) == 93)
+        self.assertTrue(reader.read_mode == "spplate")
+        self.assertTrue(len(spectra) == 93)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 
