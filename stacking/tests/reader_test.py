@@ -28,6 +28,25 @@ class ReaderTest(AbstractTest):
     test_config
     """
 
+    def test_dr16_reader_best_obs(self):
+        """Check the best_obs mode"""
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({"best obs": "True"})
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        reader = Dr16Reader(config["reader"])
+        spectra = reader.read_data()
+
+        self.assertTrue(len(reader.catalogue) == 79)
+        self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(reader.read_mode == "spplate")
+        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(
+            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+
     def test_dr16_reader_missing_options(self):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
@@ -44,6 +63,82 @@ class ReaderTest(AbstractTest):
         self.check_missing_options(options_and_values, Dr16Reader, ReaderError,
                                    Reader)
 
+    def test_dr16_reader_read_drq_issues(self):
+        """Check that errors are raised when there are issues loading the
+        the DRQ quasar catalogue"""
+
+        drq_catalogues = [
+            f"{THIS_DIR}/data/drq_catalogue_plate3655_zvi.fits.gz",
+            f"{THIS_DIR}/data/drq_catalogue_plate3655_noz.fits.gz",
+            f"{THIS_DIR}/data/drq_catalogue_plate3655_bal_flag_vi.fits.gz",
+            f"{THIS_DIR}/data/drq_catalogue_plate3655_nobi_civ.fits.gz",
+        ]
+        expected_messages = [
+            None,
+            ("Error in reading DRQ Catalogue. No valid column for "
+             f"redshift found in {drq_catalogues[1]}"),
+            None,
+            ("Error in reading DRQ Catalogue. 'BI max' was passed but "
+             "field BI_CIV was not present in the HDU"),
+        ]
+
+        num_spectra_list = [
+            79,
+            None,
+            1,
+            None,
+        ]
+
+        for drq_catalogue, expected_message, num_spectra in zip(drq_catalogues, expected_messages, num_spectra_list):
+            config = ConfigParser()
+            reader_kwargs = DR16_READER_KWARGS.copy()
+            reader_kwargs.update({
+                "drq catalogue": drq_catalogue,
+                "best obs": "True",
+            })
+            if "nobi_civ" in drq_catalogue:
+                reader_kwargs.update({"max balnicity index": 10.0})
+            config.read_dict({"reader": reader_kwargs})
+            for key, value in defaults_dr16_reader.items():
+                if key not in config["reader"]:
+                    config["reader"][key] = str(value)
+            if expected_message is None:
+                reader = Dr16Reader(config["reader"])
+                spectra = reader.read_data()
+                self.assertTrue(len(reader.catalogue) == num_spectra)
+                self.assertTrue(len(reader.spectra) == num_spectra)
+                self.assertTrue(reader.read_mode == "spplate")
+                self.assertTrue(len(spectra) == num_spectra)
+                self.assertTrue(
+                    all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+            else:
+                with self.assertRaises(ReaderError) as context_manager:
+                    reader = Dr16Reader(config["reader"])
+                    reader.read_data()
+                self.compare_error_message(context_manager, expected_message)
+
+    def test_dr16_reader_read_spall_issues(self):
+        """Check that errors are raised when there are issues loading the
+        spAll file"""
+
+        input_directories = [
+            f"{THIS_DIR}/data/config_tests", # missing spAll file
+            f"{THIS_DIR}/data/spAll_multiple_files",
+        ]
+
+        for input_directory in input_directories:
+            config = ConfigParser()
+            reader_kwargs = DR16_READER_KWARGS.copy()
+            reader_kwargs.update({"input directory": input_directory})
+            config.read_dict({"reader": reader_kwargs})
+            for key, value in defaults_dr16_reader.items():
+                if key not in config["reader"]:
+                    config["reader"][key] = str(value)
+            expected_message = "Missing argument 'spAll' required by Dr16Reader"
+            with self.assertRaises(ReaderError) as context_manager:
+                Dr16Reader(config["reader"])
+            self.compare_error_message(context_manager, expected_message)
+
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
         config = ConfigParser()
@@ -57,9 +152,9 @@ class ReaderTest(AbstractTest):
         spectra = reader.read_data()
 
         self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 79)
+        self.assertTrue(len(reader.spectra) == 78)
         self.assertTrue(reader.read_mode == "spec")
-        self.assertTrue(len(spectra) == 79)
+        self.assertTrue(len(spectra) == 78)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 
@@ -75,9 +170,9 @@ class ReaderTest(AbstractTest):
         spectra = reader.read_data()
 
         self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 93)
+        self.assertTrue(len(reader.spectra) == 92)
         self.assertTrue(reader.read_mode == "spplate")
-        self.assertTrue(len(spectra) == 93)
+        self.assertTrue(len(spectra) == 92)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 
@@ -93,9 +188,9 @@ class ReaderTest(AbstractTest):
         spectra = reader.read_data()
 
         self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 93)
+        self.assertTrue(len(reader.spectra) == 92)
         self.assertTrue(reader.read_mode == "spplate")
-        self.assertTrue(len(spectra) == 93)
+        self.assertTrue(len(spectra) == 92)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
 

@@ -164,7 +164,11 @@ class Dr16Reader(Reader):
                     "Missing argument 'spAll' required by Dr16Reader. Looking "
                     "for spAll in input directory...")
 
-                if config.get("input directory") is None:
+                # this should never occur as the existence of the input directory
+                # is checked in the class parent (Reader)
+                # this is left here to avoid unexpected behaviour in case that
+                # class changes
+                if config.get("input directory") is None: # pragma: no cover
                     self.logger.error(
                         "'spAll' file not found. If you didn't want to load the "
                         "spAll file you should pass the option 'best obs = True'. "
@@ -186,7 +190,7 @@ class Dr16Reader(Reader):
                 if len(filenames) == 0:
                     self.logger.error(
                         "'spAll' file not found. If you didn't want to load the "
-                        " spAll file you should pass the option 'best obs = True'. "
+                        "spAll file you should pass the option 'best obs = True'. "
                         "Quiting...")
                     raise ReaderError(
                         "Missing argument 'spAll' required by Dr16Reader")
@@ -239,7 +243,6 @@ class Dr16Reader(Reader):
         catalogue = Table.read(self.drq_filename, hdu="CATALOG")
 
         keep_columns = ['Z', 'THING_ID', 'PLATE', 'MJD', 'FIBERID']
-
         # Redshift
         if 'Z' not in catalogue.colnames:
             if 'Z_VI' in catalogue.colnames:
@@ -408,7 +411,7 @@ class Dr16Reader(Reader):
                 "THING_ID", "PLATE", "MJD", "FIBERID", "PLATEQUALITY",
                 "ZWARNING"
             ])
-        except IOError as error:
+        except IOError as error: # pragma: no cover
             raise ReaderError("Error in reading spAll catalogue. Error "
                               f"reading file {self.spall}. IOError "
                               f"message: {str(error)}") from error
