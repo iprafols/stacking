@@ -401,7 +401,9 @@ class Dr16Reader(Reader):
             num_read_total += num_read
             if num_read > 0.0:
                 time_read = (time.time() - start_time) / num_read
-            else:
+            # we should never enter here unless the spPlate file is
+            # corrupted, kept as a fail-safe
+            else: # pragma: no cover
                 time_read = np.nan
             self.logger.progress(
                 "read %d from %s in %.3f seconds per spec. Progress: %d of %d",

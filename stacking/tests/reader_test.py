@@ -105,7 +105,7 @@ class ReaderTest(AbstractTest):
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({
             "spAll": f"{THIS_DIR}/data/spAll-plate3655.fits",
-            "input directory": "non/existent"
+            "input directory": "non/existent",
         })
         config.read_dict({"reader": reader_kwargs})
         for key, value in defaults_dr16_reader.items():
