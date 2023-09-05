@@ -43,7 +43,7 @@ def reset_logger():
         handler.close()
         logger.removeHandler(handler)
     logger.addHandler(logging.NullHandler())
-    
+
 def setup_logger(logging_level_console=logging.DEBUG,
                  log_file=None,
                  logging_level_file=logging.DEBUG):
