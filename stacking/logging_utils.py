@@ -33,6 +33,7 @@ def ok_warning(self, message, *args, **kws):
 
 logging.Logger.ok_warning = ok_warning
 
+
 def reset_logger():
     """This function reset the stacking logger by closing
     and removing its handlers.
@@ -43,6 +44,7 @@ def reset_logger():
         handler.close()
         logger.removeHandler(handler)
     logger.addHandler(logging.NullHandler())
+
 
 def setup_logger(logging_level_console=logging.DEBUG,
                  log_file=None,

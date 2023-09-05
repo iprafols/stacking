@@ -168,7 +168,7 @@ class Dr16Reader(Reader):
                 # is checked in the class parent (Reader)
                 # this is left here to avoid unexpected behaviour in case that
                 # class changes
-                if config.get("input directory") is None: # pragma: no cover
+                if config.get("input directory") is None:  # pragma: no cover
                     self.logger.error(
                         "'spAll' file not found. If you didn't want to load the "
                         "spAll file you should pass the option 'best obs = True'. "
@@ -226,6 +226,14 @@ class Dr16Reader(Reader):
             self.read_from_spplate()
         elif self.read_mode == "spec":
             self.read_from_spec()
+        # this should never enter unless new reading modes are not properly added
+        else:  # pragma: no cover
+            raise ReaderError(
+                f"Don't know what to do with reading mode {self.read_mode}. "
+                "This is one of the supported reading modes, but maybe it "
+                "was not properly coded. If you did the change yourself, check "
+                "that you added the behaviour of the new mode to method `read_data`. "
+                "Otherwise contact 'stacking' developpers.")
 
         return self.spectra
 
@@ -411,7 +419,7 @@ class Dr16Reader(Reader):
                 "THING_ID", "PLATE", "MJD", "FIBERID", "PLATEQUALITY",
                 "ZWARNING"
             ])
-        except IOError as error: # pragma: no cover
+        except IOError as error:
             raise ReaderError("Error in reading spAll catalogue. Error "
                               f"reading file {self.spall}. IOError "
                               f"message: {str(error)}") from error

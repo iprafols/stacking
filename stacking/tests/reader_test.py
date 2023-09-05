@@ -5,7 +5,7 @@ import unittest
 
 from stacking.errors import ReaderError
 from stacking.reader import Reader
-from stacking.readers.dr16_reader import Dr16Reader
+from stacking.readers.dr16_reader import Dr16Reader, SUPPORTED_READING_MODES
 from stacking.readers.dr16_reader import defaults as defaults_dr16_reader
 from stacking.spectrum import Spectrum
 from stacking.tests.abstract_test import AbstractTest
@@ -72,58 +72,54 @@ class ReaderTest(AbstractTest):
             f"{THIS_DIR}/data/drq_catalogue_plate3655_noz.fits.gz",
             f"{THIS_DIR}/data/drq_catalogue_plate3655_bal_flag_vi.fits.gz",
             f"{THIS_DIR}/data/drq_catalogue_plate3655_nobi_civ.fits.gz",
+            f"{THIS_DIR}/data/drq_catalogue_plate3655_bi_civ.fits.gz",
         ]
-        expected_messages = [
-            None,
+        expectations = [
+            79,
             ("Error in reading DRQ Catalogue. No valid column for "
              f"redshift found in {drq_catalogues[1]}"),
-            None,
+            1,
             ("Error in reading DRQ Catalogue. 'BI max' was passed but "
              "field BI_CIV was not present in the HDU"),
+            77,
         ]
 
-        num_spectra_list = [
-            79,
-            None,
-            1,
-            None,
-        ]
-
-        for drq_catalogue, expected_message, num_spectra in zip(drq_catalogues, expected_messages, num_spectra_list):
+        for drq_catalogue, expectation in zip(drq_catalogues, expectations):
             config = ConfigParser()
             reader_kwargs = DR16_READER_KWARGS.copy()
             reader_kwargs.update({
                 "drq catalogue": drq_catalogue,
                 "best obs": "True",
             })
-            if "nobi_civ" in drq_catalogue:
-                reader_kwargs.update({"max balnicity index": 10.0})
+            if "bi_civ" in drq_catalogue:
+                reader_kwargs.update({"max balnicity index": 0.5})
             config.read_dict({"reader": reader_kwargs})
             for key, value in defaults_dr16_reader.items():
                 if key not in config["reader"]:
                     config["reader"][key] = str(value)
-            if expected_message is None:
+            if isinstance(expectation, int):
                 reader = Dr16Reader(config["reader"])
                 spectra = reader.read_data()
-                self.assertTrue(len(reader.catalogue) == num_spectra)
-                self.assertTrue(len(reader.spectra) == num_spectra)
+                print(len(reader.catalogue), expectation)
+                self.assertTrue(len(reader.catalogue) == expectation)
+                self.assertTrue(len(reader.spectra) == expectation)
                 self.assertTrue(reader.read_mode == "spplate")
-                self.assertTrue(len(spectra) == num_spectra)
+                self.assertTrue(len(spectra) == expectation)
                 self.assertTrue(
                     all(isinstance(spectrum, Spectrum) for spectrum in spectra))
             else:
                 with self.assertRaises(ReaderError) as context_manager:
                     reader = Dr16Reader(config["reader"])
                     reader.read_data()
-                self.compare_error_message(context_manager, expected_message)
+                self.compare_error_message(context_manager, expectation)
 
-    def test_dr16_reader_read_spall_issues(self):
-        """Check that errors are raised when there are issues loading the
+    def test_dr16_reader_spall_issues(self):
+        """Check that errors are raised when there are issues with the
         spAll file"""
 
         input_directories = [
-            f"{THIS_DIR}/data/config_tests", # missing spAll file
-            f"{THIS_DIR}/data/spAll_multiple_files",
+            f"{THIS_DIR}/data/config_tests",  # missing spAll file
+            f"{THIS_DIR}/data/spAll_multiple_files",  #multiple files
         ]
 
         for input_directory in input_directories:
@@ -138,6 +134,23 @@ class ReaderTest(AbstractTest):
             with self.assertRaises(ReaderError) as context_manager:
                 Dr16Reader(config["reader"])
             self.compare_error_message(context_manager, expected_message)
+
+        # specifying non-exitant file
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({"spall": "missing.fits.gz"})
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        expected_message = (
+            "Error in reading spAll catalogue. Error "
+            "reading file missing.fits.gz. IOError "
+            "message: [Errno 2] No such file or directory: 'missing.fits.gz'")
+        with self.assertRaises(ReaderError) as context_manager:
+            reader = Dr16Reader(config["reader"])
+            reader.read_data()
+        self.compare_error_message(context_manager, expected_message)
 
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
@@ -193,6 +206,24 @@ class ReaderTest(AbstractTest):
         self.assertTrue(len(spectra) == 92)
         self.assertTrue(
             all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+
+    def test_dr16_reader_unsupported_reading_mode(self):
+        """Check that Dr16Reader raises errors when the reading mode is not
+        supported"""
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({"read mode": "unsupported"})
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        expected_message = (
+            "Error reading data in Dr16Reader. Read mode unsupported is not "
+            "supported. Supported reading modes are " +
+            " ".join(SUPPORTED_READING_MODES))
+        with self.assertRaises(ReaderError) as context_manager:
+            Dr16Reader(config["reader"])
+        self.compare_error_message(context_manager, expected_message)
 
     def test_reader(self):
         """Test the abstract reader"""
