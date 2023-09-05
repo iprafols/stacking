@@ -28,6 +28,50 @@ class ReaderTest(AbstractTest):
     test_config
     """
 
+    def run_dr16_reader_with_errors(self, config, expected_message):
+        """Check behaviour when errors are expected
+
+        Arguments
+        ---------
+        config: ConfigParser
+        Run configuration
+
+        expected_message: str
+        Expected error message
+        """
+        with self.assertRaises(ReaderError) as context_manager:
+            reader = Dr16Reader(config["reader"])
+            reader.read_data()
+        self.compare_error_message(context_manager, expected_message)
+
+    def run_dr16_reader_without_errors(self, config, size_catalogue,
+                                       num_spectra, mode):
+        """Check behaviour when no errors are expected
+
+        Arguments
+        ---------
+        config: ConfigParser
+        Run configuration
+
+        size_catalogue: int
+        Size of the loaded catalgoue
+
+        num_spectra: int
+        Number of loaded spectra
+
+        mode: str
+        Reading mode
+        """
+        reader = Dr16Reader(config["reader"])
+        spectra = reader.read_data()
+
+        self.assertTrue(len(reader.catalogue) == size_catalogue)
+        self.assertTrue(len(reader.spectra) == num_spectra)
+        self.assertTrue(reader.read_mode == mode)
+        self.assertTrue(len(spectra) == num_spectra)
+        self.assertTrue(
+            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+
     def test_dr16_reader_best_obs(self):
         """Check the best_obs mode"""
         config = ConfigParser()
@@ -37,15 +81,7 @@ class ReaderTest(AbstractTest):
         for key, value in defaults_dr16_reader.items():
             if key not in config["reader"]:
                 config["reader"][key] = str(value)
-        reader = Dr16Reader(config["reader"])
-        spectra = reader.read_data()
-
-        self.assertTrue(len(reader.catalogue) == 79)
-        self.assertTrue(len(reader.spectra) == 79)
-        self.assertTrue(reader.read_mode == "spplate")
-        self.assertTrue(len(spectra) == 79)
-        self.assertTrue(
-            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+        self.run_dr16_reader_without_errors(config, 79, 79, "spplate")
 
     def test_dr16_reader_missing_options(self):
         """Check that errors are raised when required options are missing"""
@@ -62,6 +98,22 @@ class ReaderTest(AbstractTest):
 
         self.check_missing_options(options_and_values, Dr16Reader, ReaderError,
                                    Reader)
+
+    def test_dr16_reader_no_spectra(self):
+        """Check that errors are raised when no spectra are found"""
+        config = ConfigParser()
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({
+            "spAll": f"{THIS_DIR}/data/spAll-plate3655.fits",
+            "input directory": "non/existent"
+        })
+        config.read_dict({"reader": reader_kwargs})
+        for key, value in defaults_dr16_reader.items():
+            if key not in config["reader"]:
+                config["reader"][key] = str(value)
+        expected_message = (
+            "No spectra were read, check the logs for more details")
+        self.run_dr16_reader_with_errors(config, expected_message)
 
     def test_dr16_reader_read_drq_issues(self):
         """Check that errors are raised when there are issues loading the
@@ -98,20 +150,10 @@ class ReaderTest(AbstractTest):
                 if key not in config["reader"]:
                     config["reader"][key] = str(value)
             if isinstance(expectation, int):
-                reader = Dr16Reader(config["reader"])
-                spectra = reader.read_data()
-                print(len(reader.catalogue), expectation)
-                self.assertTrue(len(reader.catalogue) == expectation)
-                self.assertTrue(len(reader.spectra) == expectation)
-                self.assertTrue(reader.read_mode == "spplate")
-                self.assertTrue(len(spectra) == expectation)
-                self.assertTrue(
-                    all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+                self.run_dr16_reader_without_errors(config, expectation,
+                                                    expectation, "spplate")
             else:
-                with self.assertRaises(ReaderError) as context_manager:
-                    reader = Dr16Reader(config["reader"])
-                    reader.read_data()
-                self.compare_error_message(context_manager, expectation)
+                self.run_dr16_reader_with_errors(config, expectation)
 
     def test_dr16_reader_spall_issues(self):
         """Check that errors are raised when there are issues with the
@@ -131,9 +173,7 @@ class ReaderTest(AbstractTest):
                 if key not in config["reader"]:
                     config["reader"][key] = str(value)
             expected_message = "Missing argument 'spAll' required by Dr16Reader"
-            with self.assertRaises(ReaderError) as context_manager:
-                Dr16Reader(config["reader"])
-            self.compare_error_message(context_manager, expected_message)
+            self.run_dr16_reader_with_errors(config, expected_message)
 
         # specifying non-exitant file
         config = ConfigParser()
@@ -147,10 +187,7 @@ class ReaderTest(AbstractTest):
             "Error in reading spAll catalogue. Error "
             "reading file missing.fits.gz. IOError "
             "message: [Errno 2] No such file or directory: 'missing.fits.gz'")
-        with self.assertRaises(ReaderError) as context_manager:
-            reader = Dr16Reader(config["reader"])
-            reader.read_data()
-        self.compare_error_message(context_manager, expected_message)
+        self.run_dr16_reader_with_errors(config, expected_message)
 
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
@@ -161,15 +198,7 @@ class ReaderTest(AbstractTest):
         for key, value in defaults_dr16_reader.items():
             if key not in config["reader"]:
                 config["reader"][key] = str(value)
-        reader = Dr16Reader(config["reader"])
-        spectra = reader.read_data()
-
-        self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 78)
-        self.assertTrue(reader.read_mode == "spec")
-        self.assertTrue(len(spectra) == 78)
-        self.assertTrue(
-            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+        self.run_dr16_reader_without_errors(config, 93, 78, "spec")
 
     def test_dr16_reader_spplate(self):
         """Tests Dr16Reader when run in spplate mode"""
@@ -179,15 +208,7 @@ class ReaderTest(AbstractTest):
         for key, value in defaults_dr16_reader.items():
             if key not in config["reader"]:
                 config["reader"][key] = str(value)
-        reader = Dr16Reader(config["reader"])
-        spectra = reader.read_data()
-
-        self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 92)
-        self.assertTrue(reader.read_mode == "spplate")
-        self.assertTrue(len(spectra) == 92)
-        self.assertTrue(
-            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+        self.run_dr16_reader_without_errors(config, 93, 92, "spplate")
 
         # specifying 'mode'
         config = ConfigParser()
@@ -197,15 +218,7 @@ class ReaderTest(AbstractTest):
         for key, value in defaults_dr16_reader.items():
             if key not in config["reader"]:
                 config["reader"][key] = str(value)
-        reader = Dr16Reader(config["reader"])
-        spectra = reader.read_data()
-
-        self.assertTrue(len(reader.catalogue) == 93)
-        self.assertTrue(len(reader.spectra) == 92)
-        self.assertTrue(reader.read_mode == "spplate")
-        self.assertTrue(len(spectra) == 92)
-        self.assertTrue(
-            all(isinstance(spectrum, Spectrum) for spectrum in spectra))
+        self.run_dr16_reader_without_errors(config, 93, 92, "spplate")
 
     def test_dr16_reader_unsupported_reading_mode(self):
         """Check that Dr16Reader raises errors when the reading mode is not
@@ -221,9 +234,7 @@ class ReaderTest(AbstractTest):
             "Error reading data in Dr16Reader. Read mode unsupported is not "
             "supported. Supported reading modes are " +
             " ".join(SUPPORTED_READING_MODES))
-        with self.assertRaises(ReaderError) as context_manager:
-            Dr16Reader(config["reader"])
-        self.compare_error_message(context_manager, expected_message)
+        self.run_dr16_reader_with_errors(config, expected_message)
 
     def test_reader(self):
         """Test the abstract reader"""

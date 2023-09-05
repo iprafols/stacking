@@ -235,6 +235,10 @@ class Dr16Reader(Reader):
                 "that you added the behaviour of the new mode to method `read_data`. "
                 "Otherwise contact 'stacking' developpers.")
 
+        if len(self.spectra) == 0:
+            raise ReaderError(
+                "No spectra were read, check the logs for more details")
+
         return self.spectra
 
     def read_drq_catalogue(self):
