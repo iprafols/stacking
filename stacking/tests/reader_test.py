@@ -25,7 +25,18 @@ class ReaderTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
-    test_config
+    run_dr16_reader_with_errors
+    run_dr16_reader_without_errors
+    test_dr16_reader_best_obs
+    test_dr16_reader_missing_options
+    test_dr16_reader_no_spectra
+    test_dr16_reader_read_drq_issues
+    test_dr16_reader_spall_issues
+    test_dr16_reader_spec
+    test_dr16_reader_spplate
+    test_dr16_reader_unsupported_reading_mode
+    test_reader
+    test_reader_missing_options
     """
 
     def run_dr16_reader_with_errors(self, config, expected_message):

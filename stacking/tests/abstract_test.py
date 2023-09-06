@@ -15,7 +15,6 @@ class AbstractTest(unittest.TestCase):
     Methods
     -------
     (check unittest.TestCase)
-
     compare_ascii
     compare_fits
     setUp
@@ -61,7 +60,6 @@ class AbstractTest(unittest.TestCase):
 
         parent_classes: class or list of class - Default: []
         Parent(s) of the test class
-
         """
         if parent_classes is None:
             parent_classes = []
