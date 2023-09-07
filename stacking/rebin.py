@@ -105,6 +105,14 @@ class Rebin:
                     np.log10(wavelength),
                     self.common_wavelength_grid,
                 )
+            # this should never enter unless new step types are not properly added
+            else:  # pragma: no cover
+                raise RebinError(
+                    f"Don't know what to do with step_type {self.read_mode}. "
+                    "If this is one of the supported reading modes, but maybe it "
+                    "was not properly coded. If you did the change yourself, check "
+                    "that you added the behaviour of the new mode to method `__call__`. "
+                    "Otherwise contact 'stacking' developpers.")
 
             spectrum.set_flux_ivar_common_grid(rebinned_flux, rebinned_ivar)
 
@@ -165,8 +173,7 @@ class Rebin:
                 "Missing argument 'step wavelength' required by Rebin")
         if self.step_type == "lin":
             self.size_common_grid = int(
-                (self.max_wavelength - self.min_wavelength) /
-                step_wavelength)
+                (self.max_wavelength - self.min_wavelength) / step_wavelength)
             expected_max_wavelength = self.min_wavelength + self.size_common_grid * step_wavelength
         elif self.step_type == "log":
             self.size_common_grid = ((np.log10(self.max_wavelength) -
@@ -261,14 +268,12 @@ def rebin(flux, ivar, wavelength, common_wavelength_grid):
     valid_bins = (bins > 0) & (bins < common_wavelength_grid.size)
 
     # rebin flux, ivar and transmission_correction
-    rebin_flux = np.bincount(
-        bins[valid_bins],
-        weights=ivar[valid_bins] * flux[valid_bins],
-        minlength=common_wavelength_grid.size)
-    rebin_ivar = np.bincount(
-        bins[valid_bins],
-        weights=ivar[valid_bins],
-        minlength=common_wavelength_grid.size)
+    rebin_flux = np.bincount(bins[valid_bins],
+                             weights=ivar[valid_bins] * flux[valid_bins],
+                             minlength=common_wavelength_grid.size)
+    rebin_ivar = np.bincount(bins[valid_bins],
+                             weights=ivar[valid_bins],
+                             minlength=common_wavelength_grid.size)
 
     # normalize rebinned flux
     pos = rebin_ivar != 0.0

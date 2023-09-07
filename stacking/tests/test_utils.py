@@ -16,10 +16,12 @@ setup_logger()
 
 # initialize reader
 config = ConfigParser()
-config.read_dict({"reader": {
-    "drq catalogue": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
-    "input directory": f"{THIS_DIR}/data",
-}})
+config.read_dict({
+    "reader": {
+        "drq catalogue": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
+        "input directory": f"{THIS_DIR}/data",
+    }
+})
 for key, value in defaults_dr16_reader.items():
     if key not in config["reader"]:
         config["reader"][key] = str(value)
@@ -34,8 +36,6 @@ assert len(READER.spectra) == 92
 assert READER.read_mode == "spplate"
 assert len(SPECTRA) == 92
 assert all(isinstance(spectrum, Spectrum) for spectrum in SPECTRA)
-
-
 
 # reset logger
 # this must happen at the very end of the module

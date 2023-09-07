@@ -230,7 +230,7 @@ class Dr16Reader(Reader):
         else:  # pragma: no cover
             raise ReaderError(
                 f"Don't know what to do with reading mode {self.read_mode}. "
-                "This is one of the supported reading modes, but maybe it "
+                "If this is one of the supported reading modes, but maybe it "
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `read_data`. "
                 "Otherwise contact 'stacking' developpers.")
@@ -351,8 +351,8 @@ class Dr16Reader(Reader):
             ivar = (np.array(hdul[1]["ivar"][:], dtype=np.float64) *
                     hdul[1]["and_mask"][:] == 0)
 
-            self.spectra.append(Spectrum(
-                thingid, flux, ivar, wavelength, row["Z"]))
+            self.spectra.append(
+                Spectrum(thingid, flux, ivar, wavelength, row["Z"]))
 
     def read_from_spplate(self):
         """Read the spectra and formats its data as Spectrum instances."""
@@ -405,7 +405,7 @@ class Dr16Reader(Reader):
                 time_read = (time.time() - start_time) / num_read
             # we should never enter here unless the spPlate file is
             # corrupted, kept as a fail-safe
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 time_read = np.nan
             self.logger.progress(
                 "read %d from %s in %.3f seconds per spec. Progress: %d of %d",

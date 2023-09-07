@@ -25,6 +25,7 @@ class RebinTest(AbstractTest):
     test_rebin_lin
     test_rebin_log
     """
+
     def run_rebin_whitout_errors(self, config, test_file, out_file):
         """Check behaviour when no errors are expected
 
@@ -63,7 +64,8 @@ class RebinTest(AbstractTest):
                             format="E",
                             array=spectrum.ivar_common_grid),
             ]
-            hdu_list.append(fits.BinTableHDU.from_columns(cols, name=f"{spectrum.specid}"))
+            hdu_list.append(
+                fits.BinTableHDU.from_columns(cols, name=f"{spectrum.specid}"))
         hdul = fits.HDUList(hdu_list)
         hdul.writeto(out_file, overwrite=True)
 
@@ -75,12 +77,14 @@ class RebinTest(AbstractTest):
         test_file = f"{THIS_DIR}/data/rebinned_lin.fits.gz"
 
         config = ConfigParser()
-        config.read_dict({"rebin": {
-            "max wavelength": 5000,
-            "min wavelength": 1000,
-            "step type": "lin",
-            "step wavelength": 0.8,
-        }})
+        config.read_dict({
+            "rebin": {
+                "max wavelength": 5000,
+                "min wavelength": 1000,
+                "step type": "lin",
+                "step wavelength": 0.8,
+            }
+        })
 
         self.run_rebin_whitout_errors(config, test_file, out_file)
 
@@ -90,15 +94,16 @@ class RebinTest(AbstractTest):
         test_file = f"{THIS_DIR}/data/rebinned_log.fits.gz"
 
         config = ConfigParser()
-        config.read_dict({"rebin": {
-            "max wavelength": 4999.1941102499995,
-            "min wavelength": 1000,
-            "step type": "log",
-            "step wavelength": 1e-4,
-        }})
+        config.read_dict({
+            "rebin": {
+                "max wavelength": 4999.1941102499995,
+                "min wavelength": 1000,
+                "step type": "log",
+                "step wavelength": 1e-4,
+            }
+        })
 
         self.run_rebin_whitout_errors(config, test_file, out_file)
-
 
     def test_rebin_missing_options(self):
         """Check that errors are raised when required options are missing"""
@@ -112,6 +117,7 @@ class RebinTest(AbstractTest):
         ]
 
         self.check_missing_options(options_and_values, Rebin, RebinError)
+
 
 if __name__ == '__main__':
     unittest.main()
