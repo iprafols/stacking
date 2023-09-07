@@ -7,12 +7,14 @@ from stacking.errors import RebinError
 from stacking.spectrum import Spectrum
 
 accepted_options = [
-    "max wavelength", "min wavelength", "rebin", "step type", "step wavelength"
+    "convert to restframe", "max wavelength", "min wavelength", "rebin",
+    "step type", "step wavelength"
 ]
 required_options = [
     "max wavelength", "min wavelength", "step type", "step wavelength"
 ]
 defaults = {
+    "convert to restframe": True,
     "rebin": True,
 }
 
@@ -31,6 +33,9 @@ class Rebin:
     ----------
     common_wavelength_grid: array of float
     Common wavelength grid
+
+    convert_to_restframe: bool
+    If True, then convert the wavelength array to rest-frame before rebining
 
     max_wavelength: float
     Maximum wavelength of the common wavelength grid
@@ -82,18 +87,22 @@ class Rebin:
         The rebinned spetrum
         """
         if self.rebin:
+            wavelength = spectrum.wavelength.copy()
+            if self.convert_to_restframe:
+                wavelength /= (1 + spectrum.redshift)
+
             if self.step_type == "lin":
                 rebinned_flux, rebinned_ivar = rebin(
                     spectrum.flux,
                     spectrum.ivar,
-                    spectrum.wavelength,
+                    wavelength,
                     self.common_wavelength_grid,
                 )
             elif self.step_type == "log":
                 rebinned_flux, rebinned_ivar = rebin(
                     spectrum.flux,
                     spectrum.ivar,
-                    np.log10(spectrum.wavelength),
+                    np.log10(wavelength),
                     self.common_wavelength_grid,
                 )
 
@@ -116,6 +125,11 @@ class Rebin:
         -----
         RebinError upon missing required variables
         """
+        self.convert_to_restframe = config.getboolean("convert to restframe")
+        if self.convert_to_restframe is None:
+            raise RebinError(
+                "Missing argument 'convert to restframe' required by Rebin")
+
         self.max_wavelength = config.getfloat("max wavelength")
         if self.max_wavelength is None:
             raise RebinError(
@@ -125,6 +139,12 @@ class Rebin:
         if self.min_wavelength is None:
             raise RebinError(
                 "Missing argument 'min wavelength' required by Rebin")
+
+        if self.min_wavelength > self.max_wavelength:
+            raise RebinError(
+                "The minimum wavelength must be smaller than the maximum wavelength"
+                f"Found values: min = {self.min_wavelength}, max = {self.max_wavelength}"
+            )
 
         self.rebin = config.getboolean("rebin")
         if self.rebin is None:
@@ -144,9 +164,9 @@ class Rebin:
             raise RebinError(
                 "Missing argument 'step wavelength' required by Rebin")
         if self.step_type == "lin":
-            self.size_common_grid = (
+            self.size_common_grid = int(
                 (self.max_wavelength - self.min_wavelength) /
-                step_wavelength).astype(np.int64)
+                step_wavelength)
             expected_max_wavelength = self.min_wavelength + self.size_common_grid * step_wavelength
         elif self.step_type == "log":
             self.size_common_grid = ((np.log10(self.max_wavelength) -
@@ -238,18 +258,20 @@ def rebin(flux, ivar, wavelength, common_wavelength_grid):
     rebin_ivar = np.zeros(common_wavelength_grid.size)
 
     bins = find_bins(wavelength, common_wavelength_grid)
-    max_bin = np.max(bins)
-    binned_arr_size = bins.max() + 1
+    valid_bins = (bins > 0) & (bins < common_wavelength_grid.size)
 
     # rebin flux, ivar and transmission_correction
-    rebin_flux[:max_bin] = np.bincount(bins,
-                                       weights=ivar * flux,
-                                       minlength=binned_arr_size)
-    rebin_ivar[:max_bin] = np.bincount(bins,
-                                       weights=ivar,
-                                       minlength=binned_arr_size)
+    rebin_flux = np.bincount(
+        bins[valid_bins],
+        weights=ivar[valid_bins] * flux[valid_bins],
+        minlength=common_wavelength_grid.size)
+    rebin_ivar = np.bincount(
+        bins[valid_bins],
+        weights=ivar[valid_bins],
+        minlength=common_wavelength_grid.size)
 
     # normalize rebinned flux
-    rebin_flux[rebin_ivar == 0.0] /= rebin_ivar[rebin_ivar == 0.0]
+    pos = rebin_ivar != 0.0
+    rebin_flux[pos] /= rebin_ivar[pos]
 
     return rebin_flux, rebin_ivar

@@ -22,6 +22,9 @@ def main(args):
     # read data
     interface.read_data()
 
+    # rebin spectra
+    interface.rebin_data()
+
     # normalize spectra
     interface.normalize_spectra()
 

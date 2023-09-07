@@ -20,8 +20,14 @@ class Spectrum:
     ivar: array of float
     The inverse variance associated with the flux
 
+    ivar_common_grid: array of float or None
+    If present, the inverse variance rebinned to the common grid
+
     flux: array of float
     The flux array
+
+    flux_common_grid: array of float or None
+    If present, the flux array rebinned to the common grid
 
     metadata: dict
     Metadata associated to the spectrum
