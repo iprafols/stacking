@@ -37,7 +37,7 @@ class Spectrum:
     """
     common_wavelength_grid = None
 
-    def __init__(self, specid, flux, ivar, wavelength):
+    def __init__(self, specid, flux, ivar, wavelength, redshift):
         """Initialize class instance
 
         Arguments
@@ -53,11 +53,15 @@ class Spectrum:
 
         wavelength: array of float
         The wavelength array
+
+        redshift: float
+        Redshift of the object
         """
         self.specid = specid
         self.flux = flux
         self.ivar = ivar
         self.wavelength = wavelength
+        self.redshift = redshift
 
         self.flux_common_grid = None
         self.ivar_common_grid = None
@@ -84,7 +88,7 @@ class Spectrum:
         Spectrum.common_wavelength_grid
 
         ivar_common_grid: array of float
-        The inverse variance in the common grid. Must have the same length as 
+        The inverse variance in the common grid. Must have the same length as
         Spectrum.common_wavelength_grid
         """
         if flux_common_grid.size != Spectrum.common_wavelength_grid.size:

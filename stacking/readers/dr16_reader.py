@@ -351,7 +351,8 @@ class Dr16Reader(Reader):
             ivar = (np.array(hdul[1]["ivar"][:], dtype=np.float64) *
                     hdul[1]["and_mask"][:] == 0)
 
-            self.spectra.append(Spectrum(thingid, flux, ivar, wavelength))
+            self.spectra.append(Spectrum(
+                thingid, flux, ivar, wavelength, row["Z"]))
 
     def read_from_spplate(self):
         """Read the spectra and formats its data as Spectrum instances."""
@@ -392,6 +393,7 @@ class Dr16Reader(Reader):
                         flux[array_index],
                         ivar[array_index],
                         wavelength,
+                        row["Z"],
                     ))
 
                 self.logger.debug("%d read from file %s and fiberid %d",
