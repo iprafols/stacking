@@ -21,12 +21,29 @@ class RebinTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
-    run_rebin_whitout_errors
+    run_rebin_without_errors
     test_rebin_lin
     test_rebin_log
+    test_rebin_missing_options
+    test_rebin_wrong_wavelength_cuts
     """
 
-    def run_rebin_whitout_errors(self, config, test_file, out_file):
+    def run_rebin_with_errors(self, config, expected_message):
+        """Check behaviour when errors are expected
+
+        Arguments
+        ---------
+        config: ConfigParser
+        Run configuration
+
+        expected_message: str
+        Expected error message
+        """
+        with self.assertRaises(RebinError) as context_manager:
+            Rebin(config["rebin"])
+        self.compare_error_message(context_manager, expected_message)
+
+    def run_rebin_without_errors(self, config, test_file, out_file):
         """Check behaviour when no errors are expected
 
         Arguments
@@ -86,7 +103,7 @@ class RebinTest(AbstractTest):
             }
         })
 
-        self.run_rebin_whitout_errors(config, test_file, out_file)
+        self.run_rebin_without_errors(config, test_file, out_file)
 
     def test_rebin_log(self):
         """Test the data rebinning using loglinear wavelength solution"""
@@ -103,20 +120,53 @@ class RebinTest(AbstractTest):
             }
         })
 
-        self.run_rebin_whitout_errors(config, test_file, out_file)
+        self.run_rebin_without_errors(config, test_file, out_file)
 
     def test_rebin_missing_options(self):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
-            ("convert to restframe", "False"),
             ("max wavelength", "4999.1941102499995"),
             ("min wavelength", "1000"),
-            ("rebin", "True"),
             ("step type", "log"),
             ("step wavelength", "1e-4"),
         ]
 
         self.check_missing_options(options_and_values, Rebin, RebinError)
+
+    def test_rebin_wrong_wavelength_cuts(self):
+        """Check the behaviour when the wavelength cuts are not correct"""
+
+        # max wavelength < min wavelength
+        config = ConfigParser()
+        config.read_dict(
+            {"rebin": {
+                "max wavelength": 1000,
+                "min wavelength": 5000,
+            }})
+
+        expected_message = (
+            "The minimum wavelength must be smaller than the maximum wavelength"
+            "Found values: min = 5000.0, max = 1000.0")
+        self.run_rebin_with_errors(config, expected_message)
+
+        # problems with limiting wavelengths
+        config = ConfigParser()
+        config.read_dict({
+            "rebin": {
+                "max wavelength": 5000,
+                "min wavelength": 1000,
+                "step type": "log",
+                "step wavelength": 0.0001,
+            }
+        })
+
+        expected_message = (
+            "Inconsistent values given for 'min wavelength' (1000.0), "
+            "'max wavelength' (5000.0) and "
+            "'step wavelength' (0.0001). Limiting wavelengths "
+            "should be separated by N times the step with N being an integer. "
+            "Expected a maximum wavelength of 4999.1941102499995")
+        self.run_rebin_with_errors(config, expected_message)
 
 
 if __name__ == '__main__':

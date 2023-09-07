@@ -7,16 +7,12 @@ from stacking.errors import RebinError
 from stacking.spectrum import Spectrum
 
 accepted_options = [
-    "convert to restframe", "max wavelength", "min wavelength", "rebin",
-    "step type", "step wavelength"
+    "max wavelength", "min wavelength", "step type", "step wavelength"
 ]
 required_options = [
     "max wavelength", "min wavelength", "step type", "step wavelength"
 ]
-defaults = {
-    "convert to restframe": True,
-    "rebin": True,
-}
+defaults = {}
 
 VALID_STEP_TYPES = ["lin", "log"]
 
@@ -34,17 +30,11 @@ class Rebin:
     common_wavelength_grid: array of float
     Common wavelength grid
 
-    convert_to_restframe: bool
-    If True, then convert the wavelength array to rest-frame before rebining
-
     max_wavelength: float
     Maximum wavelength of the common wavelength grid
 
     min_wavelength: float
     Minimum wavelength of the common wavelength grid
-
-    rebin: bool
-    A boolean indicating whether rebin is necessary
 
     size_common_grid: int
     Number of pixels in the common wavelength grid
@@ -65,7 +55,6 @@ class Rebin:
         """
         self.max_wavelength = None
         self.min_wavelength = None
-        self.rebin = None
         self.size_common_grid = None
         self.step_type = None
         self.__parse_config(config)
@@ -86,38 +75,32 @@ class Rebin:
         spectrum: Spectrum
         The rebinned spetrum
         """
-        if self.rebin:
-            wavelength = spectrum.wavelength.copy()
-            if self.convert_to_restframe:
-                wavelength /= (1 + spectrum.redshift)
+        wavelength = spectrum.wavelength / (1 + spectrum.redshift)
 
-            if self.step_type == "lin":
-                rebinned_flux, rebinned_ivar = rebin(
-                    spectrum.flux,
-                    spectrum.ivar,
-                    wavelength,
-                    self.common_wavelength_grid,
-                )
-            elif self.step_type == "log":
-                rebinned_flux, rebinned_ivar = rebin(
-                    spectrum.flux,
-                    spectrum.ivar,
-                    np.log10(wavelength),
-                    self.common_wavelength_grid,
-                )
-            # this should never enter unless new step types are not properly added
-            else:  # pragma: no cover
-                raise RebinError(
-                    f"Don't know what to do with step_type {self.step_type}. "
-                    "If this is one of the supported reading modes, but maybe it "
-                    "was not properly coded. If you did the change yourself, check "
-                    "that you added the behaviour of the new mode to method `__call__`. "
-                    "Otherwise contact 'stacking' developpers.")
+        if self.step_type == "lin":
+            rebinned_flux, rebinned_ivar = rebin(
+                spectrum.flux,
+                spectrum.ivar,
+                wavelength,
+                self.common_wavelength_grid,
+            )
+        elif self.step_type == "log":
+            rebinned_flux, rebinned_ivar = rebin(
+                spectrum.flux,
+                spectrum.ivar,
+                np.log10(wavelength),
+                self.common_wavelength_grid,
+            )
+        # this should never enter unless new step types are not properly added
+        else:  # pragma: no cover
+            raise RebinError(
+                f"Don't know what to do with step_type {self.step_type}. "
+                "If this is one of the supported reading modes, but maybe it "
+                "was not properly coded. If you did the change yourself, check "
+                "that you added the behaviour of the new mode to method `__call__`. "
+                "Otherwise contact 'stacking' developpers.")
 
-            spectrum.set_flux_ivar_common_grid(rebinned_flux, rebinned_ivar)
-
-        else:
-            spectrum.set_flux_ivar_common_grid(spectrum.flux, spectrum.ivar)
+        spectrum.set_flux_ivar_common_grid(rebinned_flux, rebinned_ivar)
 
         return spectrum
 
@@ -133,11 +116,6 @@ class Rebin:
         -----
         RebinError upon missing required variables
         """
-        self.convert_to_restframe = config.getboolean("convert to restframe")
-        if self.convert_to_restframe is None:
-            raise RebinError(
-                "Missing argument 'convert to restframe' required by Rebin")
-
         self.max_wavelength = config.getfloat("max wavelength")
         if self.max_wavelength is None:
             raise RebinError(
@@ -153,10 +131,6 @@ class Rebin:
                 "The minimum wavelength must be smaller than the maximum wavelength"
                 f"Found values: min = {self.min_wavelength}, max = {self.max_wavelength}"
             )
-
-        self.rebin = config.getboolean("rebin")
-        if self.rebin is None:
-            raise RebinError("Missing argument 'rebin' required by Rebin")
 
         self.step_type = config.get("step type")
         if self.step_type is None:
@@ -182,6 +156,15 @@ class Rebin:
             expected_max_wavelength = 10**(
                 np.log10(self.min_wavelength) +
                 self.size_common_grid * step_wavelength)
+        # this should never enter unless new step types are not properly added
+        else:  # pragma: no cover
+            raise RebinError(
+                f"Don't know what to do with step_type {self.step_type}. "
+                "If this is one of the supported reading modes, but maybe it "
+                "was not properly coded. If you did the change yourself, check "
+                "that you added the behaviour of the new mode to method `__call__`. "
+                "Otherwise contact 'stacking' developpers.")
+
         if not np.isclose(expected_max_wavelength, self.max_wavelength):
             raise RebinError(
                 f"Inconsistent values given for 'min wavelength' ({self.min_wavelength}), "
@@ -202,6 +185,15 @@ class Rebin:
                 np.log10(self.min_wavelength), np.log10(self.max_wavelength),
                 self.size_common_grid)
             Spectrum.set_common_wavelength_grid(10**self.common_wavelength_grid)
+
+        # this should never enter unless new step types are not properly added
+        else:  # pragma: no cover
+            raise RebinError(
+                f"Don't know what to do with step_type {self.step_type}. "
+                "If this is one of the supported reading modes, but maybe it "
+                "was not properly coded. If you did the change yourself, check "
+                "that you added the behaviour of the new mode to method `__call__`. "
+                "Otherwise contact 'stacking' developpers.")
 
 
 @njit()
