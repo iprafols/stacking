@@ -137,7 +137,7 @@ class Rebin:
             raise RebinError("Missing argument 'step type' required by Rebin")
         if self.step_type not in VALID_STEP_TYPES:
             raise RebinError(
-                f"Error loading Rebin instance. 'step type' {self.step_type} "
+                f"Error loading Rebin instance. 'step type' = '{self.step_type}' "
                 " is not supported. Supported modes are " +
                 " ".join(VALID_STEP_TYPES))
 

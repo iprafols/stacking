@@ -7,7 +7,7 @@ from astropy.io import fits
 
 from stacking.errors import RebinError
 from stacking.rebin import defaults as defaults_rebin
-from stacking.rebin import Rebin
+from stacking.rebin import Rebin, VALID_STEP_TYPES
 from stacking.tests.test_utils import SPECTRA
 from stacking.tests.abstract_test import AbstractTest
 
@@ -88,6 +88,58 @@ class RebinTest(AbstractTest):
 
         self.compare_fits(test_file, out_file)
 
+    def test_rebin_invalid_step_type(self):
+        """Check the behaviour when the step type is not valid"""
+        config = ConfigParser()
+        config.read_dict({
+            "rebin": {
+                "max wavelength": 5000,
+                "min wavelength": 1000,
+                "step type": "invalid",
+            }
+        })
+
+        expected_message = (
+            "Error loading Rebin instance. 'step type' = 'invalid' "
+            " is not supported. Supported modes are " +
+            " ".join(VALID_STEP_TYPES))
+        self.run_rebin_with_errors(config, expected_message)
+
+    def test_rebin_invalid_wavelength_cuts(self):
+        """Check the behaviour when the wavelength cuts are not correct"""
+
+        # max wavelength < min wavelength
+        config = ConfigParser()
+        config.read_dict(
+            {"rebin": {
+                "max wavelength": 1000,
+                "min wavelength": 5000,
+            }})
+
+        expected_message = (
+            "The minimum wavelength must be smaller than the maximum wavelength"
+            "Found values: min = 5000.0, max = 1000.0")
+        self.run_rebin_with_errors(config, expected_message)
+
+        # problems with limiting wavelengths
+        config = ConfigParser()
+        config.read_dict({
+            "rebin": {
+                "max wavelength": 5000,
+                "min wavelength": 1000,
+                "step type": "log",
+                "step wavelength": 0.0001,
+            }
+        })
+
+        expected_message = (
+            "Inconsistent values given for 'min wavelength' (1000.0), "
+            "'max wavelength' (5000.0) and "
+            "'step wavelength' (0.0001). Limiting wavelengths "
+            "should be separated by N times the step with N being an integer. "
+            "Expected a maximum wavelength of 4999.1941102499995")
+        self.run_rebin_with_errors(config, expected_message)
+
     def test_rebin_lin(self):
         """Test the data rebinning using linear wavelength solution"""
         out_file = f"{THIS_DIR}/results/rebinned_lin.fits.gz"
@@ -132,41 +184,6 @@ class RebinTest(AbstractTest):
         ]
 
         self.check_missing_options(options_and_values, Rebin, RebinError)
-
-    def test_rebin_wrong_wavelength_cuts(self):
-        """Check the behaviour when the wavelength cuts are not correct"""
-
-        # max wavelength < min wavelength
-        config = ConfigParser()
-        config.read_dict(
-            {"rebin": {
-                "max wavelength": 1000,
-                "min wavelength": 5000,
-            }})
-
-        expected_message = (
-            "The minimum wavelength must be smaller than the maximum wavelength"
-            "Found values: min = 5000.0, max = 1000.0")
-        self.run_rebin_with_errors(config, expected_message)
-
-        # problems with limiting wavelengths
-        config = ConfigParser()
-        config.read_dict({
-            "rebin": {
-                "max wavelength": 5000,
-                "min wavelength": 1000,
-                "step type": "log",
-                "step wavelength": 0.0001,
-            }
-        })
-
-        expected_message = (
-            "Inconsistent values given for 'min wavelength' (1000.0), "
-            "'max wavelength' (5000.0) and "
-            "'step wavelength' (0.0001). Limiting wavelengths "
-            "should be separated by N times the step with N being an integer. "
-            "Expected a maximum wavelength of 4999.1941102499995")
-        self.run_rebin_with_errors(config, expected_message)
 
 
 if __name__ == '__main__':
