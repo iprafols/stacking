@@ -108,7 +108,7 @@ class Rebin:
             # this should never enter unless new step types are not properly added
             else:  # pragma: no cover
                 raise RebinError(
-                    f"Don't know what to do with step_type {self.read_mode}. "
+                    f"Don't know what to do with step_type {self.step_type}. "
                     "If this is one of the supported reading modes, but maybe it "
                     "was not properly coded. If you did the change yourself, check "
                     "that you added the behaviour of the new mode to method `__call__`. "
