@@ -28,28 +28,30 @@ class RebinTest(AbstractTest):
     test_rebin_wrong_wavelength_cuts
     """
 
-    def run_rebin_with_errors(self, config, expected_message):
+    def run_rebin_with_errors(self, rebin_kwargs, expected_message):
         """Check behaviour when errors are expected
 
         Arguments
         ---------
-        config: ConfigParser
-        Run configuration
+        rebin_kwargs: dict
+        Keyword arguments to set the configuration run
 
         expected_message: str
         Expected error message
         """
+        config = create_rebin_config(rebin_kwargs)
+
         with self.assertRaises(RebinError) as context_manager:
             Rebin(config["rebin"])
         self.compare_error_message(context_manager, expected_message)
 
-    def run_rebin_without_errors(self, config, test_file, out_file):
+    def run_rebin_without_errors(self, rebin_kwargs, test_file, out_file):
         """Check behaviour when no errors are expected
 
         Arguments
         ---------
-        config: ConfigParser
-        Run configuration
+        rebin_kwargs: dict
+        Keyword arguments to set the configuration run
 
         test_file: str
         Name of the test file against which we compare the results
@@ -57,9 +59,7 @@ class RebinTest(AbstractTest):
         out_file: str
         Name of the output file
         """
-        for key, value in defaults_rebin.items():
-            if key not in config["rebin"]:
-                config["rebin"][key] = str(value)
+        config = create_rebin_config(rebin_kwargs)
 
         rebin = Rebin(config["rebin"])
         rebinned_spectra = [rebin(spectrum) for spectrum in SPECTRA]
@@ -90,89 +90,70 @@ class RebinTest(AbstractTest):
 
     def test_rebin_invalid_step_type(self):
         """Check the behaviour when the step type is not valid"""
-        config = ConfigParser()
-        config.read_dict({
-            "rebin": {
-                "max wavelength": 5000,
-                "min wavelength": 1000,
-                "step type": "invalid",
-            }
-        })
-
+        rebin_kwargs = {
+            "max wavelength": 5000,
+            "min wavelength": 1000,
+            "step type": "invalid",
+        }
         expected_message = (
             "Error loading Rebin instance. 'step type' = 'invalid' "
             " is not supported. Supported modes are " +
             " ".join(VALID_STEP_TYPES))
-        self.run_rebin_with_errors(config, expected_message)
+        self.run_rebin_with_errors(rebin_kwargs, expected_message)
 
     def test_rebin_invalid_wavelength_cuts(self):
         """Check the behaviour when the wavelength cuts are not correct"""
 
         # max wavelength < min wavelength
-        config = ConfigParser()
-        config.read_dict(
-            {"rebin": {
-                "max wavelength": 1000,
-                "min wavelength": 5000,
-            }})
-
+        rebin_kwargs = {
+            "max wavelength": 1000,
+            "min wavelength": 5000,
+        }
         expected_message = (
             "The minimum wavelength must be smaller than the maximum wavelength"
             "Found values: min = 5000.0, max = 1000.0")
-        self.run_rebin_with_errors(config, expected_message)
+        self.run_rebin_with_errors(rebin_kwargs, expected_message)
 
         # problems with limiting wavelengths
-        config = ConfigParser()
-        config.read_dict({
-            "rebin": {
-                "max wavelength": 5000,
-                "min wavelength": 1000,
-                "step type": "log",
-                "step wavelength": 0.0001,
-            }
-        })
-
+        rebin_kwargs = {
+            "max wavelength": 5000,
+            "min wavelength": 1000,
+            "step type": "log",
+            "step wavelength": 0.0001,
+        }
         expected_message = (
             "Inconsistent values given for 'min wavelength' (1000.0), "
             "'max wavelength' (5000.0) and "
             "'step wavelength' (0.0001). Limiting wavelengths "
             "should be separated by N times the step with N being an integer. "
             "Expected a maximum wavelength of 4999.1941102499995")
-        self.run_rebin_with_errors(config, expected_message)
+        self.run_rebin_with_errors(rebin_kwargs, expected_message)
 
     def test_rebin_lin(self):
         """Test the data rebinning using linear wavelength solution"""
         out_file = f"{THIS_DIR}/results/rebinned_lin.fits.gz"
         test_file = f"{THIS_DIR}/data/rebinned_lin.fits.gz"
 
-        config = ConfigParser()
-        config.read_dict({
-            "rebin": {
-                "max wavelength": 5000,
-                "min wavelength": 1000,
-                "step type": "lin",
-                "step wavelength": 0.8,
-            }
-        })
-
-        self.run_rebin_without_errors(config, test_file, out_file)
+        rebin_kwargs = {
+            "max wavelength": 5000,
+            "min wavelength": 1000,
+            "step type": "lin",
+            "step wavelength": 0.8,
+        }
+        self.run_rebin_without_errors(rebin_kwargs, test_file, out_file)
 
     def test_rebin_log(self):
         """Test the data rebinning using loglinear wavelength solution"""
         out_file = f"{THIS_DIR}/results/rebinned_log.fits.gz"
         test_file = f"{THIS_DIR}/data/rebinned_log.fits.gz"
 
-        config = ConfigParser()
-        config.read_dict({
-            "rebin": {
-                "max wavelength": 4999.1941102499995,
-                "min wavelength": 1000,
-                "step type": "log",
-                "step wavelength": 1e-4,
-            }
-        })
-
-        self.run_rebin_without_errors(config, test_file, out_file)
+        rebin_kwargs = {
+            "max wavelength": 4999.1941102499995,
+            "min wavelength": 1000,
+            "step type": "log",
+            "step wavelength": 1e-4,
+        }
+        self.run_rebin_without_errors(rebin_kwargs, test_file, out_file)
 
     def test_rebin_missing_options(self):
         """Check that errors are raised when required options are missing"""
@@ -185,6 +166,26 @@ class RebinTest(AbstractTest):
 
         self.check_missing_options(options_and_values, Rebin, RebinError)
 
+def create_rebin_config(rebin_kwargs):
+    """Create a configuration instance to run Rebin
+
+    Arguments
+    ---------
+    rebin_kwargs: dict
+    Keyword arguments to set the configuration run
+
+    Return
+    ------
+    config: ConfigParser
+    Run configuration
+    """
+    config = ConfigParser()
+    config.read_dict({"rebin": rebin_kwargs})
+    for key, value in defaults_rebin.items():
+        if key not in config["rebin"]:
+            config["rebin"][key] = str(value)
+
+    return config
 
 if __name__ == '__main__':
     unittest.main()

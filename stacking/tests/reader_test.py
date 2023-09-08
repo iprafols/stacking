@@ -40,7 +40,7 @@ class ReaderTest(AbstractTest):
     """
 
     def run_dr16_reader_with_errors(self, reader_kwargs, expected_message):
-        """Check behaviour when errors are expected
+        """Check behaviour of Dr16Reader when errors are expected
 
         Arguments
         ---------
@@ -59,7 +59,7 @@ class ReaderTest(AbstractTest):
 
     def run_dr16_reader_without_errors(self, reader_kwargs, size_catalogue,
                                        num_spectra, mode):
-        """Check behaviour when no errors are expected
+        """Check behaviour of Dr16Reader when no errors are expected
 
         Arguments
         ---------
