@@ -69,8 +69,10 @@ class NormalizerTest(AbstractTest):
             normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
             normalizer_kwargs.update({
                 "log directory": out_dir,
-                "num processors": f"{num_processors}"})
-            config = create_multiple_regions_normalization_config(normalizer_kwargs)
+                "num processors": f"{num_processors}"
+            })
+            config = create_multiple_regions_normalization_config(
+                normalizer_kwargs)
 
             normalizer = MultipleRegionsNormalization(config["normalizer"])
             normalizer.compute_norm_factors(spectra)
@@ -122,13 +124,11 @@ class NormalizerTest(AbstractTest):
         # compare against expectations
         self.compare_ascii_numeric(test_file, out_file)
 
-    def test_multiple_regions_normalization_compute_correction_factors_errors(self):
+    def test_multiple_regions_normalization_compute_correction_factors_errors(
+            self):
         """Check that an error is raised in compute_correction_factors
         from MultipleRegionsNormalization when an interval has no common measurements
         with the main interval"""
-        out_file = f"{THIS_DIR}/results/correction_factors.txt"
-        test_file = f"{THIS_DIR}/data/correction_factors.txt"
-
         config = create_multiple_regions_normalization_config(
             MULTIPLE_REGIONS_NORMALIZATION_KWARGS)
 
@@ -137,14 +137,12 @@ class NormalizerTest(AbstractTest):
         norm_factors["norm factor 0"] = np.nan
         normalizer.norm_factors = norm_factors
 
-        expected_message = (
-            "Error computing the correction for normalisation "
-            "factor interval 0. No common measurements with "
-            "the main intervals were found.")
+        expected_message = ("Error computing the correction for normalisation "
+                            "factor interval 0. No common measurements with "
+                            "the main intervals were found.")
         with self.assertRaises(NormalizerError) as context_manager:
             normalizer.compute_correction_factors()
         self.compare_error_message(context_manager, expected_message)
-
 
     def test_multiple_regions_normalization_compute_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
@@ -265,8 +263,7 @@ class NormalizerTest(AbstractTest):
                     Spectrum.common_wavelength_grid,
                     normalized_spectrum.normalized_flux,
                     normalized_spectrum2.normalized_flux):
-                results.write(
-                    f"{wavelength} {norm_flux}  {norm_flux2}\n")
+                results.write(f"{wavelength} {norm_flux}  {norm_flux2}\n")
 
         # compare against expectations
         self.compare_ascii_numeric(test_file, out_file)
