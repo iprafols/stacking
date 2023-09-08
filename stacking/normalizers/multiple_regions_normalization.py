@@ -151,6 +151,8 @@ class MultipleRegionsNormalization(Normalizer):
             raise NormalizerError(
                 "Missing argument 'num processors' required by "
                 "MultipleRegionsNormalization")
+        if self.num_processors == 0:
+            self.num_processors = multiprocessing.cpu_count() // 2
 
         self.save_format = config.get("save format")
         if self.save_format is None:
@@ -202,15 +204,15 @@ class MultipleRegionsNormalization(Normalizer):
         if self.num_processors > 1:
             context = multiprocessing.get_context('fork')
             with context.Pool(processes=self.num_processors) as pool:
-                imap_it = pool.imap(compute_norm_factors, arguments)
+                norm_factors = pool.starmap(compute_norm_factors, arguments)
         else:
-            imap_it = [
+            norm_factors = [
                 compute_norm_factors(*argument) for argument in arguments
             ]
 
         # unpack them together in a dataframe
         self.norm_factors = pd.DataFrame(
-            imap_it,
+            norm_factors,
             columns=[
                 f"{col_type} {index}" for index in range(self.num_intervals)
                 for col_type in ["norm factor", "norm S/N", "num pixels"]

@@ -60,8 +60,7 @@ class NormalizerTest(AbstractTest):
         """Test the class MultipleRegionsNormalization"""
         test_dir = f"{THIS_DIR}/data/multiple_regions_normalization/"
 
-        # TODO: 2 processors
-        for num_processors in [1]:#, 2]:
+        for num_processors in [0, 1, 2]:
             out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
@@ -162,12 +161,10 @@ class NormalizerTest(AbstractTest):
         self.assertTrue(isinstance(normalizer.norm_factors, pd.DataFrame))
 
         # save results
-        normalizer.norm_factors.to_csv(out_file,
-                                       index=False,
-                                       float_format='%.6f')
+        normalizer.norm_factors.to_csv(out_file, sep=" ", index=False)
 
         # compare against expectations
-        self.compare_ascii(test_file, out_file)
+        self.compare_ascii_numeric(test_file, out_file)
 
     def test_multiple_regions_normalization_invalid_intervals(self):
         """Check that errors are raised when the given intervals are not
