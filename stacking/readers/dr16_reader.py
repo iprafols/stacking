@@ -230,7 +230,7 @@ class Dr16Reader(Reader):
         else:  # pragma: no cover
             raise ReaderError(
                 f"Don't know what to do with reading mode {self.read_mode}. "
-                "If this is one of the supported reading modes, but maybe it "
+                "This is one of the supported reading modes, but maybe it "
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `read_data`. "
                 "Otherwise contact 'stacking' developpers.")

@@ -88,7 +88,8 @@ class StackingInterface:
                 self.spectra = pool.map(normalizer.normalize, self.spectra)
         else:
             self.spectra = [
-                normalizer.normalize(spectrum) for spectrum in self.spectra
+                normalizer.normalize_spectrum(spectrum)
+                for spectrum in self.spectra
             ]
         end_time_step = time.time()
         self.logger.progress("Time spent normalizing: %f seconds",

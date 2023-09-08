@@ -29,7 +29,7 @@ class RebinTest(AbstractTest):
     """
 
     def run_rebin_with_errors(self, rebin_kwargs, expected_message):
-        """Check behaviour when errors are expected
+        """Check behaviour of Rebin when errors are expected
 
         Arguments
         ---------
@@ -46,7 +46,7 @@ class RebinTest(AbstractTest):
         self.compare_error_message(context_manager, expected_message)
 
     def run_rebin_without_errors(self, rebin_kwargs, test_file, out_file):
-        """Check behaviour when no errors are expected
+        """Check behaviour of Rebin when no errors are expected
 
         Arguments
         ---------
@@ -86,6 +86,7 @@ class RebinTest(AbstractTest):
         hdul = fits.HDUList(hdu_list)
         hdul.writeto(out_file, overwrite=True)
 
+        # compare against expectations
         self.compare_fits(test_file, out_file)
 
     def test_rebin_invalid_step_type(self):
@@ -166,6 +167,7 @@ class RebinTest(AbstractTest):
 
         self.check_missing_options(options_and_values, Rebin, RebinError)
 
+
 def create_rebin_config(rebin_kwargs):
     """Create a configuration instance to run Rebin
 
@@ -186,6 +188,7 @@ def create_rebin_config(rebin_kwargs):
             config["rebin"][key] = str(value)
 
     return config
+
 
 if __name__ == '__main__':
     unittest.main()

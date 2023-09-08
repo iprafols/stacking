@@ -29,7 +29,7 @@ class Normalizer:
         ReaderError if function was not overloaded by child class
         """
         raise NormalizerError(
-            "Method 'normalize_spectrum' was not overloaded by child class")
+            "Method 'compute_norm_factors' was not overloaded by child class")
 
     def normalize_spectrum(self, spectrum):
         """ Normalize a spectrum

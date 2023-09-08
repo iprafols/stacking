@@ -189,7 +189,8 @@ class ReaderTest(AbstractTest):
     def test_dr16_reader_spplate(self):
         """Tests Dr16Reader when run in spplate mode"""
         # using default  value for 'mode'
-        self.run_dr16_reader_without_errors(DR16_READER_KWARGS, 93, 92, "spplate")
+        self.run_dr16_reader_without_errors(DR16_READER_KWARGS, 93, 92,
+                                            "spplate")
 
         # specifying 'mode'
         reader_kwargs = DR16_READER_KWARGS.copy()
@@ -253,6 +254,7 @@ def create_dr16_reader_config(reader_kwargs):
             config["reader"][key] = str(value)
 
     return config
+
 
 if __name__ == '__main__':
     unittest.main()

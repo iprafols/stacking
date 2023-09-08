@@ -95,7 +95,7 @@ class Rebin:
         else:  # pragma: no cover
             raise RebinError(
                 f"Don't know what to do with step_type {self.step_type}. "
-                "If this is one of the supported reading modes, but maybe it "
+                "This is one of the supported reading modes, but maybe it "
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `__call__`. "
                 "Otherwise contact 'stacking' developpers.")
@@ -160,7 +160,7 @@ class Rebin:
         else:  # pragma: no cover
             raise RebinError(
                 f"Don't know what to do with step_type {self.step_type}. "
-                "If this is one of the supported reading modes, but maybe it "
+                "This is one of the supported reading modes, but maybe it "
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `__call__`. "
                 "Otherwise contact 'stacking' developpers.")
@@ -190,7 +190,7 @@ class Rebin:
         else:  # pragma: no cover
             raise RebinError(
                 f"Don't know what to do with step_type {self.step_type}. "
-                "If this is one of the supported reading modes, but maybe it "
+                "This is one of the supported reading modes, but maybe it "
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `__call__`. "
                 "Otherwise contact 'stacking' developpers.")

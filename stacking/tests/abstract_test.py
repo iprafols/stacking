@@ -89,6 +89,43 @@ class AbstractTest(unittest.TestCase):
             # add the option to test the next option
             config["test"][option] = value
 
+    def compare_ascii(self, orig_file, new_file):
+        """Compare two ascii files to check that they are equal
+
+        Arguments
+        ---------
+        orig_file: str
+        Control file
+
+        new_file: str
+        New file
+
+        expand_dir: bool - Default: False
+        If set to true, replace the instances of the string 'THIS_DIR' by
+        its value
+        """
+        with open(orig_file, 'r',
+                  encoding="utf-8") as orig, open(new_file,
+                                                  'r',
+                                                  encoding="utf-8") as new:
+            for orig_line, new_line in zip(orig.readlines(), new.readlines()):
+                # this is necessary to remove the system dependent bits of
+                # the paths
+                if "py/picca/tests/delta_extraction" in orig_line:
+                    orig_line = re.sub(r"\/[^ ]*\/stacking\/tests\/", "",
+                                       orig_line)
+                    new_line = re.sub(r"\/[^ ]*\/stacking\/tests\/", "",
+                                      new_line)
+
+                if not orig_line == new_line:
+                    report_mismatch(orig_file, new_file)
+                    print("Lines not equal")
+                    print("Original line:")
+                    print(orig_line)
+                    print("New line:")
+                    print(new_line)
+                    self.fail()
+
     def compare_error_message(self,
                               context_manager,
                               expected_messages,
@@ -146,6 +183,33 @@ class AbstractTest(unittest.TestCase):
                 print("Received:")
                 print(received_message)
             self.assertTrue(received_message in expected_messages)
+
+    def compare_files(self, orig_file, new_file):
+        """Compare two fits files to check that they are equal.
+
+        This will call methods compare_ascii or compare_fits based
+        on the file extension. The file extension is determined from
+        the original file. The new file is assumed to have the same
+        extension.
+
+        Arguments
+        ---------
+        orig_file: str
+        Control file
+
+        new_file: str
+        New file
+        """
+        # ascii files
+        if orig_file.endswith(".txt") or orig_file.endswith(".csv"):
+            self.compare_ascii(orig_file, new_file)
+        # fits files
+        elif orig_file.endswith(".fits") or orig_file.endswith(".fits.gz"):
+            self.compare_fits(orig_file, new_file)
+        # unkown
+        else:
+            report_mismatch(orig_file, new_file)
+            print("Unrecognized file extension")
 
     def compare_fits(self, orig_file, new_file):
         """Compare two fits files to check that they are equal
@@ -208,13 +272,13 @@ class AbstractTest(unittest.TestCase):
         if orig_data is None:
             if new_data is not None:
                 self.report_fits_mismatch_data(orig_file, new_file, orig_data,
-                                               new_data, orig_hdu["EXTNAME"])
+                                               new_data, orig_hdu.header["EXTNAME"])
 
         # Image HDU
         elif orig_data.dtype.names is None:
             if not np.allclose(orig_data, new_data, equal_nan=True):
                 self.report_fits_mismatch_data(orig_file, new_file, orig_data,
-                                               new_data, orig_hdu["EXTNAME"])
+                                               new_data, orig_hdu.header["EXTNAME"])
 
         # Table HDU
         else:
@@ -224,7 +288,7 @@ class AbstractTest(unittest.TestCase):
                                                    new_file,
                                                    orig_data,
                                                    new_data,
-                                                   orig_hdu["EXTNAME"],
+                                                   orig_hdu.header["EXTNAME"],
                                                    col=col,
                                                    missing_col="new")
                 self.assertTrue(col in new_data.dtype.names)
@@ -242,7 +306,7 @@ class AbstractTest(unittest.TestCase):
                                                    new_file,
                                                    orig_data,
                                                    new_data,
-                                                   orig_hdu["EXTNAME"],
+                                                   orig_hdu.header["EXTNAME"],
                                                    col=col,
                                                    rtol=rtol)
             for col in new_data.dtype.names:
@@ -251,7 +315,7 @@ class AbstractTest(unittest.TestCase):
                                                    new_file,
                                                    orig_data,
                                                    new_data,
-                                                   orig_hdu["EXTNAME"],
+                                                   orig_hdu.header["EXTNAME"],
                                                    col=col,
                                                    missing_col="orig")
 
@@ -281,7 +345,7 @@ class AbstractTest(unittest.TestCase):
                                                  new_header,
                                                  key,
                                                  missing_key="new")
-            if key in ["CHECKSUM", "DATASUM"]:
+            if key in ["CHECKSUM", "DATASUM", "DATETIME"]:
                 continue
             if (orig_header[key] != new_header[key] and
                 (isinstance(orig_header[key], str) or
@@ -297,21 +361,6 @@ class AbstractTest(unittest.TestCase):
                                                  key,
                                                  missing_key="orig")
 
-    def report_fits_mismatch(self, orig_file, new_file):
-        """Print messages to give more details on a mismatch when comparing fits
-        files
-
-        Arguments
-        ---------
-        orig_file: str
-        Control file
-
-        new_file: str
-        New file
-        """
-        print(f"\nOriginal file: {orig_file}")
-        print(f"New file: {new_file}")
-
     def report_fits_mismatch_data(self,
                                   orig_file,
                                   new_file,
@@ -319,7 +368,7 @@ class AbstractTest(unittest.TestCase):
                                   new_data,
                                   hdu_name,
                                   col=None,
-                                  missing_col=False,
+                                  missing_col=None,
                                   rtol=1e-5):
         """Print messages to give more details on a mismatch when comparing
         data arrays in fits files
@@ -352,7 +401,7 @@ class AbstractTest(unittest.TestCase):
         Relative tolerance parameter (see documentation for
         numpy.islcose or np.allclose)
         """
-        self.report_fits_mismatch(orig_file, new_file)
+        report_mismatch(orig_file, new_file)
 
         if col is None:
             if orig_data is None:
@@ -411,10 +460,13 @@ class AbstractTest(unittest.TestCase):
         missing_key: "new", "orig" or None - Default: None
         HDU where the key is missing. None if it is present in both
         """
-        self.report_fits_mismatch(orig_file, new_file)
+        report_mismatch(orig_file, new_file)
 
         if missing_key is None:
-            print(f"\n For header {orig_header['EXTNAME']}")
+            if "EXTNAME" in orig_header:
+                print(f"\n For header {orig_header['EXTNAME']}")
+            else:
+                print("\n For nameless header (possibly a PrimaryHDU)")
             print(f"Different values found for key {key}: "
                   f"orig: {orig_header[key]}, new: {new_header[key]}")
 
@@ -442,7 +494,7 @@ class AbstractTest(unittest.TestCase):
         new_hdul: fits.hdu.hdulist.HDUList
         New HDU list
         """
-        self.report_fits_mismatch(orig_file, new_file)
+        report_mismatch(orig_file, new_file)
 
         print("Different number of extensions found")
         print("orig_hdul.info():")
@@ -451,6 +503,22 @@ class AbstractTest(unittest.TestCase):
         new_hdul.info()
 
         self.fail()
+
+
+def report_mismatch(orig_file, new_file):
+    """Print messages to give more details on a mismatch when comparing
+    files
+
+    Arguments
+    ---------
+    orig_file: str
+    Control file
+
+    new_file: str
+    New file
+    """
+    print(f"\nOriginal file: {orig_file}")
+    print(f"New file: {new_file}")
 
 
 if __name__ == '__main__':
