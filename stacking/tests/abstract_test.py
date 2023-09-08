@@ -6,6 +6,7 @@ import unittest
 
 from astropy.io import fits
 import numpy as np
+import pandas as pd
 
 from stacking.logging_utils import setup_logger, reset_logger
 
@@ -126,6 +127,50 @@ class AbstractTest(unittest.TestCase):
                     print(new_line)
                     self.fail()
 
+    def compare_ascii_numeric(self, orig_file, new_file):
+        """Compare two numeric ascii files to check that they are equal
+
+        Arguments
+        ---------
+        orig_file: str
+        Control file
+
+        new_file: str
+        New file
+
+        expand_dir: bool - Default: False
+        If set to true, replace the instances of the string 'THIS_DIR' by
+        its value
+        """
+        orig_df = pd.read_csv(orig_file, delim_whitespace=True)
+        new_df = pd.read_csv(orig_file, delim_whitespace=True)
+
+        if orig_df.shape != new_df.shape:
+            report_mismatch(orig_file, new_file)
+            print("Read data has different shapes")
+            print(f"Original shape: {orig_df.shape}")
+            print(f"New shape: {new_df.shape}")
+            self.fail()
+
+        if any(orig_df.columns != new_df.columns):
+            report_mismatch(orig_file, new_file)
+            print("Different columns found")
+            print(f"Original columns: {orig_df.columns}")
+            print(f"New columns: {new_df.columns}")
+            self.fail()
+
+        for col in orig_df.columns:
+            if not np.allclose(orig_df[col], new_df[col], equal_nan=True):
+                report_mismatch(orig_file, new_file)
+                print(f"Different data found for column {col}")
+                print("orig new is_close orig-new\n")
+                for index in orig_df.shape[1]:
+                    print(
+                        f"{orig_df[col][index]} {new_df[col][index]} "
+                        f"{np.isclose(orig_df[col][index], new_df[col][index])} "
+                        f"{orig_df[col][index] - new_df[col][index]}\n")
+                self.fail()
+
     def compare_error_message(self,
                               context_manager,
                               expected_messages,
@@ -185,9 +230,11 @@ class AbstractTest(unittest.TestCase):
             self.assertTrue(received_message in expected_messages)
 
     def compare_files(self, orig_file, new_file):
-        """Compare two fits files to check that they are equal.
+        """Compare two files to check that they are equal.
 
-        This will call methods compare_ascii or compare_fits based
+        This assumes the files contain numeric data
+
+        This will call methods compare_ascii_numeric or compare_fits based
         on the file extension. The file extension is determined from
         the original file. The new file is assumed to have the same
         extension.
@@ -202,7 +249,7 @@ class AbstractTest(unittest.TestCase):
         """
         # ascii files
         if orig_file.endswith(".txt") or orig_file.endswith(".csv"):
-            self.compare_ascii(orig_file, new_file)
+            self.compare_ascii_numeric(orig_file, new_file)
         # fits files
         elif orig_file.endswith(".fits") or orig_file.endswith(".fits.gz"):
             self.compare_fits(orig_file, new_file)

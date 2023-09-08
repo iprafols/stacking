@@ -265,24 +265,25 @@ class MultipleRegionsNormalization(Normalizer):
                 index=False,
                 float_format='%.6f',
                 encoding="utf-8",
+                sep=" ",
             )
 
             # intervals used
             filename = f"{self.log_directory}normalization_intervals.{self.save_format}"
             with open(filename, "w", encoding="utf-8") as results:
-                results.write("start,end\n")
+                results.write("# start end\n")
                 for index in range(self.intervals.shape[0]):
                     results.write(
-                        f"{self.intervals[index, 0]:.6f},{self.intervals[index, 1]:.6f}\n"
+                        f"{self.intervals[index, 0]},{self.intervals[index, 1]}\n"
                     )
 
             # correction_factors
             filename = f"{self.log_directory}correction_factors.{self.save_format}"
             with open(filename, "w", encoding="utf-8") as results:
-                results.write("interval,correction factor\n")
+                results.write("# interval correction_factor\n")
                 for index, correction_factor in enumerate(
                         self.correction_factors):
-                    results.write(f"{index},{correction_factor:.6f}\n")
+                    results.write(f"{index},{correction_factor}\n")
 
         # save as fits file
         elif self.save_format in ["fits", "fits.gz"]:

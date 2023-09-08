@@ -4,6 +4,7 @@ from copy import copy
 import os
 import unittest
 
+import numpy as np
 import pandas as pd
 
 from stacking.errors import NormalizerError
@@ -57,41 +58,47 @@ class NormalizerTest(AbstractTest):
 
     def test_multiple_regions_normalization(self):
         """Test the class MultipleRegionsNormalization"""
-        out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
         test_dir = f"{THIS_DIR}/data/multiple_regions_normalization/"
 
-        spectra = [copy(spectrum) for spectrum in REBINNED_SPECTRA]
+        # TODO: 2 processors
+        for num_processors in [1]:#, 2]:
+            out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+            spectra = [copy(spectrum) for spectrum in REBINNED_SPECTRA]
 
-        normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
-        normalizer_kwargs.update({"log directory": out_dir})
-        config = create_multiple_regions_normalization_config(normalizer_kwargs)
+            normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
+            normalizer_kwargs.update({
+                "log directory": out_dir,
+                "num processors": f"{num_processors}"})
+            config = create_multiple_regions_normalization_config(normalizer_kwargs)
 
-        normalizer = MultipleRegionsNormalization(config["normalizer"])
-        normalizer.compute_norm_factors(spectra)
-        normalizer.save_norm_factors()
-        spectra = [
-            normalizer.normalize_spectrum(spectrum) for spectrum in spectra
-        ]
+            normalizer = MultipleRegionsNormalization(config["normalizer"])
+            normalizer.compute_norm_factors(spectra)
+            normalizer.save_norm_factors()
+            spectra = [
+                normalizer.normalize_spectrum(spectrum) for spectrum in spectra
+            ]
 
-        # save results
-        with open(f"{out_dir}normed_fluxes.txt", "w",
-                  encoding="utf-8") as results:
-            results.write(
-                "# specid normed_flux0 normed_flux1 normed_flux2 ...\n")
-            for spectrum in spectra:
-                results.write(f"{spectrum.specid} ")
-                for item in spectrum.normalized_flux:
-                    results.write(f"{item:.6f} ")
+            # save results
+            with open(f"{out_dir}normalized_fluxes.txt", "w",
+                      encoding="utf-8") as results:
+                results.write("# ")
+                for spectrum in spectra:
+                    results.write(f"normalized_flux_{spectrum.specid} ")
                 results.write("\n")
 
-        # compare against expectations
-        self.assertTrue(normalizer.save_format == "fits.gz")
-        self.compare_fits(f"{test_dir}normalization_factors.fits.gz",
-                          f"{out_dir}normalization_factors.fits.gz")
-        self.compare_ascii(f"{test_dir}normed_fluxes.txt",
-                           f"{out_dir}normed_fluxes.txt")
+                for index in range(spectra[0].normalized_flux.size):
+                    for spectrum in spectra:
+                        results.write(f"{spectrum.normalized_flux[index]} ")
+                    results.write("\n")
+
+            # compare against expectations
+            self.assertTrue(normalizer.save_format == "fits.gz")
+            self.compare_fits(f"{test_dir}normalization_factors.fits.gz",
+                              f"{out_dir}normalization_factors.fits.gz")
+            self.compare_ascii_numeric(f"{test_dir}normalized_fluxes.txt",
+                                       f"{out_dir}normalized_fluxes.txt")
 
     def test_multiple_regions_normalization_compute_correction_factors(self):
         """Test method compute_correction_factors from MultipleRegionsNormalization"""
@@ -108,13 +115,37 @@ class NormalizerTest(AbstractTest):
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
-            results.write("interval,correction factor\n")
+            results.write("# interval correction_factor\n")
             for index, correction_factor in enumerate(
                     normalizer.correction_factors):
-                results.write(f"{index},{correction_factor:.6f}\n")
+                results.write(f"{index} {correction_factor}\n")
 
         # compare against expectations
-        self.compare_ascii(test_file, out_file)
+        self.compare_ascii_numeric(test_file, out_file)
+
+    def test_multiple_regions_normalization_compute_correction_factors_errors(self):
+        """Check that an error is raised in compute_correction_factors
+        from MultipleRegionsNormalization when an interval has no common measurements
+        with the main interval"""
+        out_file = f"{THIS_DIR}/results/correction_factors.txt"
+        test_file = f"{THIS_DIR}/data/correction_factors.txt"
+
+        config = create_multiple_regions_normalization_config(
+            MULTIPLE_REGIONS_NORMALIZATION_KWARGS)
+
+        normalizer = MultipleRegionsNormalization(config["normalizer"])
+        norm_factors = copy(NORM_FACTORS)
+        norm_factors["norm factor 0"] = np.nan
+        normalizer.norm_factors = norm_factors
+
+        expected_message = (
+            "Error computing the correction for normalisation "
+            "factor interval 0. No common measurements with "
+            "the main intervals were found.")
+        with self.assertRaises(NormalizerError) as context_manager:
+            normalizer.compute_correction_factors()
+        self.compare_error_message(context_manager, expected_message)
+
 
     def test_multiple_regions_normalization_compute_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
@@ -163,6 +194,7 @@ class NormalizerTest(AbstractTest):
         self.run_multiple_regions_normalization_with_errors(
             normalizer_kwargs, expected_message)
 
+        # main interval too large
         normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
         normalizer_kwargs.update({"main interval": "999"})
         expected_message = (
@@ -170,6 +202,15 @@ class NormalizerTest(AbstractTest):
             "999 as main interval, but I only read "
             "2 intervals (keep in mind the zero-based "
             "indexing in python)")
+        self.run_multiple_regions_normalization_with_errors(
+            normalizer_kwargs, expected_message)
+
+        # negative main interval
+        normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
+        normalizer_kwargs.update({"main interval": "-1"})
+        expected_message = (
+            "Invalid value for 'main interval'. Expected a positive integer. "
+            "Found: -1")
         self.run_multiple_regions_normalization_with_errors(
             normalizer_kwargs, expected_message)
 
@@ -228,10 +269,10 @@ class NormalizerTest(AbstractTest):
                     normalized_spectrum.normalized_flux,
                     normalized_spectrum2.normalized_flux):
                 results.write(
-                    f"{wavelength:.6f} {norm_flux:.6f}  {norm_flux2:.6f}\n")
+                    f"{wavelength} {norm_flux}  {norm_flux2}\n")
 
         # compare against expectations
-        self.compare_ascii(test_file, out_file)
+        self.compare_ascii_numeric(test_file, out_file)
 
     def test_multiple_regions_normalization_save_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
@@ -264,10 +305,10 @@ class NormalizerTest(AbstractTest):
                                f"{out_dir}normalization_factors.{save_format}")
 
             if save_format == "txt":
-                self.compare_ascii(
+                self.compare_ascii_numeric(
                     f"{test_dir}normalization_intervals.{save_format}",
                     f"{out_dir}normalization_intervals.{save_format}")
-                self.compare_ascii(
+                self.compare_ascii_numeric(
                     f"{test_dir}correction_factors.{save_format}",
                     f"{out_dir}correction_factors.{save_format}")
 
