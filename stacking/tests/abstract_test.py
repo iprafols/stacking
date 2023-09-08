@@ -272,13 +272,15 @@ class AbstractTest(unittest.TestCase):
         if orig_data is None:
             if new_data is not None:
                 self.report_fits_mismatch_data(orig_file, new_file, orig_data,
-                                               new_data, orig_hdu.header["EXTNAME"])
+                                               new_data,
+                                               orig_hdu.header["EXTNAME"])
 
         # Image HDU
         elif orig_data.dtype.names is None:
             if not np.allclose(orig_data, new_data, equal_nan=True):
                 self.report_fits_mismatch_data(orig_file, new_file, orig_data,
-                                               new_data, orig_hdu.header["EXTNAME"])
+                                               new_data,
+                                               orig_hdu.header["EXTNAME"])
 
         # Table HDU
         else:

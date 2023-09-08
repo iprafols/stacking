@@ -265,7 +265,7 @@ class MultipleRegionsNormalization(Normalizer):
                 index=False,
                 float_format='%.6f',
                 encoding="utf-8",
-                )
+            )
 
             # intervals used
             filename = f"{self.log_directory}normalization_intervals.{self.save_format}"
@@ -273,16 +273,16 @@ class MultipleRegionsNormalization(Normalizer):
                 results.write("start,end\n")
                 for index in range(self.intervals.shape[0]):
                     results.write(
-                        f"{self.intervals[index, 0]:.6f},{self.intervals[index, 1]:.6f}\n")
+                        f"{self.intervals[index, 0]:.6f},{self.intervals[index, 1]:.6f}\n"
+                    )
 
             # correction_factors
             filename = f"{self.log_directory}correction_factors.{self.save_format}"
             with open(filename, "w", encoding="utf-8") as results:
                 results.write("interval,correction factor\n")
-                for index, correction_factor in enumerate(self.correction_factors):
-                    results.write(
-                        f"{index},{correction_factor:.6f}\n")
-
+                for index, correction_factor in enumerate(
+                        self.correction_factors):
+                    results.write(f"{index},{correction_factor:.6f}\n")
 
         # save as fits file
         elif self.save_format in ["fits", "fits.gz"]:
@@ -332,9 +332,11 @@ class MultipleRegionsNormalization(Normalizer):
                 fits.Column(name="INTERVAL",
                             format="J",
                             disp="I4",
-                            array=np.arange(self.correction_factors.size, dtype=int)),
+                            array=np.arange(self.correction_factors.size,
+                                            dtype=int)),
             ]
-            hdu3 = fits.BinTableHDU.from_columns(cols, name="CORRECTION_FACTORS")
+            hdu3 = fits.BinTableHDU.from_columns(cols,
+                                                 name="CORRECTION_FACTORS")
 
             hdul = fits.HDUList([primary_hdu, hdu, hdu2, hdu3])
             hdul.writeto(filename, overwrite=True, checksum=True)

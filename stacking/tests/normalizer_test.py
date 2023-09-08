@@ -109,7 +109,8 @@ class NormalizerTest(AbstractTest):
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
             results.write("interval,correction factor\n")
-            for index, correction_factor in enumerate(normalizer.correction_factors):
+            for index, correction_factor in enumerate(
+                    normalizer.correction_factors):
                 results.write(f"{index},{correction_factor:.6f}\n")
 
         # compare against expectations
@@ -263,10 +264,12 @@ class NormalizerTest(AbstractTest):
                                f"{out_dir}normalization_factors.{save_format}")
 
             if save_format == "txt":
-                self.compare_ascii(f"{test_dir}normalization_intervals.{save_format}",
-                                   f"{out_dir}normalization_intervals.{save_format}")
-                self.compare_ascii(f"{test_dir}correction_factors.{save_format}",
-                                   f"{out_dir}correction_factors.{save_format}")
+                self.compare_ascii(
+                    f"{test_dir}normalization_intervals.{save_format}",
+                    f"{out_dir}normalization_intervals.{save_format}")
+                self.compare_ascii(
+                    f"{test_dir}correction_factors.{save_format}",
+                    f"{out_dir}correction_factors.{save_format}")
 
     def test_normalizer(self):
         """Test the abstract normalizer"""

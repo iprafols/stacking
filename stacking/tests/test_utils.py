@@ -80,13 +80,12 @@ for spectrum in REBINNED_SPECTRA:
 NORM_FACTORS = pd.read_csv(f"{THIS_DIR}/data/normalization_factors.txt")
 
 # correction factors
-
-CORRECTION_FACTORS = np.array([
-    float(line.split(",")[1])
-    for line in open(f"{THIS_DIR}/data/correction_factors.txt",
-                     encoding="utf-8").readlines()
-    if not line.startswith("interval,correction factor")
-])
+with open(f"{THIS_DIR}/data/correction_factors.txt", encoding="utf-8") as file:
+    CORRECTION_FACTORS = np.array([
+        float(line.split(",")[1])
+        for line in file.readlines()
+        if not line.startswith("interval,correction factor")
+    ])
 
 # reset logger
 # this must happen at the very end of the module
