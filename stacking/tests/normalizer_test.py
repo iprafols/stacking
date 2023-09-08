@@ -13,6 +13,7 @@ from stacking.normalizers.multiple_regions_normalization import (
     defaults as defaults_multiple_regions_normalization)
 from stacking.normalizers.multiple_regions_normalization import (
     MultipleRegionsNormalization, ACCEPTED_SAVE_FORMATS)
+from stacking.normalizers.no_normalization import NoNormalization
 from stacking.spectrum import Spectrum
 from stacking.tests.abstract_test import AbstractTest
 from stacking.tests.test_utils import REBINNED_SPECTRA, NORM_FACTORS, CORRECTION_FACTORS
@@ -305,6 +306,21 @@ class NormalizerTest(AbstractTest):
                 self.compare_ascii_numeric(
                     f"{test_dir}correction_factors.{save_format}",
                     f"{out_dir}correction_factors.{save_format}")
+
+    def test_no_normalization(self):
+        """Test the class NoNormalization"""
+        config = ConfigParser()
+        config.read_dict({"normalizer": {}})
+        normalizer = NoNormalization(config["normalizer"])
+
+        spectra = [copy(spectrum) for spectrum in REBINNED_SPECTRA]
+
+        normalizer.compute_norm_factors(spectra)
+        spectra = [
+            normalizer.normalize_spectrum(spectrum) for spectrum in spectra
+        ]
+        for spectrum in spectra:
+            self.assertTrue(np.allclose(spectrum.flux_common_grid, spectrum.normalized_flux))
 
     def test_normalizer(self):
         """Test the abstract normalizer"""
