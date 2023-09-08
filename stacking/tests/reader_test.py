@@ -39,30 +39,32 @@ class ReaderTest(AbstractTest):
     test_reader_missing_options
     """
 
-    def run_dr16_reader_with_errors(self, config, expected_message):
+    def run_dr16_reader_with_errors(self, reader_kwargs, expected_message):
         """Check behaviour when errors are expected
 
         Arguments
         ---------
-        config: ConfigParser
-        Run configuration
+        reader_kwargs: dict
+        Keyword arguments to set the configuration run
 
         expected_message: str
         Expected error message
         """
+        config = create_dr16_reader_config(reader_kwargs)
+
         with self.assertRaises(ReaderError) as context_manager:
             reader = Dr16Reader(config["reader"])
             reader.read_data()
         self.compare_error_message(context_manager, expected_message)
 
-    def run_dr16_reader_without_errors(self, config, size_catalogue,
+    def run_dr16_reader_without_errors(self, reader_kwargs, size_catalogue,
                                        num_spectra, mode):
         """Check behaviour when no errors are expected
 
         Arguments
         ---------
-        config: ConfigParser
-        Run configuration
+        reader_kwargs: dict
+        Keyword arguments to set the configuration run
 
         size_catalogue: int
         Size of the loaded catalgoue
@@ -73,6 +75,8 @@ class ReaderTest(AbstractTest):
         mode: str
         Reading mode
         """
+        config = create_dr16_reader_config(reader_kwargs)
+
         reader = Dr16Reader(config["reader"])
         spectra = reader.read_data()
 
@@ -85,17 +89,13 @@ class ReaderTest(AbstractTest):
 
     def test_dr16_reader_best_obs(self):
         """Check the best_obs mode"""
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"best obs": "True"})
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
-        self.run_dr16_reader_without_errors(config, 79, 79, "spplate")
+        self.run_dr16_reader_without_errors(reader_kwargs, 79, 79, "spplate")
 
     def test_dr16_reader_missing_options(self):
-        """Check that errors are raised when required options are missing"""
+        """Check that errors are raised when required options are missing
+        in Dr16Reader"""
         options_and_values = [
             ("input directory", f"{THIS_DIR}/data/"),
             ("best obs", "False"),
@@ -112,19 +112,14 @@ class ReaderTest(AbstractTest):
 
     def test_dr16_reader_no_spectra(self):
         """Check that errors are raised when no spectra are found"""
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({
             "spAll": f"{THIS_DIR}/data/spAll-plate3655.fits",
             "input directory": "non/existent",
         })
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
         expected_message = (
             "No spectra were read, check the logs for more details")
-        self.run_dr16_reader_with_errors(config, expected_message)
+        self.run_dr16_reader_with_errors(reader_kwargs, expected_message)
 
     def test_dr16_reader_read_drq_issues(self):
         """Check that errors are raised when there are issues loading the
@@ -148,7 +143,6 @@ class ReaderTest(AbstractTest):
         ]
 
         for drq_catalogue, expectation in zip(drq_catalogues, expectations):
-            config = ConfigParser()
             reader_kwargs = DR16_READER_KWARGS.copy()
             reader_kwargs.update({
                 "drq catalogue": drq_catalogue,
@@ -156,15 +150,11 @@ class ReaderTest(AbstractTest):
             })
             if "bi_civ" in drq_catalogue:
                 reader_kwargs.update({"max balnicity index": 0.5})
-            config.read_dict({"reader": reader_kwargs})
-            for key, value in defaults_dr16_reader.items():
-                if key not in config["reader"]:
-                    config["reader"][key] = str(value)
             if isinstance(expectation, int):
-                self.run_dr16_reader_without_errors(config, expectation,
+                self.run_dr16_reader_without_errors(reader_kwargs, expectation,
                                                     expectation, "spplate")
             else:
-                self.run_dr16_reader_with_errors(config, expectation)
+                self.run_dr16_reader_with_errors(reader_kwargs, expectation)
 
     def test_dr16_reader_spall_issues(self):
         """Check that errors are raised when there are issues with the
@@ -176,76 +166,46 @@ class ReaderTest(AbstractTest):
         ]
 
         for input_directory in input_directories:
-            config = ConfigParser()
             reader_kwargs = DR16_READER_KWARGS.copy()
             reader_kwargs.update({"input directory": input_directory})
-            config.read_dict({"reader": reader_kwargs})
-            for key, value in defaults_dr16_reader.items():
-                if key not in config["reader"]:
-                    config["reader"][key] = str(value)
             expected_message = "Missing argument 'spAll' required by Dr16Reader"
-            self.run_dr16_reader_with_errors(config, expected_message)
+            self.run_dr16_reader_with_errors(reader_kwargs, expected_message)
 
         # specifying non-exitant file
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"spall": "missing.fits.gz"})
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
         expected_message = (
             "Error in reading spAll catalogue. Error "
             "reading file missing.fits.gz. IOError "
             "message: [Errno 2] No such file or directory: 'missing.fits.gz'")
-        self.run_dr16_reader_with_errors(config, expected_message)
+        self.run_dr16_reader_with_errors(reader_kwargs, expected_message)
 
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"read mode": "spec"})
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
-        self.run_dr16_reader_without_errors(config, 93, 78, "spec")
+        self.run_dr16_reader_without_errors(reader_kwargs, 93, 78, "spec")
 
     def test_dr16_reader_spplate(self):
         """Tests Dr16Reader when run in spplate mode"""
         # using default  value for 'mode'
-        config = ConfigParser()
-        config.read_dict({"reader": DR16_READER_KWARGS})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
-        self.run_dr16_reader_without_errors(config, 93, 92, "spplate")
+        self.run_dr16_reader_without_errors(DR16_READER_KWARGS, 93, 92, "spplate")
 
         # specifying 'mode'
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"mode": "spplate"})
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
-        self.run_dr16_reader_without_errors(config, 93, 92, "spplate")
+        self.run_dr16_reader_without_errors(reader_kwargs, 93, 92, "spplate")
 
     def test_dr16_reader_unsupported_reading_mode(self):
         """Check that Dr16Reader raises errors when the reading mode is not
         supported"""
-        config = ConfigParser()
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"read mode": "unsupported"})
-        config.read_dict({"reader": reader_kwargs})
-        for key, value in defaults_dr16_reader.items():
-            if key not in config["reader"]:
-                config["reader"][key] = str(value)
         expected_message = (
             "Error reading data in Dr16Reader. Read mode unsupported is not "
             "supported. Supported reading modes are " +
             " ".join(SUPPORTED_READING_MODES))
-        self.run_dr16_reader_with_errors(config, expected_message)
+        self.run_dr16_reader_with_errors(reader_kwargs, expected_message)
 
     def test_reader(self):
         """Test the abstract reader"""
@@ -264,13 +224,35 @@ class ReaderTest(AbstractTest):
         self.compare_error_message(context_manager, expected_message)
 
     def test_reader_missing_options(self):
-        """Check that errors are raised when required options are missing"""
+        """Check that errors are raised when required options are missing
+        in Reader"""
         options_and_values = [
             ("input directory", f"{THIS_DIR}/data/"),
         ]
 
         self.check_missing_options(options_and_values, Reader, ReaderError)
 
+
+def create_dr16_reader_config(reader_kwargs):
+    """Create a configuration instance to run Dr16Reader
+
+    Arguments
+    ---------
+    reader_kwargs: dict
+    Keyword arguments to set the configuration run
+
+    Return
+    ------
+    config: ConfigParser
+    Run configuration
+    """
+    config = ConfigParser()
+    config.read_dict({"reader": reader_kwargs})
+    for key, value in defaults_dr16_reader.items():
+        if key not in config["reader"]:
+            config["reader"][key] = str(value)
+
+    return config
 
 if __name__ == '__main__':
     unittest.main()
