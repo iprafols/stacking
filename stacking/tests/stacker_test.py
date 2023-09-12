@@ -46,7 +46,9 @@ class StackerTest(AbstractTest):
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
             results.write("# wavelength stacked_flux total_weight\n")
-            for wavelength, stacked_flux, stacked_weight in zip(COMMON_WAVELENGTH_GRID, stacker.stacked_flux, stacker.stacked_weight):
+            for wavelength, stacked_flux, stacked_weight in zip(
+                    COMMON_WAVELENGTH_GRID, stacker.stacked_flux,
+                    stacker.stacked_weight):
                 results.write(f"{wavelength} {stacked_flux} {stacked_weight}\n")
 
         self.compare_ascii_numeric(test_file, out_file)
@@ -57,15 +59,13 @@ class StackerTest(AbstractTest):
         config.read_dict({"stacker": STACKER_KWARGS})
         stacker = Stacker(config["stacker"])
 
-        self.assertEquals(stacker.stacked_flux.size,
-                          COMMON_WAVELENGTH_GRID.size)
+        self.assertEqual(stacker.stacked_flux.size, COMMON_WAVELENGTH_GRID.size)
         self.assertTrue(
-            np.allclose(stacker.stacked_flux.size, COMMON_WAVELENGTH_GRID.size))
-        self.assertEquals(stacker.stacked_weight.size,
-                          COMMON_WAVELENGTH_GRID.size)
+            np.allclose(stacker.stacked_flux, COMMON_WAVELENGTH_GRID))
+        self.assertEqual(stacker.stacked_weight.size,
+                         COMMON_WAVELENGTH_GRID.size)
         self.assertTrue(
-            np.allclose(stacker.stacked_weight.size,
-                        COMMON_WAVELENGTH_GRID.size))
+            np.allclose(stacker.stacked_weight, COMMON_WAVELENGTH_GRID))
 
         # calling compute_norm_factors should raise an error
         expected_message = "Method 'stack' was not overloaded by child class"

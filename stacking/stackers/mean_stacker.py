@@ -1,9 +1,7 @@
 """ This module defines the class MeanStacker to compute the stack
 using the mean of the stacked values"""
-import logging
 import numpy as np
 
-from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
 
 ASSOCIATED_WRITER = "StandardWriter"
@@ -30,7 +28,6 @@ class MeanStacker(Stacker):
 
     stacked_weight: array of float
     The sum of weights associated with each flux
-
     """
 
     def stack(self, spectra):
@@ -49,11 +46,12 @@ class MeanStacker(Stacker):
         self.stacked_flux = np.nansum(np.stack([
             spectrum.normalized_flux * spectrum.ivar_common_grid
             for spectrum in spectra
-        ], axis=0), axis=0)
-        self.stacked_weight = np.nansum(np.stack([
-            spectrum.ivar_common_grid
-            for spectrum in spectra
-        ], axis=0), axis=0)
+        ],
+                                               axis=0),
+                                      axis=0)
+        self.stacked_weight = np.nansum(np.stack(
+            [spectrum.ivar_common_grid for spectrum in spectra], axis=0),
+                                        axis=0)
 
         # normalize
         good_pixels = np.where(self.stacked_weight != 0.0)
