@@ -46,11 +46,10 @@ class MeanStacker(Stacker):
         self.stacked_flux = np.nansum(np.stack([
             spectrum.normalized_flux * spectrum.ivar_common_grid
             for spectrum in spectra
-        ],
-                                               axis=0),
+        ]),
                                       axis=0)
         self.stacked_weight = np.nansum(np.stack(
-            [spectrum.ivar_common_grid for spectrum in spectra], axis=0),
+            [spectrum.ivar_common_grid for spectrum in spectra]),
                                         axis=0)
 
         # normalize

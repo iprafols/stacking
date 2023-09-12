@@ -1,6 +1,5 @@
 """This file contains configuration tests"""
 from configparser import ConfigParser
-from copy import copy
 import os
 import unittest
 
@@ -8,6 +7,7 @@ import numpy as np
 
 from stacking.errors import StackerError
 from stacking.stackers.mean_stacker import MeanStacker
+from stacking.stackers.median_stacker import MedianStacker
 from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest
@@ -32,16 +32,22 @@ class StackerTest(AbstractTest):
     test_stacker_unset_spectrum
     """
 
-    def test_mean_stacker(self):
-        """Test the class MeanStacker"""
-        out_file = f"{THIS_DIR}/results/mean_stacking.txt"
-        test_file = f"{THIS_DIR}/data/mean_stacking.txt"
+    def run_simple_stack(self, stacker, test_file, out_file):
+        """Compute the stack and check its output
 
-        config = ConfigParser()
-        config.read_dict({"stacker": STACKER_KWARGS})
+        Arguments
+        ---------
+        stacker: Stacker
+        The initialized stacker
 
-        stacker = MeanStacker(config["stacker"])
-        stacker.stack(copy(NORMALIZED_SPECTRA))
+        test_file: str
+        Name of the test file against which we compare the results
+
+        out_file: str
+        Name of the output file
+        """
+        # compute stack
+        stacker.stack(NORMALIZED_SPECTRA)
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
@@ -51,7 +57,32 @@ class StackerTest(AbstractTest):
                     stacker.stacked_weight):
                 results.write(f"{wavelength} {stacked_flux} {stacked_weight}\n")
 
+        # compare with test
         self.compare_ascii_numeric(test_file, out_file)
+
+    def test_mean_stacker(self):
+        """Test the class MeanStacker"""
+        out_file = f"{THIS_DIR}/results/mean_stacking.txt"
+        test_file = f"{THIS_DIR}/data/mean_stacking.txt"
+
+        config = ConfigParser()
+        config.read_dict({"stacker": STACKER_KWARGS})
+
+        stacker = MeanStacker(config["stacker"])
+
+        self.run_simple_stack(stacker, test_file, out_file)
+
+    def test_median_stacker(self):
+        """Test the class MeanStacker"""
+        out_file = f"{THIS_DIR}/results/median_stacking.txt"
+        test_file = f"{THIS_DIR}/data/median_stacking.txt"
+
+        config = ConfigParser()
+        config.read_dict({"stacker": STACKER_KWARGS})
+
+        stacker = MedianStacker(config["stacker"])
+
+        self.run_simple_stack(stacker, test_file, out_file)
 
     def test_stacker(self):
         """Test the abstract normalizer"""
@@ -72,7 +103,7 @@ class StackerTest(AbstractTest):
         # calling compute_norm_factors should raise an error
         expected_message = "Method 'stack' was not overloaded by child class"
         with self.assertRaises(StackerError) as context_manager:
-            stacker.stack(copy(NORMALIZED_SPECTRA))
+            stacker.stack(NORMALIZED_SPECTRA)
         self.compare_error_message(context_manager, expected_message)
 
     def test_stacker_missing_options(self):
