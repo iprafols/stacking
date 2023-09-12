@@ -331,7 +331,9 @@ class NormalizerTest(AbstractTest):
             normalizer.normalize_spectrum(spectrum) for spectrum in spectra
         ]
         for spectrum in spectra:
-            self.assertTrue(np.allclose(spectrum.flux_common_grid, spectrum.normalized_flux))
+            self.assertTrue(
+                np.allclose(spectrum.flux_common_grid,
+                            spectrum.normalized_flux))
 
     def test_normalizer(self):
         """Test the abstract normalizer"""

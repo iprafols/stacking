@@ -45,6 +45,10 @@ class Stacker:
         self.__parse_config(config)
 
         # initialize results
+        if Spectrum.common_wavelength_grid is None:
+            raise StackerError(
+                "Spectrum.common_wavelength_grid must be set to initialize any "
+                "Stacker instances")
         self.stacked_flux = np.zeros(Spectrum.common_wavelength_grid.size)
         self.stacked_total_weight = np.zeros(
             Spectrum.common_wavelength_grid.size)

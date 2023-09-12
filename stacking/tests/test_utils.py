@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 
 from stacking.logging_utils import setup_logger, reset_logger
+from stacking.normalizers.multiple_regions_normalization import MultipleRegionsNormalization
+from stacking.normalizers.multiple_regions_normalization import (
+    defaults as defaults_multiple_regions_normalization)
 from stacking.readers.dr16_reader import Dr16Reader
 from stacking.readers.dr16_reader import defaults as defaults_dr16_reader
 from stacking.rebin import Rebin
@@ -20,7 +23,7 @@ os.environ["THIS_DIR"] = THIS_DIR
 # this must happen at the very beginning of the module
 setup_logger()
 
-# initialize reader
+# initialize needed configuration
 config = ConfigParser()
 config.read_dict({
     "reader": {
@@ -32,6 +35,12 @@ config.read_dict({
         "min wavelength": 1000,
         "step type": "log",
         "step wavelength": 1e-4,
+    },
+    "normalizer": {
+        "log directory": f"{THIS_DIR}/results/",
+        "num processors": 1,
+        "intervals": "4400 - 4600, 4600 - 4800",
+        "main interval": 1,
     }
 })
 for key, value in defaults_dr16_reader.items():
@@ -40,10 +49,12 @@ for key, value in defaults_dr16_reader.items():
 for key, value in defaults_rebin.items():
     if key not in config["rebin"]:
         config["rebin"][key] = str(value)
-
-reader = Dr16Reader(config["reader"])
+for key, value in defaults_multiple_regions_normalization.items():
+    if key not in config["normalizer"]:
+        config["normalizer"][key] = str(value)
 
 # read spectra
+reader = Dr16Reader(config["reader"])
 SPECTRA = reader.read_data()
 
 assert len(reader.catalogue) == 93
@@ -56,11 +67,10 @@ for spectrum in SPECTRA:
     assert spectrum.ivar_common_grid is None
     assert spectrum.normalized_flux is None
 
-rebin = Rebin(config["rebin"])
-
 # rebin spectra
 COMMON_WAVELENGTH_GRID = 10**np.linspace(np.log10(1000),
                                          np.log10(4999.1941102499995), 6989)
+rebin = Rebin(config["rebin"])
 REBINNED_SPECTRA = [rebin(copy(spectrum)) for spectrum in SPECTRA]
 
 for spectrum in SPECTRA:
@@ -87,8 +97,34 @@ with open(f"{THIS_DIR}/data/correction_factors.txt", encoding="utf-8") as file:
         if not line.startswith("#")
     ])
 
-# reset logger
+# normalized spectra
+normalizer = MultipleRegionsNormalization(config["normalizer"])
+normalizer.norm_factors = NORM_FACTORS
+normalizer.correction_factors = CORRECTION_FACTORS
+NORMALIZED_SPECTRA = [
+    normalizer.normalize_spectrum(copy(spectrum))
+    for spectrum in REBINNED_SPECTRA
+]
+
+for spectrum in REBINNED_SPECTRA:
+    assert isinstance(spectrum, Spectrum)
+    assert spectrum.flux_common_grid is not None
+    assert spectrum.ivar_common_grid is not None
+    assert spectrum.normalized_flux is None
+
+for spectrum in NORMALIZED_SPECTRA:
+    assert isinstance(spectrum, Spectrum)
+    assert spectrum.flux_common_grid is not None
+    assert spectrum.ivar_common_grid is not None
+    assert spectrum.normalized_flux is not None
+
+# Resets
 # this must happen at the very end of the module
+
+# reset Spectrum
+Spectrum.common_wavelength_grid = None
+
+# reset logger
 reset_logger()
 
 if __name__ == '__main__':

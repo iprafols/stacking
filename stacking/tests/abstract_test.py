@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 
 from stacking.logging_utils import setup_logger, reset_logger
+from stacking.spectrum import Spectrum
+from stacking.tests.test_utils import COMMON_WAVELENGTH_GRID
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,6 +31,7 @@ class AbstractTest(unittest.TestCase):
         - Check that the results folder exists and create it
         if it does not.
         - Setup logger
+        - Ensure Spectrum.common_wavelength_grid is defined
         """
         # setup results folder
         if not os.path.exists(f"{THIS_DIR}/results/"):
@@ -37,10 +40,17 @@ class AbstractTest(unittest.TestCase):
         # setup logger
         setup_logger()
 
+        # setup Spectrum.common_wavelength_grid
+        Spectrum.common_wavelength_grid = COMMON_WAVELENGTH_GRID
+
     def tearDown(self):
         """ Actions done at test end
+        - Reset Spectrum.common_wavelength_grid
         - Reset logger
         """
+        # reset Spectrum.common_wavelength_grid
+        Spectrum.common_wavelength_grid = None
+
         reset_logger()
 
     def check_missing_options(self,
