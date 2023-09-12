@@ -35,7 +35,18 @@ class NormalizerTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
-
+    run_multiple_regions_normalization_with_errors
+    test_multiple_regions_normalization
+    test_multiple_regions_normalization_compute_correction_factors
+    test_multiple_regions_normalization_compute_correction_factors_errors
+    test_multiple_regions_normalization_compute_norm_factors
+    test_multiple_regions_normalization_invalid_intervals
+    test_multiple_regions_normalization_invalid_save_format
+    test_multiple_regions_normalization_missing_options
+    test_multiple_regions_normalization_normalize_spectrum
+    test_multiple_regions_normalization_save_norm_factors
+    test_no_normalization
+    test_normalizer
     """
 
     def run_multiple_regions_normalization_with_errors(self, normalizer_kwargs,
