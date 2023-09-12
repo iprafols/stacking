@@ -12,15 +12,5 @@ class StandardWriter(Writer):
 
     Attributes
     ----------
-    (see Writer in stacking/writer.py)
-
-    logger: logging.Logger
-    Logger object
-
-    stacked_flux: array of float
-    The stacked flux
-
-    stacked_weight: array of float
-    The sum of weights associated with each flux
-
+    (see Writer in stacking/writer.py
     """

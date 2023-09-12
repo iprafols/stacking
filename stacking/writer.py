@@ -44,8 +44,13 @@ class Writer:
             raise WriterError(
                 "Missing argument 'output directory' required by Writer")
 
-    def write_results(self):
+    def write_results(self, stacker):
         """Write the results
+
+        Arguments
+        ---------
+        stacker: Stacker
+        The used stacker
 
         Raise
         -----

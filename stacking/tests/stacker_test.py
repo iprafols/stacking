@@ -27,6 +27,9 @@ class StackerTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
+    run_simple_stack
+    test_mean_stacker
+    test_median_stacker
     test_stacker
     test_stacker_missing_options
     test_stacker_unset_spectrum

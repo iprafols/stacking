@@ -15,6 +15,7 @@ from stacking.readers.dr16_reader import defaults as defaults_dr16_reader
 from stacking.rebin import Rebin
 from stacking.rebin import defaults as defaults_rebin
 from stacking.spectrum import Spectrum
+from stacking.stackers.mean_stacker import MeanStacker
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
@@ -41,6 +42,9 @@ config.read_dict({
         "num processors": 1,
         "intervals": "4400 - 4600, 4600 - 4800",
         "main interval": 1,
+    },
+    "stacker": {
+        "num processors": 1,
     }
 })
 for key, value in defaults_dr16_reader.items():
@@ -117,6 +121,10 @@ for spectrum in NORMALIZED_SPECTRA:
     assert spectrum.flux_common_grid is not None
     assert spectrum.ivar_common_grid is not None
     assert spectrum.normalized_flux is not None
+
+# stacker
+stacker = MeanStacker(config["stacker"])
+stacker.stack(NORMALIZED_SPECTRA)
 
 # Resets
 # this must happen at the very end of the module
