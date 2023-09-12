@@ -61,11 +61,13 @@ class StackerTest(AbstractTest):
 
         self.assertEqual(stacker.stacked_flux.size, COMMON_WAVELENGTH_GRID.size)
         self.assertTrue(
-            np.allclose(stacker.stacked_flux, COMMON_WAVELENGTH_GRID))
+            np.allclose(stacker.stacked_flux,
+                        np.zeros_like(COMMON_WAVELENGTH_GRID)))
         self.assertEqual(stacker.stacked_weight.size,
                          COMMON_WAVELENGTH_GRID.size)
         self.assertTrue(
-            np.allclose(stacker.stacked_weight, COMMON_WAVELENGTH_GRID))
+            np.allclose(stacker.stacked_weight,
+                        np.zeros_like(COMMON_WAVELENGTH_GRID)))
 
         # calling compute_norm_factors should raise an error
         expected_message = "Method 'stack' was not overloaded by child class"
