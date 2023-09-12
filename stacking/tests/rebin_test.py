@@ -1,4 +1,4 @@
-"""This file contains configuration tests"""
+"""This file contains rebin tests"""
 from configparser import ConfigParser
 import os
 import unittest

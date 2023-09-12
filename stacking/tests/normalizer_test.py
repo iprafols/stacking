@@ -1,4 +1,4 @@
-"""This file contains configuration tests"""
+"""This file contains normalizer tests"""
 from configparser import ConfigParser
 from copy import copy
 import os
