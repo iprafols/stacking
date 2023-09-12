@@ -33,25 +33,6 @@ class MeanStacker(Stacker):
 
     """
 
-    def __init__(self, config):
-        """Initialize class instance
-
-        Arguments
-        ---------
-        config: configparser.SectionProxy
-        Parsed options to initialize class
-
-        Raise
-        -----
-        StackerError if the selected reading mode is not supported
-        """
-        self.logger = logging.getLogger(__name__)
-        super().__init__(config)
-
-        # initialize results
-        self.stacked_flux = np.zeros(Spectrum.common_wavelength_grid.size)
-        self.stacked_weight = np.zeros(Spectrum.common_wavelength_grid.size)
-
     def stack(self, spectra):
         """ Stack spectra
 
@@ -64,10 +45,16 @@ class MeanStacker(Stacker):
         -----
         ReaderError if function was not overloaded by child class
         """
-        for spectrum in spectra:
-            self.stacked_flux += spectrum.flux * spectrum.ivar
-            self.stacked_weight += spectrum.ivar
+        # TODO: parallelize this to also save memory
+        self.stacked_flux = np.nansum(np.stack([
+            spectrum.normalized_flux * spectrum.ivar_common_grid
+            for spectrum in spectra
+        ], axis=0), axis=0)
+        self.stacked_weight = np.nansum(np.stack([
+            spectrum.ivar_common_grid
+            for spectrum in spectra
+        ], axis=0), axis=0)
 
         # normalize
-        good_pixels = np.where(self.stacked_weight == 0.0)
+        good_pixels = np.where(self.stacked_weight != 0.0)
         self.stacked_flux[good_pixels] /= self.stacked_weight[good_pixels]
