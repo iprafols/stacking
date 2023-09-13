@@ -28,6 +28,11 @@ class SpectrumTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
+    check_spectrum
+    test_spectrum_init
+    test_spectrum_set_common_wavelength_grid
+    test_spectrum_set_flux_ivar_common_grid
+    test_spectrum_set_normalized_flux
     """
 
     def check_spectrum(self,
