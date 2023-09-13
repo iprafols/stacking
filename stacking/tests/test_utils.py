@@ -22,7 +22,7 @@ os.environ["THIS_DIR"] = THIS_DIR
 
 # setup logger
 # this must happen at the very beginning of the module
-setup_logger()
+setup_logger(logging_level_console="PROGRESS")
 
 # initialize needed configuration
 config = ConfigParser()

@@ -65,13 +65,13 @@ def setup_logger(logging_level_console=logging.DEBUG,
     logging_level_file: int or str - Default: logging.DEBUG
     Logging level for the file handler. If str, it should be a Level from
     the logging module (i.e. CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET).
-    Additionally, the user-defined level PROGRESS and WARNING_OK are allowed.
+    Additionally, the user-defined level PROGRESS and WARN_OK are allowed.
     Ignored if log_file is None.
     """
     if isinstance(logging_level_console, str):
         if logging_level_console.upper() == "PROGRESS":
             logging_level_console = PROGRESS_LEVEL_NUM
-        elif logging_level_console.upper() == "WARNING_OK":
+        elif logging_level_console.upper() == "WARN_OK":
             logging_level_console = OK_WARNING_LEVEL_NUM
         else:
             logging_level_console = getattr(logging,
@@ -80,12 +80,13 @@ def setup_logger(logging_level_console=logging.DEBUG,
     if isinstance(logging_level_file, str):
         if logging_level_file.upper() == "PROGRESS":
             logging_level_file = PROGRESS_LEVEL_NUM
-        elif logging_level_file.upper() == "WARNING_OK":
+        elif logging_level_file.upper() == "WARN_OK":
             logging_level_file = OK_WARNING_LEVEL_NUM
         else:
             logging_level_file = getattr(logging, logging_level_file.upper())
 
     logger = logging.getLogger("stacking")
+    logger.setLevel(logging.DEBUG)
 
     # logging formatter
     formatter = logging.Formatter('[%(levelname)s]: %(message)s')

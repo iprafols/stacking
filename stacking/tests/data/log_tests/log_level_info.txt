@@ -1,0 +1,5 @@
+[INFO]: info
+[WARNING]: warning
+[WARNING OK]: warning ok
+[ERROR]: error
+[CRITICAL]: critical

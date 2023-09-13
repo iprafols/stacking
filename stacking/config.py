@@ -20,8 +20,8 @@ from stacking.writer import Writer
 
 try:
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-    PICCA_BASE = THIS_DIR.split("py/picca")[0]
-    GIT_HASH = git.Repo(PICCA_BASE).head.object.hexsha
+    STACKING_BASE = THIS_DIR.replace("stacking/stacking", "stacking")
+    GIT_HASH = git.Repo(STACKING_BASE).head.object.hexsha
 except InvalidGitRepositoryError:  # pragma: no cover
     GIT_HASH = "not known"
 
