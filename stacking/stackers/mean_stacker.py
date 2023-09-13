@@ -2,7 +2,8 @@
 using the mean of the stacked values"""
 import numpy as np
 
-from stacking.stacker import Stacker
+from stacking.stacker import (Stacker, defaults, accepted_options,
+                             required_options)
 
 ASSOCIATED_WRITER = "StandardWriter"
 

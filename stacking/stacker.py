@@ -5,7 +5,9 @@ import numpy as np
 from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
 
+accepted_options = []
 required_options = []
+defaults = {}
 
 
 class Stacker:

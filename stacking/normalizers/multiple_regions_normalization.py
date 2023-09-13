@@ -312,6 +312,7 @@ class MultipleRegionsNormalization(Normalizer):
                 for col in self.norm_factors.columns
             ]
             hdu = fits.BinTableHDU.from_columns(cols, name="NORM_FACTORS")
+            # TODO: add description of columns
 
             # intervals used
             cols = [
@@ -325,6 +326,7 @@ class MultipleRegionsNormalization(Normalizer):
                             array=self.intervals[:, 1]),
             ]
             hdu2 = fits.BinTableHDU.from_columns(cols, name="NORM_INTERVALS")
+            # TODO: add description of columns
 
             # correction factors
             cols = [
@@ -340,6 +342,7 @@ class MultipleRegionsNormalization(Normalizer):
             ]
             hdu3 = fits.BinTableHDU.from_columns(cols,
                                                  name="CORRECTION_FACTORS")
+            # TODO: add description of columns
 
             hdul = fits.HDUList([primary_hdu, hdu, hdu2, hdu3])
             hdul.writeto(filename, overwrite=True, checksum=True)

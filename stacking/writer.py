@@ -2,9 +2,13 @@
 
 from stacking.errors import WriterError
 
-accepted_options = ["output directory"]
-required_options = ["output directory"]
+accepted_options = ["output directory", "output file", "overwrite"]
+required_options = ["output directory", "output file"]
+defaults = {
+    "overwrite": False,
+}
 
+ACCEPTED_SAVE_FORMATS = ["fits", "fits.gz"]
 
 class Writer:
     """Abstract class to write the results
@@ -43,6 +47,32 @@ class Writer:
         if self.output_directory is None:
             raise WriterError(
                 "Missing argument 'output directory' required by Writer")
+        if not self.output_directory.endswith("/"):
+            self.output_directory += "/"
+
+        self.output_file = config.get("output file")
+        if self.output_file is None:
+            raise WriterError(
+                "Missing argument 'output file' required by Writer")
+        if "/" in self.output_file:
+            raise WriterError(
+                "Variable 'output file' should not incude folders. "
+                f"Found: {self.output_file}")
+        format_ok = False
+        for save_format in ACCEPTED_SAVE_FORMATS:
+            if self.output_file.endswith(save_format):
+                format_ok = True
+                break
+        if not format_ok:
+            raise WriterError(
+                "Invalid extension for 'output file'. Expected one of " +
+                " ".join(ACCEPTED_SAVE_FORMATS) +
+                f" Given filename: {self.output_file}")
+
+        self.overwrite = config.getboolean("overwrite")
+        if self.overwrite is None:
+            raise WriterError(
+                "Missing argument 'overwrite' required by Writer")
 
     def write_results(self, stacker):
         """Write the results

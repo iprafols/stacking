@@ -6,7 +6,7 @@ import argparse
 
 from stacking.stacking_interface import StackingInterface
 
-module_logger = logging.getLogger("picca.delta_extraction")
+module_logger = logging.getLogger("stacking")
 
 
 def main(args):
