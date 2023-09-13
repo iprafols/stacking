@@ -1,5 +1,4 @@
 """This file contains spectrum tests"""
-import os
 import unittest
 
 import numpy as np
@@ -7,9 +6,6 @@ import numpy as np
 from stacking.errors import SpectrumError
 from stacking.spectrum import Spectrum
 from stacking.tests.abstract_test import AbstractTest
-
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-os.environ["THIS_DIR"] = THIS_DIR
 
 SIZE = 60
 HALF_SIZE = SIZE // 2
