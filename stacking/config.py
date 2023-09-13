@@ -228,6 +228,9 @@ class Config:
         # add output directory if necesssary
         if "output directory" in accepted_options and "output directory" not in section:
             section["output directory"] = self.output_directory
+        # add overwrite if necesssary
+        if "overwrite" in accepted_options and "overwrite" not in section:
+            section["overwrite"] = f"{self.overwrite}"
         # add log directory if necessary
         if "log directory" in accepted_options and "log directory" not in section:
             section["log directory"] = f"{self.output_directory}log/"
@@ -354,6 +357,7 @@ class Config:
         """
         stacker_type, _ = self.stacker
         stacker_module = stacker_type.__module__
+
 
         # find writer associated with the selected Stacker
         try:

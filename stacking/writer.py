@@ -4,9 +4,7 @@ from stacking.errors import WriterError
 
 accepted_options = ["output directory", "output file", "overwrite"]
 required_options = ["output directory", "output file"]
-defaults = {
-    "overwrite": False,
-}
+defaults = {}
 
 ACCEPTED_SAVE_FORMATS = ["fits", "fits.gz"]
 
