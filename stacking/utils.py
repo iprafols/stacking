@@ -171,8 +171,8 @@ def update_default_options(default_options, new_options, force_overwrite=False):
                     "overwrite the default values of a parent class, then pass "
                     "`force_overload=True`. If you are unsure what this message "
                     "means contact stacking developpers.")
-        else:
-            default_options[key] = value
+
+        default_options[key] = value
 
     return default_options
 
