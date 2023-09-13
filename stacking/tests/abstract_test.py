@@ -10,7 +10,7 @@ import pandas as pd
 
 from stacking.logging_utils import setup_logger, reset_logger
 from stacking.spectrum import Spectrum
-from stacking.tests.test_utils import COMMON_WAVELENGTH_GRID
+from stacking.tests.utils import COMMON_WAVELENGTH_GRID
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 

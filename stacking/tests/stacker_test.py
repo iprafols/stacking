@@ -1,4 +1,4 @@
-"""This file contains configuration tests"""
+"""This file contains stacker tests"""
 from configparser import ConfigParser
 import os
 import unittest
@@ -11,7 +11,7 @@ from stacking.stackers.median_stacker import MedianStacker
 from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.test_utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
+from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
@@ -22,7 +22,7 @@ STACKER_KWARGS = {
 
 
 class StackerTest(AbstractTest):
-    """Test the stackers.
+    """Test the stackers
 
     Methods
     -------

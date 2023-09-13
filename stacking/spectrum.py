@@ -105,7 +105,7 @@ class Spectrum:
                 f"{Spectrum.common_wavelength_grid.size}")
         if ivar_common_grid.size != Spectrum.common_wavelength_grid.size:
             raise SpectrumError(
-                "Normalized flux should be based on the common wavelength grid "
+                "Normalized ivar should be based on the common wavelength grid "
                 f"but sizes differ. ivar_common_grid.size = {ivar_common_grid.size} "
                 "Spectrum.common_wavelength_grid.size = "
                 f"{Spectrum.common_wavelength_grid.size}")

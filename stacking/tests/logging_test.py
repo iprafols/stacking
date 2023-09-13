@@ -1,4 +1,4 @@
-"""This file contains rebin tests"""
+"""This file contains logging tests"""
 import logging
 import os
 import unittest
@@ -35,6 +35,7 @@ class LoggingTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
+    test_logging
     """
 
     def test_logging(self):

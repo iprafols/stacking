@@ -8,7 +8,7 @@ from astropy.io import fits
 from stacking.errors import RebinError
 from stacking.rebin import defaults as defaults_rebin
 from stacking.rebin import Rebin, VALID_STEP_TYPES
-from stacking.tests.test_utils import SPECTRA
+from stacking.tests.utils import SPECTRA
 from stacking.tests.abstract_test import AbstractTest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))

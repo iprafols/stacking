@@ -16,7 +16,7 @@ from stacking.normalizers.multiple_regions_normalization import (
 from stacking.normalizers.no_normalization import NoNormalization
 from stacking.spectrum import Spectrum
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.test_utils import REBINNED_SPECTRA, NORM_FACTORS, CORRECTION_FACTORS
+from stacking.tests.utils import REBINNED_SPECTRA, NORM_FACTORS, CORRECTION_FACTORS
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR

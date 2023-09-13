@@ -1,4 +1,4 @@
-"""This file contains normalizer tests"""
+"""This file contains writer tests"""
 from configparser import ConfigParser
 from copy import copy
 import os
@@ -6,7 +6,7 @@ import unittest
 
 from stacking.errors import WriterError
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.test_utils import stacker
+from stacking.tests.utils import stacker
 from stacking.writer import Writer, ACCEPTED_SAVE_FORMATS
 from stacking.writer import defaults as defaults_writer
 from stacking.writers.standard_writer import StandardWriter
