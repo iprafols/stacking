@@ -202,6 +202,14 @@ class ConfigTest(AbstractTest):
         )
         self.check_error(in_file, expected_message)
 
+        # check 'type' in writer section
+        in_file = f"{THIS_DIR}/data/config_tests/config_invalid_writer_option_type.ini"
+        expected_message = (
+            "Section [writer] does not accept argument 'type'. "
+            "This should be defined in the 'ASSOCIATED_WRITER' attribute "
+            "of the selected Stacker")
+        self.check_error(in_file, expected_message)
+
     def test_config_missing_options(self):
         """Check that missing required options raise errors """
         # check general section

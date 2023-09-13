@@ -107,7 +107,7 @@ class StackingInterface:
 
         reader_type, reader_arguments = self.config.reader
         reader = reader_type(reader_arguments)
-        self.spectra = reader.read()
+        self.spectra = reader.read_data()
 
         # we should never enter this block unless ReaderType is not correctly
         # writen

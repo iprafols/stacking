@@ -207,7 +207,8 @@ class Config:
                 f"In section [{section_name}], error loading class {name}, "
                 f"module did not contain requested class") from error
 
-        if not issubclass(loaded_type, check_type):
+        # this should not happen unless new features are wrongly coded
+        if not issubclass(loaded_type, check_type):  # pragma: no cover
             raise ConfigError(
                 f"Error loading class {loaded_type.__name__}. "
                 f"This class should inherit from {check_type.__name__} but "
@@ -362,20 +363,23 @@ class Config:
         try:
             associated_writer = attribute_from_string("ASSOCIATED_WRITER",
                                                       stacker_module)
-        except AttributeError as error:
+        # this should not happen unless new stackers are wrongly coded
+        except AttributeError as error:  # pragma: no cover
             raise ConfigError(
                 "Error finding writer associated with selected Stacker, "
                 f"missing attribute 'associated_writer' in module {stacker_module} "
             ) from error
 
-        # add writer type
-        if "writer" not in self.config:
+        # this should never be true as the general section is loaded in the
+        # default dictionary
+        if "writer" not in self.config:  # pragma: no cover
             raise ConfigError("Missing section [writer]")
         section = self.config["writer"]
+        # add writer type
         if "type" in section:
             raise ConfigError(
                 "Section [writer] does not accept argument 'type'. "
-                "This should be defined in the 'associated_writer' attribute "
+                "This should be defined in the 'ASSOCIATED_WRITER' attribute "
                 "of the selected Stacker")
         self.config["writer"]["type"] = associated_writer
 
