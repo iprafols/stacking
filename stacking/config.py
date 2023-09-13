@@ -358,7 +358,6 @@ class Config:
         stacker_type, _ = self.stacker
         stacker_module = stacker_type.__module__
 
-
         # find writer associated with the selected Stacker
         try:
             associated_writer = attribute_from_string("ASSOCIATED_WRITER",
