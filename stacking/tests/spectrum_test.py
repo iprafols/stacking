@@ -1,5 +1,4 @@
 """This file contains spectrum tests"""
-import logging
 import os
 import unittest
 
@@ -13,15 +12,14 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
 
 SIZE = 60
-HALF_SIZE = SIZE//2
-THIRD_SIZE = SIZE//3
+HALF_SIZE = SIZE // 2
+THIRD_SIZE = SIZE // 3
 
 FLUX = np.arange(SIZE, dtype=float)
 IVAR = np.ones(SIZE, dtype=float)
 RESDHIFT = 2.1
 SPECID = 1234
 WAVELENGTH = np.arange(SIZE, dtype=float) - 0.5
-
 
 
 class SpectrumTest(AbstractTest):
@@ -32,7 +30,12 @@ class SpectrumTest(AbstractTest):
     (see AbstractTest in stacking/tests/abstract_test.py)
     """
 
-    def check_spectrum(self, spectrum, common_wavelength_grid=None, flux_common_grid=None, ivar_common_grid=None, normalized_flux=None):
+    def check_spectrum(self,
+                       spectrum,
+                       common_wavelength_grid=None,
+                       flux_common_grid=None,
+                       ivar_common_grid=None,
+                       normalized_flux=None):
         """Check the spectrum properties
 
         Arguments
@@ -70,32 +73,33 @@ class SpectrumTest(AbstractTest):
         else:
             self.assertTrue(
                 spectrum.flux_common_grid.size == flux_common_grid.size)
-            self.assertTrue(np.allclose(
-                spectrum.flux_common_grid, flux_common_grid))
+            self.assertTrue(
+                np.allclose(spectrum.flux_common_grid, flux_common_grid))
 
         if ivar_common_grid is None:
             self.assertTrue(spectrum.ivar_common_grid is None)
         else:
             self.assertTrue(
                 spectrum.ivar_common_grid.size == ivar_common_grid.size)
-            self.assertTrue(np.allclose(
-                spectrum.ivar_common_grid, ivar_common_grid))
+            self.assertTrue(
+                np.allclose(spectrum.ivar_common_grid, ivar_common_grid))
 
         if normalized_flux is None:
             self.assertTrue(spectrum.normalized_flux is None)
         else:
             self.assertTrue(
                 spectrum.normalized_flux.size == normalized_flux.size)
-            self.assertTrue(np.allclose(
-                spectrum.normalized_flux, normalized_flux))
+            self.assertTrue(
+                np.allclose(spectrum.normalized_flux, normalized_flux))
 
         if common_wavelength_grid is None:
             self.assertTrue(Spectrum.common_wavelength_grid is None)
         else:
+            self.assertTrue(spectrum.common_wavelength_grid.size ==
+                            common_wavelength_grid.size)
             self.assertTrue(
-                spectrum.common_wavelength_grid.size == common_wavelength_grid.size)
-            self.assertTrue(np.allclose(
-                Spectrum.common_wavelength_grid, common_wavelength_grid))
+                np.allclose(Spectrum.common_wavelength_grid,
+                            common_wavelength_grid))
 
     def test_spectrum_init(self):
         """ Test the method Spectrum.__init__"""
@@ -110,35 +114,35 @@ class SpectrumTest(AbstractTest):
         """ Test the class method Spectrum.set_common_wavelength_grid"""
         Spectrum.set_common_wavelength_grid(WAVELENGTH)
 
-        self.assertTrue(np.allclose(Spectrum.common_wavelength_grid, WAVELENGTH))
+        self.assertTrue(np.allclose(Spectrum.common_wavelength_grid,
+                                    WAVELENGTH))
 
     def test_spectrum_set_flux_ivar_common_grid(self):
         """ Test the method Spectrum.set_flux_ivar_common_grid"""
         spectrum = Spectrum(SPECID, FLUX, IVAR, WAVELENGTH, RESDHIFT)
         Spectrum.set_common_wavelength_grid(WAVELENGTH[:HALF_SIZE])
 
-        self.check_spectrum(
-            spectrum,
-            common_wavelength_grid=WAVELENGTH[:HALF_SIZE])
+        self.check_spectrum(spectrum,
+                            common_wavelength_grid=WAVELENGTH[:HALF_SIZE])
 
         # case: wrong flux size
         expected_message = (
             "Normalized flux should be based on the common wavelength grid "
             f"but sizes differ. flux_common_grid.size = {THIRD_SIZE} "
-            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}"
-        )
+            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}")
         with self.assertRaises(SpectrumError) as context_manager:
-            spectrum.set_flux_ivar_common_grid(FLUX[:THIRD_SIZE], IVAR[:HALF_SIZE])
+            spectrum.set_flux_ivar_common_grid(FLUX[:THIRD_SIZE],
+                                               IVAR[:HALF_SIZE])
         self.compare_error_message(context_manager, expected_message)
 
         # case: wrong ivar size
         expected_message = (
             "Normalized ivar should be based on the common wavelength grid "
             f"but sizes differ. ivar_common_grid.size = {THIRD_SIZE} "
-            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}"
-        )
+            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}")
         with self.assertRaises(SpectrumError) as context_manager:
-            spectrum.set_flux_ivar_common_grid(FLUX[:HALF_SIZE], IVAR[:THIRD_SIZE])
+            spectrum.set_flux_ivar_common_grid(FLUX[:HALF_SIZE],
+                                               IVAR[:THIRD_SIZE])
         self.compare_error_message(context_manager, expected_message)
 
         # case: correct execution
@@ -156,26 +160,23 @@ class SpectrumTest(AbstractTest):
         spectrum = Spectrum(SPECID, FLUX, IVAR, WAVELENGTH, RESDHIFT)
         Spectrum.set_common_wavelength_grid(WAVELENGTH[:HALF_SIZE])
 
-        self.check_spectrum(
-            spectrum,
-            common_wavelength_grid=WAVELENGTH[:HALF_SIZE])
+        self.check_spectrum(spectrum,
+                            common_wavelength_grid=WAVELENGTH[:HALF_SIZE])
 
         # case: wrong flux size
         expected_message = (
             "Normalized flux should be based on the common wavelength grid "
             f"but sizes differ. normalized_flux.size = {THIRD_SIZE} "
-            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}"
-        )
+            f"Spectrum.common_wavelength_grid.size = {HALF_SIZE}")
         with self.assertRaises(SpectrumError) as context_manager:
             spectrum.set_normalized_flux(FLUX[:THIRD_SIZE])
         self.compare_error_message(context_manager, expected_message)
 
         # case: correct execution
         spectrum.set_normalized_flux(FLUX[:HALF_SIZE])
-        self.check_spectrum(
-            spectrum,
-            common_wavelength_grid=WAVELENGTH[:HALF_SIZE],
-            normalized_flux=FLUX[:HALF_SIZE])
+        self.check_spectrum(spectrum,
+                            common_wavelength_grid=WAVELENGTH[:HALF_SIZE],
+                            normalized_flux=FLUX[:HALF_SIZE])
 
 
 if __name__ == '__main__':
