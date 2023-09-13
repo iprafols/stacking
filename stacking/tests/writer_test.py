@@ -20,6 +20,7 @@ WRITER_KWARGS = {
     "overwrite": "True",
 }
 
+
 class WriterTest(AbstractTest):
     """Test the normalizers.
 
@@ -28,6 +29,7 @@ class WriterTest(AbstractTest):
     (see AbstractTest in stacking/tests/abstract_test.py)
 
     """
+
     def test_standard_writer(self):
         """Test the class StandardWriter"""
         output_directory = f"{THIS_DIR}/results/"
@@ -43,7 +45,7 @@ class WriterTest(AbstractTest):
 
         writer.write_results(stacker)
 
-        self.compare_fits(test_file, output_directory+out_file)
+        self.compare_fits(test_file, output_directory + out_file)
 
     def test_writer(self):
         """Test the abstract writer"""
@@ -60,7 +62,7 @@ class WriterTest(AbstractTest):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
             ("output directory", f"{THIS_DIR}/results/"),
-            ("output file", f"output_file.fits.gz"),
+            ("output file", "output_file.fits.gz"),
             ("overwrite", "False"),
         ]
 
@@ -77,9 +79,8 @@ class WriterTest(AbstractTest):
         # case: output file contains a folder
         writer_kwargs = copy(WRITER_KWARGS)
         writer_kwargs.update({"output file": "folder/output_file.fits.gz"})
-        expected_message = (
-            "Variable 'output file' should not incude folders. "
-            "Found: folder/output_file.fits.gz")
+        expected_message = ("Variable 'output file' should not incude folders. "
+                            "Found: folder/output_file.fits.gz")
         with self.assertRaises(WriterError) as context_manager:
             initialize_writer(writer_kwargs)
         self.compare_error_message(context_manager, expected_message)
@@ -94,6 +95,7 @@ class WriterTest(AbstractTest):
         with self.assertRaises(WriterError) as context_manager:
             initialize_writer(writer_kwargs)
         self.compare_error_message(context_manager, expected_message)
+
 
 def create_writer_config(rebin_kwargs):
     """Create a configuration instance to run Writer
@@ -116,6 +118,7 @@ def create_writer_config(rebin_kwargs):
 
     return config
 
+
 def initialize_writer(writer_kwargs):
     """Initialize a writer instance
 
@@ -133,8 +136,6 @@ def initialize_writer(writer_kwargs):
     writer = Writer(config["writer"])
 
     return writer
-
-
 
 
 if __name__ == '__main__':

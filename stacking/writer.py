@@ -10,6 +10,7 @@ defaults = {
 
 ACCEPTED_SAVE_FORMATS = ["fits", "fits.gz"]
 
+
 class Writer:
     """Abstract class to write the results
 
@@ -71,8 +72,7 @@ class Writer:
 
         self.overwrite = config.getboolean("overwrite")
         if self.overwrite is None:
-            raise WriterError(
-                "Missing argument 'overwrite' required by Writer")
+            raise WriterError("Missing argument 'overwrite' required by Writer")
 
     def write_results(self, stacker):
         """Write the results

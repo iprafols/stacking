@@ -5,8 +5,9 @@ from astropy.io import fits
 
 from stacking._version import __version__
 from stacking.spectrum import Spectrum
-from stacking.writer import (Writer, defaults, accepted_options,
-                             required_options)
+from stacking.writer import Writer
+from stacking.writer import (  # pylint: disable=unused-import
+    defaults, accepted_options, required_options)
 
 
 class StandardWriter(Writer):
@@ -20,6 +21,7 @@ class StandardWriter(Writer):
     ----------
     (see Writer in stacking/writer.py
     """
+
     def write_results(self, stacker):
         """Write the results
 
@@ -54,7 +56,6 @@ class StandardWriter(Writer):
                         format="E",
                         disp="F7.3",
                         array=stacker.stacked_weight),
-
         ]
         hdu = fits.BinTableHDU.from_columns(cols, name="STACKED_SPECTRUM")
         # TODO: add description of columns
