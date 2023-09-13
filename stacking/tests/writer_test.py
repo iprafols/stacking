@@ -27,7 +27,10 @@ class WriterTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
-
+    test_standard_writer
+    test_writer
+    test_writer_missing_options
+    test_writer_parse_options
     """
 
     def test_standard_writer(self):
