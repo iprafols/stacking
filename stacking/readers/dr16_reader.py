@@ -16,8 +16,8 @@ from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
 accepted_options = update_accepted_options(accepted_options, [
-    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index", "read mode",
-    "spAll", "z min", "z max"
+    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index", "max num spec",
+    "read mode", "skip N first spec", "spAll", "z min", "z max"
 ])
 
 defaults = update_default_options(
@@ -25,6 +25,7 @@ defaults = update_default_options(
         "best obs": False,
         "keep BAL": False,
         "read mode": "spplate",
+        "skip N first spec": 0,
         "z max": 10.0,
         "z min": 0.0,
     })
@@ -45,8 +46,12 @@ class Dr16Reader(Reader):
     (see Reader in stacking/reader.py)
     __init__
     __parse_config
+    read_data
+    read_drq_catalogue
     read_from_spec
     read_from_spplate
+    read_spall
+    trim_catalogue
 
     Attributes
     ----------
@@ -60,6 +65,10 @@ class Dr16Reader(Reader):
     Maximum value allowed for the Balnicity Index to keep the quasar.
     None for no maximum
 
+    max_num_spec: int or None
+    Maximum number of spectra to load. None for no maximum.
+    Multiple spectra comming from the same line of sight are not counted here
+
     drq_filename: str
     Filename of the DRQ catalogue
 
@@ -72,6 +81,9 @@ class Dr16Reader(Reader):
 
     read_mode: str
     Reading mode. Currently supported reading modes are "spplate" and "spec"
+
+    skip_n_first_spec: int
+    Skip the N first spectra in the catalogue
 
     spall: str
     Path to the spAll file required for multiple observations
@@ -135,6 +147,8 @@ class Dr16Reader(Reader):
 
         self.max_balnicity_index = config.getfloat("max Balnicity Index")
 
+        self.max_num_spec = config.getint("max num spec")
+
         self.drq_filename = config.get("drq catalogue")
         if self.drq_filename is None:
             raise ReaderError(
@@ -154,6 +168,11 @@ class Dr16Reader(Reader):
                 f"Error reading data in Dr16Reader. Read mode {self.read_mode} is not "
                 "supported. Supported reading modes are " +
                 " ".join(SUPPORTED_READING_MODES))
+
+        self.skip_n_first_spec = config.getint("skip N first spec")
+        if self.skip_n_first_spec is None:
+            raise ReaderError(
+                "Missing argument 'skip N first spec' required by Dr16Reader")
 
         if self.best_obs:
             self.spall = None
@@ -216,6 +235,10 @@ class Dr16Reader(Reader):
         """
         # load DRQ Catalogue
         self.catalogue = self.read_drq_catalogue()
+
+        # trim catalogue if necessary
+        self.trim_catalogue()
+
         # if using multiple observations load the information from spAll file
         if not self.best_obs:
             self.read_spall()
@@ -320,9 +343,6 @@ class Dr16Reader(Reader):
                     "field BI_CIV was not present in the HDU")
 
         catalogue.keep_columns(keep_columns)
-        # Inhterited this from picca, but not sure we actually need it so I'm
-        # commenting it for now
-        #keep_rows = np.where(keep_rows)[0]
         catalogue = catalogue[keep_rows]
 
         return catalogue
@@ -376,10 +396,14 @@ class Dr16Reader(Reader):
             coeff0 = header["COEFF0"]
             coeff1 = header["COEFF1"]
 
-            flux = hdul[0].read()
-            ivar = hdul[1].read() * (hdul[2].read() == 0)
-            log_lambda = coeff0 + coeff1 * np.arange(flux.shape[1])
-            wavelength = 10**log_lambda
+            try:
+                flux = hdul[0].read()
+                ivar = hdul[1].read() * (hdul[2].read() == 0)
+                log_lambda = coeff0 + coeff1 * np.arange(flux.shape[1])
+                wavelength = 10**log_lambda
+            except:
+                log.critical(f"corrupted file: {spplate}")
+                continue
 
             # Loop over all objects inside this spPlate file
             # and create the SdssForest objects
@@ -470,6 +494,26 @@ class Dr16Reader(Reader):
             name for name in self.catalogue.colnames
             if name not in ["PLATE", "FIBERID", "MJD"]
         ]
+        self.logger.progress("Merging with DRQ catalogue")
         self.catalogue = join(catalogue[select_cols],
                               self.catalogue[select_cols_drq],
                               join_type="left")
+
+    def trim_catalogue(self):
+        """Trim the catalogue by removing the first N rows and limiting its
+        size to M entries
+
+        N is stored in self.skip_n_first_spec and M is stored in self.max_num_spec
+        If self.max_num_spec is None, then do not limit by size
+        """
+        if self.max_num_spec is None:
+            if self.skip_n_first_spec > 0:
+                self.catalogue = self.catalogue[
+                    self.skip_n_first_spec :]
+        else:
+            if self.skip_n_first_spec > 0:
+                self.catalogue = self.catalogue[
+                    self.skip_n_first_spec: self.skip_n_first_spec + self.max_num_spec]
+            else:
+                self.catalogue = self.catalogue[
+                    : self.max_num_spec]

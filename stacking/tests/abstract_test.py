@@ -38,7 +38,7 @@ class AbstractTest(unittest.TestCase):
             os.makedirs(f"{THIS_DIR}/results/")
 
         # setup logger
-        setup_logger()
+        setup_logger(logging_level_console="PROGRESS")
 
         # setup Spectrum.common_wavelength_grid
         Spectrum.common_wavelength_grid = COMMON_WAVELENGTH_GRID
