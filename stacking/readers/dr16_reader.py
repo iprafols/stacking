@@ -396,15 +396,11 @@ class Dr16Reader(Reader):
             coeff0 = header["COEFF0"]
             coeff1 = header["COEFF1"]
 
-            try:
-                flux = hdul[0].read()
-                ivar = hdul[1].read() * (hdul[2].read() == 0)
-                log_lambda = coeff0 + coeff1 * np.arange(flux.shape[1])
-                wavelength = 10**log_lambda
-            except:
-                log.critical(f"corrupted file: {spplate}")
-                continue
-
+            flux = hdul[0].read()
+            ivar = hdul[1].read() * (hdul[2].read() == 0)
+            log_lambda = coeff0 + coeff1 * np.arange(flux.shape[1])
+            wavelength = 10**log_lambda
+        
             # Loop over all objects inside this spPlate file
             # and create the SdssForest objects
             for row in group:
