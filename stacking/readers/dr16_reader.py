@@ -400,7 +400,7 @@ class Dr16Reader(Reader):
             ivar = hdul[1].read() * (hdul[2].read() == 0)
             log_lambda = coeff0 + coeff1 * np.arange(flux.shape[1])
             wavelength = 10**log_lambda
-        
+
             # Loop over all objects inside this spPlate file
             # and create the SdssForest objects
             for row in group:
