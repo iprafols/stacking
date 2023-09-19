@@ -147,12 +147,13 @@ class Rebin:
                 "Missing argument 'step wavelength' required by Rebin")
         if self.step_type == "lin":
             self.size_common_grid = int(
-                (self.max_wavelength - self.min_wavelength) / step_wavelength)
+                round((self.max_wavelength - self.min_wavelength) /
+                      step_wavelength, 0))
             expected_max_wavelength = self.min_wavelength + self.size_common_grid * step_wavelength
         elif self.step_type == "log":
-            self.size_common_grid = ((np.log10(self.max_wavelength) -
-                                      np.log10(self.min_wavelength)) /
-                                     step_wavelength).astype(np.int64)
+            self.size_common_grid = int(
+                round(((np.log10(self.max_wavelength) -
+                        np.log10(self.min_wavelength)) / step_wavelength), 0))
             expected_max_wavelength = 10**(
                 np.log10(self.min_wavelength) +
                 self.size_common_grid * step_wavelength)
@@ -169,7 +170,8 @@ class Rebin:
             raise RebinError(
                 f"Inconsistent values given for 'min wavelength' ({self.min_wavelength}), "
                 f"'max wavelength' ({self.max_wavelength}) and "
-                f"'step wavelength' ({step_wavelength}). Limiting wavelengths "
+                f"'step wavelength' ({step_wavelength}) and 'step type' "
+                f"({self.step_type}). Limiting wavelengths "
                 "should be separated by N times the step with N being an integer. "
                 f"Expected a maximum wavelength of {expected_max_wavelength}")
 

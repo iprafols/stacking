@@ -16,8 +16,8 @@ from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
 accepted_options = update_accepted_options(accepted_options, [
-    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index", "max num spec",
-    "read mode", "skip N first spec", "spAll", "z min", "z max"
+    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index",
+    "max num spec", "read mode", "skip N first spec", "spAll", "z min", "z max"
 ])
 
 defaults = update_default_options(
@@ -504,12 +504,11 @@ class Dr16Reader(Reader):
         """
         if self.max_num_spec is None:
             if self.skip_n_first_spec > 0:
-                self.catalogue = self.catalogue[
-                    self.skip_n_first_spec :]
+                self.catalogue = self.catalogue[self.skip_n_first_spec:]
         else:
             if self.skip_n_first_spec > 0:
-                self.catalogue = self.catalogue[
-                    self.skip_n_first_spec: self.skip_n_first_spec + self.max_num_spec]
+                self.catalogue = self.catalogue[self.skip_n_first_spec:self.
+                                                skip_n_first_spec +
+                                                self.max_num_spec]
             else:
-                self.catalogue = self.catalogue[
-                    : self.max_num_spec]
+                self.catalogue = self.catalogue[:self.max_num_spec]

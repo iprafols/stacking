@@ -125,9 +125,9 @@ class RebinTest(AbstractTest):
         expected_message = (
             "Inconsistent values given for 'min wavelength' (1000.0), "
             "'max wavelength' (5000.0) and "
-            "'step wavelength' (0.0001). Limiting wavelengths "
+            "'step wavelength' (0.0001) and 'step type' (log). Limiting wavelengths "
             "should be separated by N times the step with N being an integer. "
-            "Expected a maximum wavelength of 4999.1941102499995")
+            "Expected a maximum wavelength of 5000.345349769783")
         self.run_rebin_with_errors(rebin_kwargs, expected_message)
 
     def test_rebin_lin(self):

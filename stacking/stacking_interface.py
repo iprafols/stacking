@@ -39,10 +39,12 @@ class StackingInterface:
         self.config = None
         self.num_processors = None
         self.spectra = None
+        self.rebin = None
 
     def load_config(self, config_file):
         """Load the configuration of the run, sets up the print function
-        that will be used to print, and initializes the saving folders
+        that will be used to print, initializes the saving folders and the
+        rebin instance
 
         Arguments
         ---------
@@ -52,6 +54,10 @@ class StackingInterface:
         # load configuration
         self.config = Config(config_file)
         self.num_processors = self.config.num_processors
+
+        # initialize rebin (also sets common grid)
+        # done here to detect early errors
+        self.rebin = Rebin(self.config.rebin_args)
 
     def normalize_spectra(self):
         """ Normalize spectra """
@@ -128,9 +134,6 @@ class StackingInterface:
         """Rebin data to a common grid"""
         start_time = time.time()
 
-        # initialize rebinnes (also sets common grid)
-        rebin = Rebin(self.config.rebin_args)
-
         # do the actual rebinning
         if self.num_processors > 1:
             context = multiprocessing.get_context('fork')
@@ -140,9 +143,9 @@ class StackingInterface:
             chunksize = max(1, chunksize)
             with context.Pool(processes=self.num_processors) as pool:
                 self.spectra = list(
-                    pool.map(rebin, self.spectra, chunksize=chunksize))
+                    pool.map(self.rebin, self.spectra, chunksize=chunksize))
         else:
-            self.spectra = [rebin(spectrum) for spectrum in self.spectra]
+            self.spectra = [self.rebin(spectrum) for spectrum in self.spectra]
 
         end_time = time.time()
         self.logger.info("Time spent rebinning data: %f seconds",
