@@ -21,11 +21,11 @@ class Stacker:
 
     Attributes
     ----------
-    logger: logging.Logger
-    Logger object
+    stacked_flux: array of float
+    The stacked flux
 
-    stack_result: spectrum or list of Spectrum
-    The resulting stack
+    stacked_weight: array of float
+    The sum of weights associated with each flux
     """
 
     def __init__(self, config):
@@ -40,7 +40,6 @@ class Stacker:
         -----
         StackerError if the selected reading mode is not supported
         """
-        self.logger = logging.getLogger(__name__)
 
         # load variables from config
         self.num_processors = None

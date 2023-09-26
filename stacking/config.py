@@ -72,9 +72,6 @@ class Config:
     log: str or None
     Name of the log file. None for no log file
 
-    logger: logging.Logger
-    Logger object
-
     logging_level_console: str
     Level of console logging. Messages with lower priorities will not be logged.
     Accepted values are (in order of priority) NOTSET, DEBUG, PROGRESS, INFO,

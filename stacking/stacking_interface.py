@@ -62,7 +62,7 @@ class StackingInterface:
     def normalize_spectra(self):
         """ Normalize spectra """
         start_time = time.time()
-        self.logger.info("Starting normallization procedure")
+        self.logger.info("Starting normalization procedure")
 
         normalizer_type, normalizer_arguments = self.config.normalizer
         normalizer = normalizer_type(normalizer_arguments)
@@ -133,6 +133,8 @@ class StackingInterface:
     def rebin_data(self):
         """Rebin data to a common grid"""
         start_time = time.time()
+
+        self.logger.info("Rebinning data")
 
         # do the actual rebinning
         if self.num_processors > 1:
