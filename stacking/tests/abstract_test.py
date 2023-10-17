@@ -201,13 +201,12 @@ class AbstractTest(unittest.TestCase):
                     highlight_print()
                 else:
                     report_mismatch(orig_file, new_file)
-                print(f"Different data found for column {col}")
+                print(f"Different data found for column '{col}'")
                 print("orig new is_close orig-new\n")
-                for index in orig_df.shape[1]:
-                    print(
-                        f"{orig_df[col][index]} {new_df[col][index]} "
-                        f"{np.isclose(orig_df[col][index], new_df[col][index])} "
-                        f"{orig_df[col][index] - new_df[col][index]}\n")
+                for item1, item2 in zip(orig_df[col], new_df[col]):
+                    print(f"{item1} {item2} "
+                          f"{np.isclose(item1, item2, equal_nan=True)} "
+                          f"{item1 - item2}\n")
                 self.fail("DataFrame: data mismatch")
 
     def compare_error_message(self,

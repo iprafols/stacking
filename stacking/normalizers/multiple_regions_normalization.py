@@ -290,16 +290,16 @@ class MultipleRegionsNormalization(Normalizer):
         if file_format in ["csv", "txt"]:
             norm_factors = pd.read_csv(filename, delim_whitespace=True)
 
-            correction_factors_filename = filename.replace(
-                "normalization", "correction")
+            correction_factors_filename = (
+                f"{os.path.expandvars(folder)}correction_factors.{file_format}")
             if os.path.exists(correction_factors_filename):
                 correction_factors = pd.read_csv(
                     correction_factors_filename,
                     delim_whitespace=True)["correction_factor"].values
             else:
                 raise NormalizerError(
-                    f"Unable to find file correction_factors.{file_format} in "
-                    "the specified folder")
+                    f"Unable to find file correction_factors.{file_format}. "
+                    f"Specified folder: {os.path.expandvars(folder)}")
         elif file_format in ["fits", "fits.gz"]:
             norm_factors = Table.read(filename,
                                       format='fits',
@@ -309,6 +309,14 @@ class MultipleRegionsNormalization(Normalizer):
                                             format='fits',
                                             hdu="CORRECTION_FACTORS").to_pandas(
                                             )["CORRECTION_FACTOR"].values
+        # this should never enter unless new reading formats are not properly added
+        else:  # pragma: no cover
+            raise NormalizerError(
+                f"Don't know what to do with file format {file_format}. "
+                "This is one of the supported formats, maybe it "
+                "was not properly coded. If you did the change yourself, check "
+                "that you added the behaviour of the new mode to method `save_norm_factors`. "
+                "Otherwise contact 'stacking' developpers.")
 
         return norm_factors, correction_factors
 

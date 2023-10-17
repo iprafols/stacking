@@ -148,6 +148,7 @@ def save_norm_factors_ascii(filename, norm_factors):
         float_format='%.6f',
         encoding="utf-8",
         sep=" ",
+        na_rep="nan",
     )
 
 

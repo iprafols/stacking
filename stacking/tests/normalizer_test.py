@@ -15,7 +15,7 @@ from stacking.normalizers.multiple_regions_normalization import (
     MultipleRegionsNormalization, ACCEPTED_SAVE_FORMATS)
 from stacking.normalizers.no_normalization import NoNormalization
 from stacking.spectrum import Spectrum
-from stacking.tests.abstract_test import AbstractTest
+from stacking.tests.abstract_test import AbstractTest, highlight_print
 from stacking.tests.utils import REBINNED_SPECTRA, NORM_FACTORS, CORRECTION_FACTORS
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -281,7 +281,7 @@ class NormalizerTest(AbstractTest):
         # run different cases
         folders = [
             # case 1: ASCII file
-            f"{THIS_DIR}/data/multiple_regions_normalization_save_norm_factors/",
+            f"{THIS_DIR}/data/multiple_regions_normalization_load_norm_factors_txt/",
             # case 2: ASCII file missing correction factors
             (f"{THIS_DIR}/data/"
              "multiple_regions_normalization_load_norm_factors_txt_missing_correction/"
@@ -295,7 +295,10 @@ class NormalizerTest(AbstractTest):
             # case 1
             None,
             # case 2
-            "Unable to find file correction_factors.txt in the specified folder",
+            ("Unable to find file correction_factors.txt. Specified folder: "
+             f"{THIS_DIR}/data/"
+             "multiple_regions_normalization_load_norm_factors_txt_missing_correction/"
+            ),
             # case 3
             None,
             # case 4
@@ -309,14 +312,19 @@ class NormalizerTest(AbstractTest):
                     folder)
                 self.compare_df(NORM_FACTORS, norm_factors)
                 if CORRECTION_FACTORS.size != correction_factors.size:
+                    highlight_print()
+                    print(f"Folder: {folder}")
                     print("Different sizes found for correction factors")
                     print(
                         f"Orig: {CORRECTION_FACTORS.size}, new: {correction_factors.size}"
                     )
+                    highlight_print()
                     self.fail(
                         "Load normalization factors: correction factors size mismatch"
                     )
                 if not np.allclose(CORRECTION_FACTORS, correction_factors):
+                    highlight_print()
+                    print(f"Folder: {folder}")
                     print("Different correction factors found")
                     print("orig new is_close orig-new\n")
                     for orig_value, new_value in zip(CORRECTION_FACTORS,
@@ -324,9 +332,9 @@ class NormalizerTest(AbstractTest):
                         print(f"{orig_value} {new_value} "
                               f"{np.isclose(orig_value, new_value)} "
                               f"{orig_value - new_value}\n")
-                        self.fail(
-                            "Load normalization factors: correction factors mismatch"
-                        )
+                    self.fail(
+                        "Load normalization factors: correction factors mismatch"
+                    )
             else:
                 with self.assertRaises(NormalizerError) as context_manager:
                     normalizer.load_norm_factors(folder)
