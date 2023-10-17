@@ -30,7 +30,7 @@ class StandardWriter(Writer):
         stacker: Stacker
         The used stacker
         """
-        filename = self.output_directory + self.output_file
+        filename = self.output_directory + "stack/" + self.output_file
 
         # primary HDU
         primary_hdu = fits.PrimaryHDU()

@@ -27,7 +27,7 @@ except InvalidGitRepositoryError:  # pragma: no cover
 
 accepted_general_options = [
     "overwrite", "logging level console", "logging level file", "log",
-    "output directory", "num processors"
+    "output directory", "num processors", "run type"
 ]
 
 accepted_section_options = ["type"]
@@ -41,6 +41,7 @@ default_config = {
         "logging level console": "PROGRESS",
         "logging level file": "PROGRESS",
         "num processors": 0,
+        "run type": "normal"
     },
     "rebin": {
         "type": "Rebin",
@@ -102,6 +103,9 @@ class Config:
     Class should be a child of Reader and the SectionProxy should contain a
     configuration section with the parameters necessary to initialize it
 
+    run_type: str
+    Run type (e.g normal, merge stack). See stacking_interface.py for more details
+
     stacker: (class, configparser.SectionProxy)
     Class should be a child of Stacker and the SectionProxy should contain a
     configuration section with the parameters necessary to initialize it
@@ -137,6 +141,7 @@ class Config:
         self.logging_level_file = None
         self.num_processors = None
         self.output_directory = None
+        self.run_type = None
         self.__format_general_section()
 
         # other sections
@@ -316,6 +321,13 @@ class Config:
         if self.num_processors is None:  # pragma: no cover
             raise ConfigError(
                 "Missing variable 'num processors' in section [general]")
+
+        self.run_type = section.get("run type")
+        # this should never be true as the general section is loaded in the
+        # default dictionary
+        if self.run_type is None:  # pragma: no cover
+            raise ConfigError(
+                "Missing variable 'run type' in section [general]")
 
     def __parse_environ_variables(self):
         """Read all variables and replaces the enviroment variables for their

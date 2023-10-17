@@ -502,13 +502,20 @@ class Dr16Reader(Reader):
         N is stored in self.skip_n_first_spec and M is stored in self.max_num_spec
         If self.max_num_spec is None, then do not limit by size
         """
-        if self.max_num_spec is None:
-            if self.skip_n_first_spec > 0:
-                self.catalogue = self.catalogue[self.skip_n_first_spec:]
+        if self.max_num_spec is None and self.skip_n_first_spec > 0:
+            self.logger.progress(
+                f"Dropping first {self.skip_n_first_spec} objects in the catalogue"
+            )
+            self.catalogue = self.catalogue[self.skip_n_first_spec:]
         else:
             if self.skip_n_first_spec > 0:
+                self.logger.progress(
+                    f"Dropping first {self.skip_n_first_spec} objects in the catalogue\n"
+                    f"Cutting at {self.max_num_spec} objects in the catalogue")
                 self.catalogue = self.catalogue[self.skip_n_first_spec:self.
                                                 skip_n_first_spec +
                                                 self.max_num_spec]
             else:
+                self.logger.progress(
+                    f"Cutting at {self.max_num_spec} objects in the catalogue")
                 self.catalogue = self.catalogue[:self.max_num_spec]

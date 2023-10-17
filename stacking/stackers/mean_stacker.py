@@ -15,7 +15,6 @@ class MeanStacker(Stacker):
     Methods
     -------
     (see Stacker in stacking/stacker.py)
-    __init__
     stack
 
     Attributes
@@ -30,20 +29,28 @@ class MeanStacker(Stacker):
         ---------
         spectra: list of Spectrum
         The spectra to stack
-
-        Raise
-        -----
-        ReaderError if function was not overloaded by child class
         """
         # TODO: parallelize this to also save memory
-        self.stacked_flux = np.nansum(np.stack([
-            spectrum.normalized_flux * spectrum.ivar_common_grid
-            for spectrum in spectra
-        ]),
-                                      axis=0)
-        self.stacked_weight = np.nansum(np.stack(
-            [spectrum.ivar_common_grid for spectrum in spectra]),
-                                        axis=0)
+        weights = np.stack([
+            spectrum.ivar_common_grid /
+            (1 + 0.05**2 * spectrum.ivar_common_grid) for spectrum in spectra
+        ])
+        self.stacked_flux = np.nansum(
+            np.stack([spectrum.normalized_flux for spectrum in spectra]) *
+            weights,
+            axis=0)
+        self.stacked_weight = np.nansum(weights, axis=0)
+        # OLD CODE, TO BE REMOVED
+        # TODO: parallelize this to also save memory
+        #self.stacked_flux = np.nansum(np.stack([
+        #    spectrum.normalized_flux * spectrum.ivar_common_grid
+        #    for spectrum in spectra
+        #]),
+        #                              axis=0)
+        #self.stacked_weight = np.nansum(np.stack(
+        #    [spectrum.ivar_common_grid for spectrum in spectra]),
+        #                                axis=0)
+        #  END OF OLD CODE
 
         # normalize
         good_pixels = np.where(self.stacked_weight != 0.0)

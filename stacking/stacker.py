@@ -1,5 +1,4 @@
 """ Basic structure for stackers """
-import logging
 import numpy as np
 
 from stacking.errors import StackerError
@@ -16,7 +15,6 @@ class Stacker:
     Methods
     -------
     __init__
-    __parser
     stack
 
     Attributes
@@ -28,22 +26,18 @@ class Stacker:
     The sum of weights associated with each flux
     """
 
-    def __init__(self, config):
+    def __init__(self, config):  # pylint: disable=unused-argument
         """Initialize class instance
 
         Arguments
         ---------
         config: configparser.SectionProxy
-        Parsed options to initialize class
+        Ignored, passed here to have consistent inheritance calls
 
         Raise
         -----
         StackerError if the selected reading mode is not supported
         """
-
-        # load variables from config
-        self.num_processors = None
-        self.__parse_config(config)
 
         # initialize results
         if Spectrum.common_wavelength_grid is None:
@@ -52,23 +46,6 @@ class Stacker:
                 "Stacker instances")
         self.stacked_flux = np.zeros(Spectrum.common_wavelength_grid.size)
         self.stacked_weight = np.zeros(Spectrum.common_wavelength_grid.size)
-
-    def __parse_config(self, config):
-        """Parse the configuration options
-
-        Arguments
-        ---------
-        config: configparser.SectionProxy
-        Parsed options to initialize class
-
-        Raise
-        -----
-        StackerError upon missing required variables
-        """
-        self.num_processors = config.getint("num processors")
-        if self.num_processors is None:
-            raise StackerError("Missing argument 'num processors' required by "
-                               "Stacker")
 
     def stack(self, spectra):
         """ Stack spectra
@@ -80,6 +57,6 @@ class Stacker:
 
         Raise
         -----
-        ReaderError if function was not overloaded by child class
+        StackerError if function was not overloaded by child class
         """
         raise StackerError("Method 'stack' was not overloaded by child class")

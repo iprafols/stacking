@@ -3,14 +3,17 @@ package stacking
 """
 import logging
 
+
 class StackingError(Exception):
     """
         General exceptions ocurred in the package Stacking
     """
+
     def __init__(self, message):
         self.logger = logging.getLogger(__name__)
         self.logger.error(message)
         super().__init__(message)
+
 
 class ConfigError(StackingError):
     """

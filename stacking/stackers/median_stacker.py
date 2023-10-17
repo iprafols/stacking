@@ -2,9 +2,14 @@
 using the median of the stacked values"""
 import numpy as np
 
-from stacking.stacker import Stacker
+from stacking.errors import StackerError
+from stacking.stacker import Stacker, defaults, accepted_options
 from stacking.stacker import (  # pylint: disable=unused-import
-    defaults, accepted_options, required_options)
+    required_options)
+from stacking.utils import update_accepted_options, update_default_options
+
+accepted_options = update_accepted_options(accepted_options, ["weighted"])
+defaults = update_default_options(defaults, {"weighted": True})
 
 ASSOCIATED_WRITER = "StandardWriter"
 
@@ -15,13 +20,50 @@ class MedianStacker(Stacker):
     Methods
     -------
     (see Stacker in stacking/stacker.py)
-    __init__
     stack
 
     Attributes
     ----------
     (see Stacker in stacking/stacker.py)
+
+    weighted: boolean
+    If True, then compute the weighted median. Otherwise, compute the regular
+    median
     """
+
+    def __init__(self, config):
+        """Initialize class instance
+
+        Arguments
+        ---------
+        config: configparser.SectionProxy
+        Parsed options to initialize class
+
+        Raise
+        -----
+        StackerError if the selected reading mode is not supported
+        """
+        super().__init__(config)
+
+        self.weighted = None
+        self.__parse_config(config)
+
+    def __parse_config(self, config):
+        """Parse the configuration options
+
+        Arguments
+        ---------
+        config: configparser.SectionProxy
+        Parsed options to initialize class
+
+        Raise
+        -----
+        StackerError upon missing required variables
+        """
+        self.weighted = config.get("weighted")
+        if self.weighted is None:
+            raise StackerError(
+                "Missing argument 'weighted' required by MedianStacker")
 
     def stack(self, spectra):
         """ Stack spectra
@@ -30,18 +72,18 @@ class MedianStacker(Stacker):
         ---------
         spectra: list of Spectrum
         The spectra to stack
-
-        Raise
-        -----
-        ReaderError if function was not overloaded by child class
         """
-        # TODO: parallelize this to also save memory
-        self.stacked_flux = np.nanmedian(np.stack([
-            spectrum.normalized_flux / (spectrum.ivar_common_grid != 0)
-            for spectrum in spectra
-        ]),
-                                         axis=0)
+        if self.weighted:  # pylint: disable=no-else-raise
+            # TODO: compute weighted median
+            raise StackerError("Not implemented")
+        else:
+            # TODO: parallelize this to also save memory
+            self.stacked_flux = np.nanmedian(np.stack([
+                spectrum.normalized_flux / (spectrum.ivar_common_grid != 0)
+                for spectrum in spectra
+            ]),
+                                             axis=0)
 
-        self.stacked_weight = np.nansum(np.stack(
-            [spectrum.ivar_common_grid for spectrum in spectra]),
-                                        axis=0)
+            self.stacked_weight = np.nansum(np.stack(
+                [spectrum.ivar_common_grid for spectrum in spectra]),
+                                            axis=0)
