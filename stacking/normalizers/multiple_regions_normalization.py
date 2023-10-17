@@ -284,9 +284,9 @@ class MultipleRegionsNormalization(Normalizer):
         if file_format is None:
             raise NormalizerError(
                 "Unable to find file normalization_factors.EXT in the specified "
-                "folder, where EXT is one of " +
+                "folder, where EXT is one of '" +
                 " ".join(ACCEPTED_SAVE_FORMATS) +
-                f" specified folder: {folder}")
+                f"'. Specified folder: {folder}")
         if file_format in ["csv", "txt"]:
             norm_factors = pd.read_csv(filename, delim_whitespace=True)
 

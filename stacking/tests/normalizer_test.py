@@ -49,6 +49,36 @@ class NormalizerTest(AbstractTest):
     test_normalizer
     """
 
+    def run_multiple_regions_normalization_compute_norm_factors(
+            self, normalizer_kwargs, test_file, out_file):
+        """Check behaviour of MultipleRegionsNormalization.compute_norm_factors
+        when no errors are expected
+
+        Arguments
+        ---------
+        normalizer_kwargs: dict
+        Keyword arguments to set the configuration run
+
+        test_file: str
+        Name of the test file against which we compare the results
+
+        out_file: str
+        Name of the output file
+        """
+        config = create_multiple_regions_normalization_config(normalizer_kwargs)
+
+        normalizer = MultipleRegionsNormalization(config["normalizer"])
+        normalizer.compute_norm_factors(REBINNED_SPECTRA)
+
+        self.assertTrue(normalizer.norm_factors is not None)
+        self.assertTrue(isinstance(normalizer.norm_factors, pd.DataFrame))
+
+        # save results
+        normalizer.norm_factors.to_csv(out_file, sep=" ", index=False)
+
+        # compare against expectations
+        self.compare_ascii_numeric(test_file, out_file)
+
     def run_multiple_regions_normalization_with_errors(self, normalizer_kwargs,
                                                        expected_message):
         """Check behaviour of MultipleRegionsNormalization when errors are
@@ -158,23 +188,24 @@ class NormalizerTest(AbstractTest):
 
     def test_multiple_regions_normalization_compute_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
-        out_file = f"{THIS_DIR}/results/multiple_regions_normalization_compute_norm_factors.txt"
         test_file = f"{THIS_DIR}/data/multiple_regions_normalization_compute_norm_factors.txt"
 
-        config = create_multiple_regions_normalization_config(
-            MULTIPLE_REGIONS_NORMALIZATION_KWARGS)
+        # case 1: compute norm factors
+        out_file = f"{THIS_DIR}/results/multiple_regions_normalization_compute_norm_factors.txt"
+        self.run_multiple_regions_normalization_compute_norm_factors(
+            MULTIPLE_REGIONS_NORMALIZATION_KWARGS, test_file, out_file)
 
-        normalizer = MultipleRegionsNormalization(config["normalizer"])
-        normalizer.compute_norm_factors(REBINNED_SPECTRA)
+        # case 2: load norm factors
+        out_file = (
+            f"{THIS_DIR}/results/"
+            "multiple_regions_normalization_compute_norm_factors_load.txt")
+        normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
+        normalizer_kwargs["load norm factors from"] = (
+            f"{THIS_DIR}/data/multiple_regions_normalization_load_norm_factors_fits/"
+        )
 
-        self.assertTrue(normalizer.norm_factors is not None)
-        self.assertTrue(isinstance(normalizer.norm_factors, pd.DataFrame))
-
-        # save results
-        normalizer.norm_factors.to_csv(out_file, sep=" ", index=False)
-
-        # compare against expectations
-        self.compare_ascii_numeric(test_file, out_file)
+        self.run_multiple_regions_normalization_compute_norm_factors(
+            MULTIPLE_REGIONS_NORMALIZATION_KWARGS, test_file, out_file)
 
     def test_multiple_regions_normalization_invalid_intervals(self):
         """Check that errors are raised when the given intervals are not
@@ -232,15 +263,83 @@ class NormalizerTest(AbstractTest):
         self.run_multiple_regions_normalization_with_errors(
             normalizer_kwargs, expected_message)
 
+    def test_multiple_regions_normalization_invalid_sigma_i(self):
+        """Check the behaviour when the save format is not valid"""
+        normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
+        normalizer_kwargs.update({"sigma_I": "-1.0"})
+
+        expected_message = "Argument 'sigma_I' should be positive. Found -1.0"
+        self.run_multiple_regions_normalization_with_errors(
+            normalizer_kwargs, expected_message)
+
+    def test_multiple_regions_normalization_load_norm_factors(self):
+        """Test method load_norm_factors from MultipleRegionsNormalization"""
+        config = create_multiple_regions_normalization_config(
+            MULTIPLE_REGIONS_NORMALIZATION_KWARGS)
+
+        normalizer = MultipleRegionsNormalization(config["normalizer"])
+
+        # run different cases
+        folders = [
+            # case 1: ASCII file
+            f"{THIS_DIR}/data/multiple_regions_normalization_save_norm_factors/",
+            # case 2: ASCII file missing correction factors
+            (f"{THIS_DIR}/data/"
+             "multiple_regions_normalization_load_norm_factors_txt_missing_correction/"
+            ),
+            # case 3: fits file
+            f"{THIS_DIR}/data/multiple_regions_normalization_load_norm_factors_fits/",
+            # case 4: no file
+            f"{THIS_DIR}",
+        ]
+        expected_error_messages = [
+            # case 1
+            None,
+            # case 2
+            "Unable to find file correction_factors.txt in the specified folder",
+            # case 3
+            None,
+            # case 4
+            ("Unable to find file normalization_factors.EXT in the specified folder, "
+             "where EXT is one of 'csv fits fits.gz txt'. Specified folder: "
+             f"{THIS_DIR}"),
+        ]
+        for folder, expected_message in zip(folders, expected_error_messages):
+            if expected_message is None:
+                norm_factors, correction_factors = normalizer.load_norm_factors(
+                    folder)
+                self.compare_df(NORM_FACTORS, norm_factors)
+                if CORRECTION_FACTORS.size != correction_factors.size:
+                    print("Different sizes found for correction factors")
+                    print(
+                        f"Orig: {CORRECTION_FACTORS.size}, new: {correction_factors.size}"
+                    )
+                    self.fail(
+                        "Load normalization factors: correction factors size mismatch"
+                    )
+                if not np.allclose(CORRECTION_FACTORS, correction_factors):
+                    print("Different correction factors found")
+                    print("orig new is_close orig-new\n")
+                    for orig_value, new_value in zip(CORRECTION_FACTORS,
+                                                     correction_factors):
+                        print(f"{orig_value} {new_value} "
+                              f"{np.isclose(orig_value, new_value)} "
+                              f"{orig_value - new_value}\n")
+                        self.fail(
+                            "Load normalization factors: correction factors mismatch"
+                        )
+            else:
+                with self.assertRaises(NormalizerError) as context_manager:
+                    normalizer.load_norm_factors(folder)
+                self.compare_error_message(context_manager, expected_message)
+
     def test_multiple_regions_normalization_missing_options(self):
         """Check that errors are raised when required options are missing"""
-        options_and_values = [
-            ("intervals", "1300 - 1500, 2000 - 2600, 4400 - 4800"),
-            ("log directory", f"{THIS_DIR}/results/"),
-            ("main interval", "1"),
-            ("num processors", "1"),
-            ("save format", "fits.gz"),
-        ]
+        options_and_values = [("intervals",
+                               "1300 - 1500, 2000 - 2600, 4400 - 4800"),
+                              ("log directory", f"{THIS_DIR}/results/"),
+                              ("main interval", "1"), ("num processors", "1"),
+                              ("save format", "fits.gz"), ("sigma_I", "0.05")]
 
         self.check_missing_options(options_and_values,
                                    MultipleRegionsNormalization,

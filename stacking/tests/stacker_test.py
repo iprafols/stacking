@@ -84,15 +84,13 @@ class StackerTest(AbstractTest):
 
         # case 1: weighted median (currently not implemented)
         config = ConfigParser()
-        config.read_dict({"stacker": {"weighted": "False"}})
+        config.read_dict({"stacker": {"weighted": "True"}})
         stacker = MedianStacker(config["stacker"])
         expected_message = "Not implemented"
         with self.assertRaises(StackerError) as context_manager:
             MedianStacker(config["stacker"])
             self.run_simple_stack(stacker, test_file, out_file)
         self.compare_error_message(context_manager, expected_message)
-
-
 
     def test_median_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
@@ -128,7 +126,7 @@ class StackerTest(AbstractTest):
     def test_stacker_unset_spectrum(self):
         """Test the abstract normalizer"""
         config = ConfigParser()
-        config.read_dict({"stacker": {}}})
+        config.read_dict({"stacker": {}})
 
         # make sure Spectrum.common_wavelength_grid is not set
         # (this is set in the test setUp)

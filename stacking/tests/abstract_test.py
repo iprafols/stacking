@@ -147,31 +147,60 @@ class AbstractTest(unittest.TestCase):
 
         new_file: str
         New file
-
-        expand_dir: bool - Default: False
-        If set to true, replace the instances of the string 'THIS_DIR' by
-        its value
         """
         orig_df = pd.read_csv(orig_file, delim_whitespace=True)
         new_df = pd.read_csv(orig_file, delim_whitespace=True)
 
+        self.compare_df(orig_df, new_df, orig_file=orig_file, new_file=new_file)
+
+    def compare_df(self, orig_df, new_df, orig_file=None, new_file=None):
+        """Compare two pandas dataframes
+
+        Arguments
+        ---------
+        orig_df: pd.DataFrame
+        Control data frame
+
+        new_df: pd.DataFrame
+        New data frame
+
+        orig_file: str or None - Default: None
+        Control file. Used only for reporting when errors are found. Ignored
+        if either this or new_file is 'None'
+
+        new_file: str or None - Default: None
+        New file. Used only for reporting when errors are found. Ignored
+        if either this or orig_file is 'None'
+        """
         if orig_df.shape != new_df.shape:
-            report_mismatch(orig_file, new_file)
-            print("Read data has different shapes")
+            if orig_file is None or new_file is None:
+                print("\n")
+                highlight_print()
+            else:
+                report_mismatch(orig_file, new_file)
+            print("Different shapes found")
             print(f"Original shape: {orig_df.shape}")
             print(f"New shape: {new_df.shape}")
-            self.fail("ASCII numeric file: shape mismatch")
+            self.fail("DataFrame: shape mismatch")
 
         if any(orig_df.columns != new_df.columns):
-            report_mismatch(orig_file, new_file)
+            if orig_file is None or new_file is None:
+                print("\n")
+                highlight_print()
+            else:
+                report_mismatch(orig_file, new_file)
             print("Different columns found")
             print(f"Original columns: {orig_df.columns}")
             print(f"New columns: {new_df.columns}")
-            self.fail("ASCII numeric file: column naming mismatch")
+            self.fail("DataFrame: column naming mismatch")
 
         for col in orig_df.columns:
             if not np.allclose(orig_df[col], new_df[col], equal_nan=True):
-                report_mismatch(orig_file, new_file)
+                if orig_file is None or new_file is None:
+                    print("\n")
+                    highlight_print()
+                else:
+                    report_mismatch(orig_file, new_file)
                 print(f"Different data found for column {col}")
                 print("orig new is_close orig-new\n")
                 for index in orig_df.shape[1]:
@@ -179,7 +208,7 @@ class AbstractTest(unittest.TestCase):
                         f"{orig_df[col][index]} {new_df[col][index]} "
                         f"{np.isclose(orig_df[col][index], new_df[col][index])} "
                         f"{orig_df[col][index] - new_df[col][index]}\n")
-                self.fail("ASCII numeric file: data mismatch")
+                self.fail("DataFrame: data mismatch")
 
     def compare_error_message(self,
                               context_manager,
