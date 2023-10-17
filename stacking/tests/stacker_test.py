@@ -16,10 +16,6 @@ from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
 
-STACKER_KWARGS = {
-    "num processors": 1,
-}
-
 
 class StackerTest(AbstractTest):
     """Test the stackers
@@ -69,7 +65,7 @@ class StackerTest(AbstractTest):
         test_file = f"{THIS_DIR}/data/mean_stacking.txt"
 
         config = ConfigParser()
-        config.read_dict({"stacker": STACKER_KWARGS})
+        config.read_dict({"stacker": {}})
 
         stacker = MeanStacker(config["stacker"])
 
@@ -80,13 +76,23 @@ class StackerTest(AbstractTest):
         out_file = f"{THIS_DIR}/results/median_stacking.txt"
         test_file = f"{THIS_DIR}/data/median_stacking.txt"
 
+        # case 1: normal median
         config = ConfigParser()
-        config.read_dict({"stacker": STACKER_KWARGS})
-        config["stacker"]["weighted"] = "False"
-
+        config.read_dict({"stacker": {"weighted": "False"}})
         stacker = MedianStacker(config["stacker"])
-
         self.run_simple_stack(stacker, test_file, out_file)
+
+        # case 1: weighted median (currently not implemented)
+        config = ConfigParser()
+        config.read_dict({"stacker": {"weighted": "False"}})
+        stacker = MedianStacker(config["stacker"])
+        expected_message = "Not implemented"
+        with self.assertRaises(StackerError) as context_manager:
+            MedianStacker(config["stacker"])
+            self.run_simple_stack(stacker, test_file, out_file)
+        self.compare_error_message(context_manager, expected_message)
+
+
 
     def test_median_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
@@ -100,7 +106,7 @@ class StackerTest(AbstractTest):
     def test_stacker(self):
         """Test the abstract normalizer"""
         config = ConfigParser()
-        config.read_dict({"stacker": STACKER_KWARGS})
+        config.read_dict({"stacker": {}})
         stacker = Stacker(config["stacker"])
 
         self.assertEqual(stacker.stacked_flux.size, COMMON_WAVELENGTH_GRID.size)
@@ -122,7 +128,7 @@ class StackerTest(AbstractTest):
     def test_stacker_unset_spectrum(self):
         """Test the abstract normalizer"""
         config = ConfigParser()
-        config.read_dict({"stacker": STACKER_KWARGS})
+        config.read_dict({"stacker": {}}})
 
         # make sure Spectrum.common_wavelength_grid is not set
         # (this is set in the test setUp)
