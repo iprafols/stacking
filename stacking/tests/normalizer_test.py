@@ -203,9 +203,8 @@ class NormalizerTest(AbstractTest):
         normalizer_kwargs["load norm factors from"] = (
             f"{THIS_DIR}/data/multiple_regions_normalization_load_norm_factors_fits/"
         )
-
         self.run_multiple_regions_normalization_compute_norm_factors(
-            MULTIPLE_REGIONS_NORMALIZATION_KWARGS, test_file, out_file)
+            normalizer_kwargs, test_file, out_file)
 
     def test_multiple_regions_normalization_invalid_intervals(self):
         """Check that errors are raised when the given intervals are not
