@@ -135,7 +135,7 @@ class AbstractTest(unittest.TestCase):
                     print(orig_line)
                     print("New line:")
                     print(new_line)
-                    self.fail()
+                    self.fail("ASCII file: mismatch")
 
     def compare_ascii_numeric(self, orig_file, new_file):
         """Compare two numeric ascii files to check that they are equal
@@ -160,14 +160,14 @@ class AbstractTest(unittest.TestCase):
             print("Read data has different shapes")
             print(f"Original shape: {orig_df.shape}")
             print(f"New shape: {new_df.shape}")
-            self.fail()
+            self.fail("ASCII numeric file: shape mismatch")
 
         if any(orig_df.columns != new_df.columns):
             report_mismatch(orig_file, new_file)
             print("Different columns found")
             print(f"Original columns: {orig_df.columns}")
             print(f"New columns: {new_df.columns}")
-            self.fail()
+            self.fail("ASCII numeric file: column naming mismatch")
 
         for col in orig_df.columns:
             if not np.allclose(orig_df[col], new_df[col], equal_nan=True):
@@ -179,7 +179,7 @@ class AbstractTest(unittest.TestCase):
                         f"{orig_df[col][index]} {new_df[col][index]} "
                         f"{np.isclose(orig_df[col][index], new_df[col][index])} "
                         f"{orig_df[col][index] - new_df[col][index]}\n")
-                self.fail()
+                self.fail("ASCII numeric file: data mismatch")
 
     def compare_error_message(self,
                               context_manager,
@@ -227,7 +227,7 @@ class AbstractTest(unittest.TestCase):
                     print(expected_message)
                 print("Received:")
                 print(received_message)
-                self.fail()
+                self.fail("Error message mismatch")
         else:
             if received_message not in expected_messages:
                 print("\n")
@@ -238,7 +238,7 @@ class AbstractTest(unittest.TestCase):
                     print(expected_message)
                 print("Received:")
                 print(received_message)
-                self.fail()
+                self.fail("Error message mismatch")
 
     def compare_files(self, orig_file, new_file):
         """Compare two files to check that they are equal.
@@ -408,8 +408,7 @@ class AbstractTest(unittest.TestCase):
             if key in ["CHECKSUM", "DATASUM", "DATETIME"]:
                 continue
             if (orig_header[key] != new_header[key] and
-                (isinstance(orig_header[key], str) or
-                 isinstance(orig_header[key], fits.header._HeaderCommentaryCards) or
+                (isinstance(orig_header[key], str) or key == "COMMENT" or
                  not np.isclose(orig_header[key], new_header[key]))):
 
                 self.report_fits_mismatch_header(orig_file, new_file,
@@ -423,10 +422,16 @@ class AbstractTest(unittest.TestCase):
                                                  key,
                                                  missing_key="orig")
 
-    def fail(self):
-        """Overwrite the self.fail() function to print the hightligh first"""
+    def fail(self, msg=None):
+        """Overwrite the self.fail() function to print the hightligh first
+
+        Arguments
+        ---------
+        msg: str or None
+        Optional message
+        """
         highlight_print()
-        super().fail()
+        super().fail(msg)
 
     def report_fits_mismatch_data(self,
                                   orig_file,
@@ -495,7 +500,7 @@ class AbstractTest(unittest.TestCase):
                     f"Column {col} in HDU {hdu_name} missing in {missing_col} file"
                 )
 
-        self.fail()
+        self.fail("Fits file: data mismatch")
 
     def report_fits_mismatch_header(self,
                                     orig_file,
@@ -540,7 +545,7 @@ class AbstractTest(unittest.TestCase):
         else:
             print(f"key {key} missing in {missing_key} header")
 
-        self.fail()
+        self.fail("Fits file: header mismatch")
 
     def report_fits_mismatch_hdul(self, orig_file, new_file, orig_hdul,
                                   new_hdul):
@@ -569,7 +574,7 @@ class AbstractTest(unittest.TestCase):
         print("new_hdul.info():")
         new_hdul.info()
 
-        self.fail()
+        self.fail("Fits file: HDUList mismatch")
 
 
 def report_mismatch(orig_file, new_file):
@@ -588,6 +593,7 @@ def report_mismatch(orig_file, new_file):
     highlight_print()
     print(f"Original file: {orig_file}")
     print(f"New file: {new_file}")
+
 
 def highlight_print():
     """Print text to hightligh a text section"""

@@ -94,9 +94,8 @@ class StackerTest(AbstractTest):
             ("weighted", "False"),
         ]
 
-        self.check_missing_options(options_and_values,
-                                   MedianStacker, StackerError,
-                                   Stacker)
+        self.check_missing_options(options_and_values, MedianStacker,
+                                   StackerError, Stacker)
 
     def test_stacker(self):
         """Test the abstract normalizer"""

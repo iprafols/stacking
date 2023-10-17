@@ -1,5 +1,7 @@
 """ This module defines the class MedianStacker to compute the stack
 using the median of the stacked values"""
+import warnings
+
 import numpy as np
 
 from stacking.errors import StackerError
@@ -78,11 +80,18 @@ class MedianStacker(Stacker):
             raise StackerError("Not implemented")
         else:
             # TODO: parallelize this to also save memory
-            self.stacked_flux = np.nanmedian(np.stack([
-                spectrum.normalized_flux / (spectrum.ivar_common_grid != 0)
-                for spectrum in spectra
-            ]),
-                                             axis=0)
+            with warnings.catch_warnings():
+                # suppress known RuntimeWarnings
+                warnings.filterwarnings(
+                    "ignore", message="invalid value encountered in divide")
+                warnings.filterwarnings("ignore",
+                                        message="All-NaN slice encountered")
+
+                self.stacked_flux = np.nanmedian(np.stack([
+                    spectrum.normalized_flux / (spectrum.ivar_common_grid != 0)
+                    for spectrum in spectra
+                ]),
+                                                 axis=0)
 
             self.stacked_weight = np.nansum(np.stack(
                 [spectrum.ivar_common_grid for spectrum in spectra]),

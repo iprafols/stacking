@@ -76,44 +76,38 @@ class ConfigTest(AbstractTest):
             if not section in new_config.sections():
                 report_mismatch(orig_file, new_file)
                 print(f"Section [{section}] missing in new file.")
-                self.fail()
+                self.fail("Config mismatch: missing section")
 
             orig_section = orig_config[section]
             new_section = new_config[section]
 
             # check that options in the original file are present in the new file
-            if section == "run specs":
+            for key, orig_value in orig_section.items():
+                if key not in new_section.keys():
+                    report_mismatch(orig_file, new_file)
+                    print(f"key '{key}' in section [{section}] missing in new "
+                          f"file.")
+                    self.fail("Config mismatch: missing key")
+
                 # The values in run specs might have been updated, check only that
                 # they are present
-                for key in orig_section.keys():
-                    if key not in new_section.keys():
-                        report_mismatch(orig_file, new_file)
-                        print(
-                            f"key '{key}' in section [{section}] missing in new "
-                            f"file.")
-                        self.fail()
-            else:
-                for key, orig_value in orig_section.items():
-                    if key not in new_section.keys():
-                        report_mismatch(orig_file, new_file)
-                        print(
-                            f"key '{key}' in section [{new_section}] missing in "
-                            f"new file.")
-                        self.fail()
-                    new_value = new_section.get(key)
-                    # this is necessary to remove the system dependent bits of
-                    # the paths
-                    base_path = "stacking/tests/"
-                    if base_path in new_value:
-                        new_value = new_value.split(base_path)[-1]
-                        orig_value = orig_value.split(base_path)[-1]
+                if section == "run specs":
+                    continue
 
-                    if not orig_value == new_value:
-                        report_mismatch(orig_file, new_file)
-                        print(f"In section [{section}], for key '{key}' found "
-                              f"orig value = {orig_value} but new value = "
-                              f"{new_value}.")
-                        self.fail()
+                new_value = new_section.get(key)
+                # this is necessary to remove the system dependent bits of
+                # the paths
+                base_path = "stacking/tests/"
+                if base_path in new_value:
+                    new_value = new_value.split(base_path)[-1]
+                    orig_value = orig_value.split(base_path)[-1]
+
+                if not orig_value == new_value:
+                    report_mismatch(orig_file, new_file)
+                    print(f"In section [{section}], for key '{key}' found "
+                          f"orig value = {orig_value} but new value = "
+                          f"{new_value}.")
+                    self.fail("Config mismatch: different key")
 
             # check that options in the new file are present in the original file
             for key in new_section.keys():
@@ -122,15 +116,14 @@ class ConfigTest(AbstractTest):
                     print(
                         f"key '{key}' in section [{section}] missing in original "
                         f"file.")
-                    self.fail()
+                    self.fail("Config mismatch: missing key")
 
         # check that sections in the new file are present in the original file
         for section in new_config.sections():
             if not section in orig_config.sections():
                 report_mismatch(orig_file, new_file)
                 print(f"Section [{section}] missing in original file.")
-
-            self.assertTrue(section in orig_config.sections())
+                self.fail("Config mismatch: missing section")
 
     def test_config(self):
         """Basic test for config.
