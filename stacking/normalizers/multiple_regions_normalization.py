@@ -237,8 +237,6 @@ class MultipleRegionsNormalization(Normalizer):
                     compute_norm_factors(*argument) for argument in arguments
                 ]
 
-            print(norm_factors[0])
-
             # unpack them together in a dataframe
             self.norm_factors = pd.DataFrame(
                 norm_factors,
@@ -250,8 +248,6 @@ class MultipleRegionsNormalization(Normalizer):
             self.norm_factors["specid"] = [
                 spectrum.specid for spectrum in spectra
             ]
-
-            print(self.norm_factors)
 
             # create relations between the main normalisation factor and the secondary
             self.compute_correction_factors()

@@ -60,7 +60,7 @@ class MedianStacker(Stacker):
         -----
         StackerError upon missing required variables
         """
-        self.weighted = config.get("weighted")
+        self.weighted = config.getboolean("weighted")
         if self.weighted is None:
             raise StackerError(
                 "Missing argument 'weighted' required by MedianStacker")

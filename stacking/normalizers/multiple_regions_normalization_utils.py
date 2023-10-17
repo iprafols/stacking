@@ -185,9 +185,9 @@ def save_norm_factors_fits(filename, norm_factors, intervals,
     # norm factors
     cols = [
         fits.Column(
-            name=col, format="E", disp="F7.3", array=norm_factors[col].values)
-        if col not in ["num pixels", "specid"] else fits.Column(
             name=col, format="J", disp="I4", array=norm_factors[col].values)
+        if "num pixels" in col or col == "specid" else fits.Column(
+            name=col, format="E", disp="F7.3", array=norm_factors[col].values)
         for col in norm_factors.columns
     ]
     hdu = fits.BinTableHDU.from_columns(cols, name="NORM_FACTORS")

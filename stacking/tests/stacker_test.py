@@ -82,10 +82,21 @@ class StackerTest(AbstractTest):
 
         config = ConfigParser()
         config.read_dict({"stacker": STACKER_KWARGS})
+        config["stacker"]["weighted"] = "False"
 
         stacker = MedianStacker(config["stacker"])
 
         self.run_simple_stack(stacker, test_file, out_file)
+
+    def test_median_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("weighted", "False"),
+        ]
+
+        self.check_missing_options(options_and_values,
+                                   MedianStacker, StackerError,
+                                   Stacker)
 
     def test_stacker(self):
         """Test the abstract normalizer"""
@@ -108,14 +119,6 @@ class StackerTest(AbstractTest):
         with self.assertRaises(StackerError) as context_manager:
             stacker.stack(NORMALIZED_SPECTRA)
         self.compare_error_message(context_manager, expected_message)
-
-    def test_stacker_missing_options(self):
-        """Check that errors are raised when required options are missing"""
-        options_and_values = [
-            ("num processors", "1"),
-        ]
-
-        self.check_missing_options(options_and_values, Stacker, StackerError)
 
     def test_stacker_unset_spectrum(self):
         """Test the abstract normalizer"""

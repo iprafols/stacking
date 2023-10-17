@@ -219,25 +219,26 @@ class AbstractTest(unittest.TestCase):
             if not any(
                     received_message.startswith(expected_message)
                     for expected_message in expected_messages):
-                print("\nReceived incorrect error message")
+                print("\n")
+                highlight_print()
+                print("Received incorrect error message")
                 print("Expected message to start with one of:")
                 for expected_message in expected_messages:
                     print(expected_message)
                 print("Received:")
                 print(received_message)
-            self.assertTrue(
-                any(
-                    received_message.startswith(expected_message)
-                    for expected_message in expected_messages))
+                self.fail()
         else:
             if received_message not in expected_messages:
-                print("\nReceived incorrect error message")
+                print("\n")
+                highlight_print()
+                print("Received incorrect error message")
                 print("Expected one of:")
                 for expected_message in expected_messages:
                     print(expected_message)
                 print("Received:")
                 print(received_message)
-            self.assertTrue(received_message in expected_messages)
+                self.fail()
 
     def compare_files(self, orig_file, new_file):
         """Compare two files to check that they are equal.
@@ -408,7 +409,9 @@ class AbstractTest(unittest.TestCase):
                 continue
             if (orig_header[key] != new_header[key] and
                 (isinstance(orig_header[key], str) or
+                 isinstance(orig_header[key], fits.header._HeaderCommentaryCards) or
                  not np.isclose(orig_header[key], new_header[key]))):
+
                 self.report_fits_mismatch_header(orig_file, new_file,
                                                  orig_header, new_header, key)
         for key in new_header:
@@ -419,6 +422,11 @@ class AbstractTest(unittest.TestCase):
                                                  new_header,
                                                  key,
                                                  missing_key="orig")
+
+    def fail(self):
+        """Overwrite the self.fail() function to print the hightligh first"""
+        highlight_print()
+        super().fail()
 
     def report_fits_mismatch_data(self,
                                   orig_file,
@@ -525,9 +533,9 @@ class AbstractTest(unittest.TestCase):
             if "EXTNAME" in orig_header:
                 print(f"\n For header {orig_header['EXTNAME']}")
             else:
-                print("\n For nameless header (possibly a PrimaryHDU)")
+                print("For nameless header (possibly a PrimaryHDU)")
             print(f"Different values found for key {key}: "
-                  f"orig: {orig_header[key]}, new: {new_header[key]}")
+                  f"\norig: {orig_header[key]}, \nnew: {new_header[key]}")
 
         else:
             print(f"key {key} missing in {missing_key} header")
@@ -576,8 +584,15 @@ def report_mismatch(orig_file, new_file):
     new_file: str
     New file
     """
-    print(f"\nOriginal file: {orig_file}")
+    print("\n")
+    highlight_print()
+    print(f"Original file: {orig_file}")
     print(f"New file: {new_file}")
+
+def highlight_print():
+    """Print text to hightligh a text section"""
+    print("#################################")
+    print("#################################")
 
 
 if __name__ == '__main__':

@@ -35,12 +35,14 @@ class WriterTest(AbstractTest):
 
     def test_standard_writer(self):
         """Test the class StandardWriter"""
-        output_directory = f"{THIS_DIR}/results/"
+        out_dir = f"{THIS_DIR}/results/"
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
         out_file = "standard_writer.fits.gz"
         test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
 
         config = create_writer_config({
-            "output directory": output_directory,
+            "output directory": out_dir,
             "output file": out_file,
             "overwrite": "True",
         })
@@ -48,7 +50,7 @@ class WriterTest(AbstractTest):
 
         writer.write_results(stacker)
 
-        self.compare_fits(test_file, output_directory + out_file)
+        self.compare_fits(test_file, out_dir + out_file)
 
     def test_writer(self):
         """Test the abstract writer"""

@@ -76,7 +76,7 @@ class ConfigTest(AbstractTest):
             if not section in new_config.sections():
                 report_mismatch(orig_file, new_file)
                 print(f"Section [{section}] missing in new file.")
-            self.assertTrue(section in new_config.sections())
+                self.fail()
 
             orig_section = orig_config[section]
             new_section = new_config[section]
@@ -86,7 +86,12 @@ class ConfigTest(AbstractTest):
                 # The values in run specs might have been updated, check only that
                 # they are present
                 for key in orig_section.keys():
-                    self.assertTrue(key in new_section.keys())
+                    if key not in new_section.keys():
+                        report_mismatch(orig_file, new_file)
+                        print(
+                            f"key '{key}' in section [{section}] missing in new "
+                            f"file.")
+                        self.fail()
             else:
                 for key, orig_value in orig_section.items():
                     if key not in new_section.keys():
@@ -94,7 +99,7 @@ class ConfigTest(AbstractTest):
                         print(
                             f"key '{key}' in section [{new_section}] missing in "
                             f"new file.")
-                    self.assertTrue(key in new_section.keys())
+                        self.fail()
                     new_value = new_section.get(key)
                     # this is necessary to remove the system dependent bits of
                     # the paths
@@ -108,7 +113,7 @@ class ConfigTest(AbstractTest):
                         print(f"In section [{section}], for key '{key}' found "
                               f"orig value = {orig_value} but new value = "
                               f"{new_value}.")
-                    self.assertTrue(orig_value == new_value)
+                        self.fail()
 
             # check that options in the new file are present in the original file
             for key in new_section.keys():
@@ -117,7 +122,7 @@ class ConfigTest(AbstractTest):
                     print(
                         f"key '{key}' in section [{section}] missing in original "
                         f"file.")
-                self.assertTrue(key in orig_section.keys())
+                    self.fail()
 
         # check that sections in the new file are present in the original file
         for section in new_config.sections():

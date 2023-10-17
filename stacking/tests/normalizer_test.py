@@ -151,7 +151,7 @@ class NormalizerTest(AbstractTest):
 
         expected_message = ("Error computing the correction for normalisation "
                             "factor interval 0. No common measurements with "
-                            "the main intervals were found.")
+                            "the main interval were found.")
         with self.assertRaises(NormalizerError) as context_manager:
             normalizer.compute_correction_factors()
         self.compare_error_message(context_manager, expected_message)

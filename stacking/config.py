@@ -230,7 +230,7 @@ class Config:
             section["num processors"] = str(self.num_processors)
         # add output directory if necesssary
         if "output directory" in accepted_options and "output directory" not in section:
-            section["output directory"] = self.output_directory
+            section["output directory"] = f"{self.output_directory}stack/"
         # add overwrite if necesssary
         if "overwrite" in accepted_options and "overwrite" not in section:
             section["overwrite"] = f"{self.overwrite}"
