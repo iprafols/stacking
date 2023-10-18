@@ -342,7 +342,7 @@ class MultipleRegionsNormalization(Normalizer):
         except IndexError as error:
             raise NormalizerError(
                 f"Failed to normalize spectrum with specid={spectrum.specid}. "
-                "Could not find the specid in the norm_factor tables. If you "
+                "Could not find the specid in the norm_factor table. If you "
                 "loaded the table, make sure the table is correct. Otherwise "
                 "contact stacking developers") from error
 
