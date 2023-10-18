@@ -16,6 +16,7 @@ from stacking.rebin import Rebin
 from stacking.rebin import defaults as defaults_rebin
 from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
+from stacking.stackers.mean_stacker import defaults as defaults_mean_stacker
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
@@ -56,6 +57,9 @@ for key, value in defaults_rebin.items():
 for key, value in defaults_multiple_regions_normalization.items():
     if key not in config["normalizer"]:
         config["normalizer"][key] = str(value)
+for key, value in defaults_mean_stacker.items():
+    if key not in config["stacker"]:
+        config["stacker"][key] = str(value)
 
 # read spectra
 reader = Dr16Reader(config["reader"])

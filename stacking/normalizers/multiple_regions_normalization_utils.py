@@ -15,17 +15,19 @@ def compute_norm_factors(flux,
                          wavelength,
                          num_intervals,
                          intervals,
-                         sigma_i=0.05):
+                         sigma_i2=0.0025):
     """ Compute the normalisation factors for the specified intervals.
 
     The normalisation factor, n, is computed doing the average of the fluxes, f_i,
     inside the normalisation interval:
-        n = sum_i f_i / N
-    where N is the number of pixels used.
+        n = sum_j f_j w_j / sum_j w_j
+    where w_j is the weight of pixel j computed as  w = 1 / (sigma_j^2 + sigma_I^2),
+    sigma_j is the variance of pixel j, and sigma_I is an added variance to prevent
+    the highest signal-to-noise pixels to dominate the sum.
 
     The normalisation signal-to-noise, s, is computed dividing the normalisation
     factor, n, by sum in quadrature of the errors, e_i:
-        s = n / sqrt(sum_i e_i^2 / N)
+        s = n / sqrt(sum_j e_j^2 w_j/ sum_j w_j)
 
     Pixels where ivar is set to 0 are ignored in these calculations.
 
@@ -48,7 +50,7 @@ def compute_norm_factors(flux,
     two floats signaling the starting and ending wavelength of the interval.
     Naturally, the starting wavelength must be smaller than the ending wavelength.
 
-    sigma_i: float - Default: 0.05
+    sigma_i2: float - Default: 0.0025
     A correction to the weights so that pixels with very small variance do not
     dominate. Weights are computed as w = 1 / (sigma^2 + sigma_i^2)
 
@@ -65,9 +67,6 @@ def compute_norm_factors(flux,
     # normalization signal-to-noise occupy indexs 3X + 1
     # number of pixels occupy indexs 3X + 2
     results = np.zeros(4 * num_intervals, dtype=np.float64)
-
-    # sigma_I^2 (to be used in the weights calculation )
-    sigma_i2 = sigma_i * sigma_i
 
     # Disabling pylint warning, see https://github.com/PyCQA/pylint/issues/2910
     for index in prange(num_intervals):  # pylint: disable=not-an-iterable

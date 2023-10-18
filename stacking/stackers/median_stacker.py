@@ -40,10 +40,6 @@ class MedianStacker(Stacker):
         ---------
         config: configparser.SectionProxy
         Parsed options to initialize class
-
-        Raise
-        -----
-        StackerError if the selected reading mode is not supported
         """
         super().__init__(config)
 

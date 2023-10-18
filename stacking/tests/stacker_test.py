@@ -65,7 +65,7 @@ class StackerTest(AbstractTest):
         test_file = f"{THIS_DIR}/data/mean_stacking.txt"
 
         config = ConfigParser()
-        config.read_dict({"stacker": {}})
+        config.read_dict({"stacker": {"sigma_I": 0.05,}})
 
         stacker = MeanStacker(config["stacker"])
 
@@ -91,6 +91,15 @@ class StackerTest(AbstractTest):
             MedianStacker(config["stacker"])
             self.run_simple_stack(stacker, test_file, out_file)
         self.compare_error_message(context_manager, expected_message)
+
+    def test_mean_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("sigma_I", "0.05"),
+        ]
+
+        self.check_missing_options(options_and_values, MeanStacker,
+                                   StackerError, Stacker)
 
     def test_median_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""

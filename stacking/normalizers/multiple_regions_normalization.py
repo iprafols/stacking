@@ -91,7 +91,7 @@ class MultipleRegionsNormalization(Normalizer):
         self.main_interval = None
         self.num_intervals = None
         self.save_format = None
-        self.sigma_i = None
+        self.sigma_i2 = None
         self.__parse_config(config)
 
         # initialize data frame to store normalization factors
@@ -174,14 +174,15 @@ class MultipleRegionsNormalization(Normalizer):
                 " ".join(ACCEPTED_SAVE_FORMATS) +
                 f"' Found: {self.save_format}")
 
-        self.sigma_i = config.getfloat("sigma_I")
-        if self.sigma_i is None:
+        sigma_i = config.getfloat("sigma_I")
+        if sigma_i is None:
             raise NormalizerError("Missing argument 'sigma_I' required by "
                                   "MultipleRegionsNormalization")
-        if self.sigma_i < 0:
+        if sigma_i < 0:
             raise NormalizerError(
                 "Argument 'sigma_I' should be positive. Found "
-                f"{self.sigma_i}")
+                f"{sigma_i}")
+        self.sigma_i2 = sigma_i * sigma_i
 
     def compute_correction_factors(self):
         """ Compute the correction factor that relate the differnt intervals
@@ -226,7 +227,8 @@ class MultipleRegionsNormalization(Normalizer):
             # first compute individual normalisation factors
             arguments = [(spectrum.flux_common_grid, spectrum.ivar_common_grid,
                           Spectrum.common_wavelength_grid, self.num_intervals,
-                          self.intervals, self.sigma_i) for spectrum in spectra]
+                          self.intervals, self.sigma_i2)
+                         for spectrum in spectra]
 
             if self.num_processors > 1:
                 context = multiprocessing.get_context('fork')
