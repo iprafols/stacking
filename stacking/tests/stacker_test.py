@@ -71,6 +71,25 @@ class StackerTest(AbstractTest):
 
         self.run_simple_stack(stacker, test_file, out_file)
 
+    def test_mean_stacker_invalid_sigma_i(self):
+        """Check the behaviour when the save format is not valid"""
+        config = ConfigParser()
+        config.read_dict({"stacker": {"sigma_I": -1.0,}})
+
+        expected_message = "Argument 'sigma_I' should be positive. Found -1.0"
+        with self.assertRaises(StackerError) as context_manager:
+            MeanStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_mean_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("sigma_I", "0.05"),
+        ]
+
+        self.check_missing_options(options_and_values, MeanStacker,
+                                   StackerError, Stacker)
+
     def test_median_stacker(self):
         """Test the class MeanStacker"""
         out_file = f"{THIS_DIR}/results/median_stacking.txt"
@@ -91,15 +110,6 @@ class StackerTest(AbstractTest):
             MedianStacker(config["stacker"])
             self.run_simple_stack(stacker, test_file, out_file)
         self.compare_error_message(context_manager, expected_message)
-
-    def test_mean_stacker_missing_options(self):
-        """Check that errors are raised when required options are missing"""
-        options_and_values = [
-            ("sigma_I", "0.05"),
-        ]
-
-        self.check_missing_options(options_and_values, MeanStacker,
-                                   StackerError, Stacker)
 
     def test_median_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
