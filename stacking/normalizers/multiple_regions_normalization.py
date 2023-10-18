@@ -344,11 +344,6 @@ class MultipleRegionsNormalization(Normalizer):
                 "loaded the table, make sure the table is correct. Otherwise "
                 "contact stacking developers") from error
 
-        if spectrum.specid in [140014224, 183482272, 48727840.0]:
-            print(f"specid={spectrum.specid}; norm_factor={norm_factor}")
-            print(self.norm_factors[self.norm_factors["specid"] ==
-                                    spectrum.specid][["specid", "norm factor"]])
-
         if norm_factor > 0.0:
             spectrum.set_normalized_flux(spectrum.flux_common_grid /
                                          norm_factor)
