@@ -11,7 +11,7 @@ from stacking.stacker import (  # pylint: disable=unused-import
 from stacking.utils import update_accepted_options, update_default_options
 
 accepted_options = update_accepted_options(accepted_options, ["weighted"])
-defaults = update_default_options(defaults, {"weighted": True})
+defaults = update_default_options(defaults, {"weighted": False})
 
 ASSOCIATED_WRITER = "StandardWriter"
 
