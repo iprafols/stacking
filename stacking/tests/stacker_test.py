@@ -25,9 +25,11 @@ class StackerTest(AbstractTest):
     (see AbstractTest in stacking/tests/abstract_test.py)
     run_simple_stack
     test_mean_stacker
+    test_mean_stacker_invalid_sigma_i
+    test_mean_stacker_missing_options
     test_median_stacker
+    test_median_stacker_missing_options
     test_stacker
-    test_stacker_missing_options
     test_stacker_unset_spectrum
     """
 

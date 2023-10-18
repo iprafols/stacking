@@ -21,11 +21,13 @@ class RebinTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
+    run_rebin_with_errors
     run_rebin_without_errors
+    test_rebin_invalid_step_type
+    test_rebin_invalid_wavelength_cuts
     test_rebin_lin
     test_rebin_log
     test_rebin_missing_options
-    test_rebin_wrong_wavelength_cuts
     """
 
     def run_rebin_with_errors(self, rebin_kwargs, expected_message):

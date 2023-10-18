@@ -34,6 +34,7 @@ class ReaderTest(AbstractTest):
     test_dr16_reader_spall_issues
     test_dr16_reader_spec
     test_dr16_reader_spplate
+    test_dr16_reader_trim_catalogue
     test_dr16_reader_unsupported_reading_mode
     test_reader
     test_reader_missing_options
