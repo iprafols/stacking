@@ -315,7 +315,6 @@ class NormalizerTest(AbstractTest):
             if expected_message is None:
                 norm_factors, correction_factors = normalizer.load_norm_factors(
                     folder)
-                print(folder)
                 self.compare_df(NORM_FACTORS, norm_factors)
                 if CORRECTION_FACTORS.size != correction_factors.size:
                     highlight_print()
