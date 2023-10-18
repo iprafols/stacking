@@ -386,12 +386,10 @@ class NormalizerTest(AbstractTest):
         # compare against expectations
         self.compare_ascii_numeric(test_file, out_file)
 
-    def test_multiple_regions_normalization_normalize_spectrum_missing_spectrum(self):
+    def test_multiple_regions_normalization_normalize_spectrum_missing_spectrum(
+            self):
         """Test method normalize_spectrum from MultipleRegionsNormalization
         when specid is missing"""
-        out_file = f"{THIS_DIR}/results/multiple_regions_normalization_normalize_spectrum.txt"
-        test_file = f"{THIS_DIR}/data/multiple_regions_normalization_normalize_spectrum.txt"
-
         config = create_multiple_regions_normalization_config(
             MULTIPLE_REGIONS_NORMALIZATION_KWARGS)
         normalizer = MultipleRegionsNormalization(config["normalizer"])
@@ -408,11 +406,8 @@ class NormalizerTest(AbstractTest):
             "the table, make sure the table is correct. Otherwise contact "
             "stacking developers")
         with self.assertRaises(NormalizerError) as context_manager:
-            normalized_spectrum = normalizer.normalize_spectrum(
-                copy(REBINNED_SPECTRA[0]))
+            normalizer.normalize_spectrum(copy(REBINNED_SPECTRA[0]))
         self.compare_error_message(context_manager, expected_message)
-
-
 
     def test_multiple_regions_normalization_save_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
@@ -451,6 +446,7 @@ class NormalizerTest(AbstractTest):
                 self.compare_ascii_numeric(
                     f"{test_dir}correction_factors.{save_format}",
                     f"{out_dir}correction_factors.{save_format}")
+
     def test_multiple_regions_normalization_save_norm_factors_skip(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
         out_dir = f"{THIS_DIR}/results/multiple_regions_normalization_save_norm_factors_skip/"
@@ -462,8 +458,7 @@ class NormalizerTest(AbstractTest):
             "log directory": out_dir,
             "save format": "fits.gz",
         })
-        config = create_multiple_regions_normalization_config(
-            normalizer_kwargs)
+        config = create_multiple_regions_normalization_config(normalizer_kwargs)
 
         normalizer = MultipleRegionsNormalization(config["normalizer"])
         normalizer.norm_factors = NORM_FACTORS
@@ -476,7 +471,6 @@ class NormalizerTest(AbstractTest):
         # check that file was not created
         if os.path.exists(f"{out_dir}normalization_factors.fits.gz"):
             self.fail("Save normalization factor: skip")
-
 
     def test_no_normalization(self):
         """Test the class NoNormalization"""
