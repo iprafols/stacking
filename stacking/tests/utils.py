@@ -95,7 +95,8 @@ for spectrum in REBINNED_SPECTRA:
     assert spectrum.normalized_flux is None
 
 # normalization factors
-NORM_FACTORS = pd.read_csv(f"{THIS_DIR}/data/normalization_factors.txt")
+NORM_FACTORS = pd.read_csv(f"{THIS_DIR}/data/normalization_factors.txt",
+                           delim_whitespace=True)
 
 # correction factors
 with open(f"{THIS_DIR}/data/correction_factors.txt", encoding="utf-8") as file:
@@ -104,6 +105,9 @@ with open(f"{THIS_DIR}/data/correction_factors.txt", encoding="utf-8") as file:
         for line in file.readlines()
         if not line.startswith("#")
     ])
+
+# normalization intervals
+INTERVALS = np.genfromtxt(f"{THIS_DIR}/data/normalization_intervals.txt")
 
 # normalized spectra
 normalizer = MultipleRegionsNormalization(config["normalizer"])
