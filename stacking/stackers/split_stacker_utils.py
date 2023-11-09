@@ -21,8 +21,8 @@ def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
     row: pd.Series
     A dataframe row
 
-    variable: str
-    Name of the variable where cuts are applied
+    variables: list of str
+    Name of the variables where cuts are applied
 
     intervals: list of array of float
     Specified intervals for each variable.
@@ -30,8 +30,8 @@ def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
     The lower (upper) limit of the interval is included in(excluded of) the interval
     Values outside these intervals will be assinged a -1
 
-    offset: int
-    Offset to add to the group number. Must be positive
+    num_intervals: array of int
+    Number of intervals for each variable
 
     Return
     ------
@@ -48,7 +48,7 @@ def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
 
     group_number = np.sum([
         variable_index * np.prod(num_intervals[:index])
-        for index, variable_index in enumerate(varaible_indexs)
+        for index, variable_index in enumerate(variable_indexs)
     ])
 
     return group_number
@@ -94,7 +94,7 @@ def find_interval_index(value, intervals):
 
     intervals: array of float
     Specified intervals. Intervals are defined as [intervals[n], intervals[n-1]]. The
-    lower (upper) limit of the interval is included in(excluded of) the interval
+    lower (upper) limit of the interval is included in (excluded of) the interval
     Values outside these intervals will be assinged a -1
 
     Return
