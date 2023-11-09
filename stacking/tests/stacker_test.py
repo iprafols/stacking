@@ -6,9 +6,10 @@ import unittest
 import numpy as np
 
 from stacking.errors import StackerError
+from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.median_stacker import MedianStacker
-from stacking.spectrum import Spectrum
+from stacking.stackers.split_stacker import SplitStacker
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest
 from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
@@ -121,6 +122,67 @@ class StackerTest(AbstractTest):
 
         self.check_missing_options(options_and_values, MedianStacker,
                                    StackerError, Stacker)
+
+    def test_split_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("specid name", "THING_ID"),
+            ("split catalogue name", f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
+            ("split on", "Z"),
+            ("split type", "OR"),
+            ("split cuts", "[1.1 1.2 1.3]"),
+        ]
+
+        self.check_missing_options(options_and_values, SplitStacker,
+                                   StackerError, Stacker)
+
+    def notest_split_stacker_split_on(self):
+        """Check loading of variable split_on"""
+        config = ConfigParser()
+        config.read_dict({"stacker": {
+            "specid name": "THING_ID",
+            "split catalogue name": "catalogue.fits",
+            "split type": "OR",
+            "split cuts": "1.1 1.2 1.3",
+        }})
+
+        # test different cases
+        tests = [
+            # single split
+            ("Z", "Z"),
+            ("z", "Z"),
+            # multiple splits using space
+            ("Z_VI M_BH", ["Z_VI", "M_BH"]),
+            ("z_VI m_bh", ["Z_VI", "M_BH"]),
+            ("Z_VI M_BH L", ["Z_VI", "M_BH", "L"]),
+            # multiple splits using comma
+            ("Z_VI,M_BH", ["Z_VI", "M_BH"]),
+            ("z_VI,m_bh", ["Z_VI", "M_BH"]),
+            ("Z_VI,M_BH,L", ["Z_VI", "M_BH", "L"]),
+            # multiple splits using semicolon
+            ("Z_VI;M_BH", ["Z_VI", "M_BH"]),
+            ("z_VI;m_bh", ["Z_VI", "M_BH"]),
+            ("Z_VI;M_BH;L", ["Z_VI", "M_BH", "L"]),
+            # multiple splits using tab
+            (r"Z_VI\tM_BH", ["Z_VI", "M_BH"]),
+            (r"z_VI\tm_bh", ["Z_VI", "M_BH"]),
+            (r"Z_VI\tM_BH\tL", ["Z_VI", "M_BH", "L"]),
+            # multiple splits mising separators
+            ("Z_VI; M_BH", ["Z_VI", "M_BH"]),
+            ("z_VI, m_bh", ["Z_VI", "M_BH"]),
+            (r"Z_VI\t M_BH;L", ["Z_VI", "M_BH", "L"]),
+        ]
+
+        for value, expectation in tests:
+            config["stacker"]["split on"] = value
+            stacker = SplitStacker(config["stacker"])
+
+            if self.stacker.split_on != expectation:
+                highlight_print()
+                print(
+                    "Incorrect reading of variable 'split on'. Expected "
+                    f"{expectation}. Found {self.stacker.split_on}")
+                self.fail()
 
     def test_stacker(self):
         """Test the abstract normalizer"""

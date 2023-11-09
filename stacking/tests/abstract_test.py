@@ -100,6 +100,15 @@ class AbstractTest(unittest.TestCase):
             # add the option to test the next option
             config["test"][option] = value
 
+        # test that once all options are passed we can load the class normally
+        try:
+            test_class(config["test"])
+        except error_type as error:
+            highlight_print()
+            print("Unexpected error found:")
+            print(str(error))
+            self.fail()
+
     def compare_ascii(self, orig_file, new_file):
         """Compare two ascii files to check that they are equal
 
