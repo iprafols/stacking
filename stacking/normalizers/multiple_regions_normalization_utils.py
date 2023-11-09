@@ -1,5 +1,4 @@
-""" This module define the class MultipleRegionsNornalization that normalizes
-the spectra using multiple regions """
+""" This module define utility functions for class MultipleRegionsNornalization"""
 from datetime import datetime
 
 from astropy.io import fits

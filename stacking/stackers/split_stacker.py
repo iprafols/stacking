@@ -5,13 +5,21 @@ import re
 
 from astropy.table import Table
 import numpy as np
-from numba import njit
 import pandas as pd
 
 from stacking.errors import StackerError
 from stacking.stacker import Stacker
 from stacking.stacker import (  # pylint: disable=unused-import
     defaults, accepted_options, required_options)
+from stacking.stackers.split_stacker_utils import (
+    assign_group_multiple_cuts,
+    assign_group_one_cut,
+    extract_split_cut_sets,
+    find_interval_index,
+    format_split_on,
+    format_splits,
+    retreive_group,
+)
 
 ASSOCIATED_WRITER = "SplitWriter"
 
@@ -131,9 +139,8 @@ class SplitStacker(Stacker):
         if split_on is None:
             raise StackerError("Missing argument 'split on' required by "
                                "SplitStacker")
-        # use any of the following as separators (comma semicolon space tab)
-        self.split_on = re.split(r"[, \t;]+", split_on)
-
+        # use any of the following as separators (comma semicolon space)
+        self.split_on = format_split_on(split_on)
 
         self.split_type = config.get("split type")
         if self.split_type is None:
@@ -153,24 +160,18 @@ class SplitStacker(Stacker):
                                "SplitStacker")
         # the splitting on the different quantities is done using ; plus
         # possibly spaces
-        splits_cuts_sets = re.split(r"[ \t]*;[ \t]*", split_cuts)
-        if len(splits_cuts_sets) != len(self.split_on):
+        split_cuts_sets = extract_split_cut_sets(split_cuts)
+        if len(split_cuts_sets) != len(self.split_on):
             raise StackerError(
                 "Inconsistency found in reading the splits. The number of "
                 f"splitting variables is {len(self.split_on)}, but I found "
-                f"{len(splits_cuts_sets)} sets of cuts. Read vaues are\n"
-                f"'split on' \= '{split_on}'\n'split cuts' \= '{split_cuts}'. "
+                f"{len(split_cuts_sets)} sets of cuts. Read vaues are\n"
+                f"'split on' \= '{self.split_on}'\n'split cuts' \= '{split_cuts}'. "
                 "Splitting variables are delimited by a semicolon (;), a comma"
                 "(,) or a white space. Cuts sets should be delimited by the "
                 "character ';'. Cut values within a given set should be delimited "
                 "by commas and/or whitespaces)")
-
-        self.splits = [
-            np.array([float(re.sub(r"[\[\]]*", "", cut))
-                      for cut in re.split(r"[ \t]*[, ]+[ \t]*", item)],
-                     dtype=int)
-            for item in splits_cuts_sets]
-
+        self.splits = format_splits(split_cuts_sets)
 
     def assing_groups(self):
         """Assign groups to the catalogue entries. Store the total number of groups
@@ -299,125 +300,3 @@ class SplitStacker(Stacker):
                 "was not properly coded. If you did the change yourself, check "
                 "that you added the behaviour of the new mode to method `stack`. "
                 "Otherwise contact 'stacking' developpers.")
-
-def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
-    """Assign a group number based on the value stored in row[variable]
-
-    Arguments
-    ---------
-    row: pd.Series
-    A dataframe row
-
-    variable: str
-    Name of the variable where cuts are applied
-
-    intervals: list of array of float
-    Specified intervals for each variable.
-    Intervals are defined as [intervals[n], intervals[n-1]].
-    The lower (upper) limit of the interval is included in(excluded of) the interval
-    Values outside these intervals will be assinged a -1
-
-    offset: int
-    Offset to add to the group number. Must be positive
-
-    Return
-    ------
-    group_number: int
-    The group number. -1 for no group
-    """
-    variable_indexs = []
-
-    for variable, intervals_variable in zip(variables, intervals):
-        variable_index = find_interval_index(row[variable], intervals_variable)
-        if variable_index == -1:
-            return -1
-        variable_indexs.append(variable_index)
-
-    group_number = np.sum([
-        variable_index * np.prod(num_intervals[:index])
-        for index, variable_index in enumerate(varaible_indexs)
-    ])
-
-    return group_number
-
-def assign_group_one_cut(row, variable, intervals, offset):
-    """Assign a group number based on the value stored in row[variable]
-
-    Arguments
-    ---------
-    row: pd.Series
-    A dataframe row
-
-    variable: str
-    Name of the variable where cuts are applied
-
-    intervals: array of float
-    Specified intervals. Intervals are defined as [intervals[n], intervals[n-1]]. The
-    lower (upper) limit of the interval is included in(excluded of) the interval
-    Values outside these intervals will be assinged a -1
-
-    offset: int
-    Offset to add to the group number. Must be positive
-
-    Return
-    ------
-    group_number: int
-    The group number. -1 for no group
-    """
-    index = find_interval_index(row[variable], intervals)
-    if index == -1:
-        return -1
-    return index + offset
-
-@njit
-def find_interval_index(value, intervals):
-    """Given a set of cuts and a number, find in which interval is the number
-    found
-
-    Arguments
-    ---------
-    value: float
-    The value to check
-
-    intervals: array of float
-    Specified intervals. Intervals are defined as [intervals[n], intervals[n-1]]. The
-    lower (upper) limit of the interval is included in(excluded of) the interval
-    Values outside these intervals will be assinged a -1
-
-    Return
-    ------
-    interva_index: int
-    The interval index. -1 if outside the bounds
-    """
-    if value < intervals[0]:
-        return -1
-
-    for index, (min_value, max_value) in enumerate(zip(intervals[:-1], intervals[1:])):
-        if value >= min_value and value < max_value:
-            return index
-
-    return -1
-
-@njit
-def retreive_group(specid, specid_list, groups_list):
-    """Retreive the groups a specid belongs to
-
-    Arguments
-    ---------
-    specid: int
-    The specid
-
-    specid_list: array of int
-    The list of specids in the catalogue
-
-    groups_list: array of int
-    The group number associated to each specid
-
-    Return
-    ------
-    group_number: int
-    The group number associated with the specified specid
-    """
-    pos = np.where(specid_list == specid)
-
-    return groups_list[pos]
