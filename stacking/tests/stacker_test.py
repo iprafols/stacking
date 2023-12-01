@@ -9,7 +9,7 @@ from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.median_stacker import MedianStacker
-from stacking.stackers.split_stacker import SplitStacker
+from stacking.stackers.split_stacker import SplitStacker, VALID_SPLIT_TYPES
 from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest
@@ -192,6 +192,46 @@ class StackerTest(AbstractTest):
         # save output and check against expectations
         stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
         self.compare_ascii_numeric(test_file, out_file)
+
+    def test_split_stacker_inconsistent_split_cuts_and_split_on(self):
+        """Check the behaviour when 'split cuts' is not consistent with
+        'split on'
+        """
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "split on": "Z",
+            "split cuts": "[1.0 1.5 2.0 2.5 3.0]; [0.0 0.5 1.0 1.5]",
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+
+        expected_message = (
+            "Inconsistency found in reading the splits. The number of "
+            f"splitting variables is 1, but I found "
+            f"2 sets of cuts. Read vaues are\n"
+            f"'split on' = '['Z']'\n'split cuts' = '[1.0 1.5 2.0 2.5 3.0]; [0.0 0.5 1.0 1.5]'. "
+            "Splitting variables are delimited by a semicolon (;), a comma"
+            "(,) or a white space. Cuts sets should be delimited by the "
+            "character ';'. Cut values within a given set should be delimited "
+            "by commas and/or whitespaces)"
+        )
+        with self.assertRaises(StackerError) as context_manager:
+            SplitStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_split_stacker_invalid_split_type(self):
+        """Check the behaviour when the split type is not valid"""
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({"split type": "INVALID"})
+        config = create_split_stacker_config(split_stacker_kwargs)
+
+        expected_message = (
+            "Invalid value for argument 'split on' required by SplitStacker. "
+            "Expected one of '" + " ".join(VALID_SPLIT_TYPES) +
+            f" Found: 'INVALID'"
+        )
+        with self.assertRaises(StackerError) as context_manager:
+            SplitStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
 
     def test_split_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""

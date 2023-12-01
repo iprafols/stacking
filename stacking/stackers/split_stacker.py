@@ -153,7 +153,7 @@ class SplitStacker(Stacker):
             raise StackerError(
                 "Invalid value for argument 'split on' required by SplitStacker. "
                 "Expected one of '" + " ".join(VALID_SPLIT_TYPES) +
-                f"' Found: {self.split_type}'")
+                f" Found: '{self.split_type}'")
 
         split_cuts = config.get("split cuts")
         if split_cuts is None:
