@@ -12,12 +12,11 @@ from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.split_stacker import SplitStacker
 from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
-from stacking.tests.abstract_test import AbstractTest, highlight_print
+from stacking.tests.abstract_test import AbstractTest
 from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
-
 
 SPLIT_STACKER_KWARGS = {
     "specid name": "THING_ID",
@@ -26,6 +25,7 @@ SPLIT_STACKER_KWARGS = {
     "split type": "OR",
     "split cuts": "[1.1 1.2 1.3]",
 }
+
 
 class StackerTest(AbstractTest):
     """Test the stackers
@@ -165,7 +165,6 @@ class StackerTest(AbstractTest):
         stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
         self.compare_ascii_numeric(test_file, out_file)
 
-
         # case: split_type == "AND"
         out_file = f"{THIS_DIR}/results/split_stacker_assign_groups_and.txt"
         test_file = f"{THIS_DIR}/data/split_stacker_assign_groups_and.txt"
@@ -194,12 +193,12 @@ class StackerTest(AbstractTest):
         stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
         self.compare_ascii_numeric(test_file, out_file)
 
-
     def test_split_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
             ("specid name", "THING_ID"),
-            ("split catalogue name", f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
+            ("split catalogue name",
+             f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
             ("split on", "Z"),
             ("split type", "OR"),
             ("split cuts", "[1.1 1.2 1.3]"),
@@ -238,8 +237,7 @@ class StackerTest(AbstractTest):
         stacker = SplitStacker(config["stacker"])
         expected_message = (
             "I expected 2 stackers but found 0. Make sure the member 'stackers' is "
-            "properly intialized in the child class"
-        )
+            "properly intialized in the child class")
         with self.assertRaises(StackerError) as context_manager:
             stacker.stack(NORMALIZED_SPECTRA)
         self.compare_error_message(context_manager, expected_message)
@@ -286,6 +284,7 @@ class StackerTest(AbstractTest):
             Stacker(config["stacker"])
         self.compare_error_message(context_manager, expected_message)
 
+
 def create_split_stacker_config(stacker_kwargs):
     """Create a configuration instance to run Dr16Reader
 
@@ -306,6 +305,7 @@ def create_split_stacker_config(stacker_kwargs):
             config["stacker"][key] = str(value)
 
     return config
+
 
 if __name__ == '__main__':
     unittest.main()

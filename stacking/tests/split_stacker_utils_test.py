@@ -1,16 +1,10 @@
 """This file contains stacker tests"""
-from configparser import ConfigParser
 import os
 import unittest
 
 import numpy as np
 import pandas as pd
 
-from stacking.errors import StackerError
-from stacking.spectrum import Spectrum
-from stacking.stackers.mean_stacker import MeanStacker
-from stacking.stackers.median_stacker import MedianStacker
-from stacking.stackers.split_stacker import SplitStacker
 from stacking.stackers.split_stacker_utils import (
     assign_group_multiple_cuts,
     assign_group_one_cut,
@@ -20,16 +14,14 @@ from stacking.stackers.split_stacker_utils import (
     format_splits,
     retreive_group,
 )
-from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest, highlight_print
-from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
 
 ASSIGN_GROUP_DATA = pd.DataFrame.from_dict({
     "var 1": np.arange(10) + 10,
-    "var 2": np.array([-0.5, -0.4, 0.3, 0.1, -0.45]*2),
+    "var 2": np.array([-0.5, -0.4, 0.3, 0.1, -0.45] * 2),
     "var 3": np.arange(10),
 })
 
@@ -48,6 +40,7 @@ class SplitStackerUtilsTest(AbstractTest):
     test_format_splits
     test_retreive_group
     """
+
     def test_assign_group_multiple_cuts(self):
         """Test function assign_group_multiple_cuts"""
         tests = [
@@ -75,35 +68,29 @@ class SplitStackerUtilsTest(AbstractTest):
         ]
 
         for test in tests:
-            output = ASSIGN_GROUP_DATA.apply(
-                assign_group_multiple_cuts,
-                axis=1,
-                args=(test.get("variables"),
-                      test.get("intervals"),
-                      test.get("num_intervals"))
-            )
+            output = ASSIGN_GROUP_DATA.apply(assign_group_multiple_cuts,
+                                             axis=1,
+                                             args=(test.get("variables"),
+                                                   test.get("intervals"),
+                                                   test.get("num_intervals")))
 
             self.assertTrue(np.allclose(output, test.get("expectations")))
 
     def test_assign_group_one_cut(self):
         """Test function assign_group_one_cut"""
 
-        tests = [
-            (0, np.array([-1, -1, 0, 1, 2, 2, 2, 2, -1, -1])),
-            (15, np.array([-1, -1, 15, 16, 17, 17, 17, 17, -1, -1]))
-        ]
+        tests = [(0, np.array([-1, -1, 0, 1, 2, 2, 2, 2, -1, -1])),
+                 (15, np.array([-1, -1, 15, 16, 17, 17, 17, 17, -1, -1]))]
 
         for offset, expectations in tests:
-            output = ASSIGN_GROUP_DATA.apply(
-                assign_group_one_cut,
-                axis=1,
-                args=("var 1",
-                      np.array([12, 13, 14, 18], dtype=float),
-                      offset)
-            )
+            output = ASSIGN_GROUP_DATA.apply(assign_group_one_cut,
+                                             axis=1,
+                                             args=("var 1",
+                                                   np.array([12, 13, 14, 18],
+                                                            dtype=float),
+                                                   offset))
 
             self.assertTrue(np.allclose(output, expectations))
-
 
     def test_extract_split_cut_sets(self):
         """Test function extract_split_cut_sets"""
@@ -121,9 +108,8 @@ class SplitStackerUtilsTest(AbstractTest):
 
             if splits_cuts_sets != expectation:
                 highlight_print()
-                print(
-                    "Incorrect extraction of split cut sets. Expected "
-                    f"{expectation}. Found {splits_cuts_sets}")
+                print("Incorrect extraction of split cut sets. Expected "
+                      f"{expectation}. Found {splits_cuts_sets}")
                 self.fail("Extract split_cut_sets: incorrect formatting")
 
     def test_find_interval_index(self):
@@ -136,16 +122,15 @@ class SplitStackerUtilsTest(AbstractTest):
             (5, -1),
             (10.5, 0),
             (11.0, 1),
-            ]
+        ]
 
         for value, expectation in tests:
             output = find_interval_index(value, intervals)
             if not np.isclose(output, expectation):
                 highlight_print()
-                print(
-                    f"Found incorrect inteval index. For value {value} and "
-                    f"intervals {intervals} I expected {expectation}. Found "
-                    f"{output}")
+                print(f"Found incorrect inteval index. For value {value} and "
+                      f"intervals {intervals} I expected {expectation}. Found "
+                      f"{output}")
                 self.fail("Find interval index: wrong index")
 
             output_python = find_interval_index.py_func(value, intervals)
@@ -181,9 +166,8 @@ class SplitStackerUtilsTest(AbstractTest):
 
             if split_on != expectation:
                 highlight_print()
-                print(
-                    "Incorrect formatting of variable 'split on'. Expected "
-                    f"{expectation}. Found {split_on}")
+                print("Incorrect formatting of variable 'split on'. Expected "
+                      f"{expectation}. Found {split_on}")
                 self.fail("Format split_on: incorrect formatting")
 
     def test_format_splits(self):
@@ -197,15 +181,21 @@ class SplitStackerUtilsTest(AbstractTest):
             (["1.1, 2.2, 3.3, 4.4"], [np.array([1.1, 2.2, 3.3, 4.4])]),
             (["[1.1, 2.2, 3.3, 4.4]"], [np.array([1.1, 2.2, 3.3, 4.4])]),
             # two sets
-            (["1.1, 2.2", "3.3, 4.4"], [np.array([1.1, 2.2]), np.array([3.3, 4.4])]),
-            (["[1.1, 2.2]", "[3.3, 4.4]"], [np.array([1.1, 2.2]), np.array([3.3, 4.4])]),
+            (["1.1, 2.2",
+              "3.3, 4.4"], [np.array([1.1, 2.2]),
+                            np.array([3.3, 4.4])]),
+            (["[1.1, 2.2]",
+              "[3.3, 4.4]"], [np.array([1.1, 2.2]),
+                              np.array([3.3, 4.4])]),
             # three sets
-            (["1.1, 2.2", "3.3, 4.4", "5.5, 6"], [np.array([1.1, 2.2]),
-                                                  np.array([3.3, 4.4]),
-                                                  np.array([5.5, 6.0])]),
-            (["[1.1, 2.2]", "[3.3, 4.4]", "[5.5, 6]"], [np.array([1.1, 2.2]),
-                                                        np.array([3.3, 4.4]),
-                                                        np.array([5.5, 6.0])]),
+            (["1.1, 2.2", "3.3, 4.4", "5.5, 6"],
+             [np.array([1.1, 2.2]),
+              np.array([3.3, 4.4]),
+              np.array([5.5, 6.0])]),
+            (["[1.1, 2.2]", "[3.3, 4.4]", "[5.5, 6]"],
+             [np.array([1.1, 2.2]),
+              np.array([3.3, 4.4]),
+              np.array([5.5, 6.0])]),
         ]
 
         for value, expectations in tests:
@@ -213,19 +203,19 @@ class SplitStackerUtilsTest(AbstractTest):
 
             if len(splits) != len(expectations):
                 highlight_print()
-                print(
-                    "Incorrect formatting of 'splits'. Expected "
-                    f"a list of {len(expectations)} items. Found "
-                    f"{len(splits)} items instead.\nInput string: {value}\n"
-                    f"Expected output: {expectations}")
+                print("Incorrect formatting of 'splits'. Expected "
+                      f"a list of {len(expectations)} items. Found "
+                      f"{len(splits)} items instead.\nInput string: {value}\n"
+                      f"Expected output: {expectations}")
                 self.fail("Format splits: incorrect number of items")
 
             for split, expectation in zip(splits, expectations):
                 if not isinstance(split, np.ndarray):
                     highlight_print()
-                    print("Incorrect formatting of 'splits'. List items are "
-                         f"expected to be arrays. Found:{split}\nInput string: "
-                         f"{value}\n")
+                    print(
+                        "Incorrect formatting of 'splits'. List items are "
+                        f"expected to be arrays. Found:{split}\nInput string: "
+                        f"{value}\n")
                     self.fail("Format splits: item not an array")
                 if not np.allclose(split, expectation):
                     highlight_print()
@@ -238,8 +228,8 @@ class SplitStackerUtilsTest(AbstractTest):
     def test_retreive_group(self):
         """Test function retreive_group"""
         specid = 12345678
-        specids = np.array([
-            31345346264346, 12345678, 4522457457457, 4574573543457], dtype=int)
+        specids = np.array(
+            [31345346264346, 12345678, 4522457457457, 4574573543457], dtype=int)
         groups = np.array([-1, 0, 5, 1])
         expected_value = 0
 
@@ -248,6 +238,7 @@ class SplitStackerUtilsTest(AbstractTest):
 
         output = retreive_group.py_func(specid, specids, groups)
         self.assertTrue(output == expected_value)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,6 +13,7 @@ VALID_SPLIT_TYPES = [
     "AND"
 ]
 
+
 def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
     """Assign a group number based on the value stored in row[variable]
 
@@ -53,6 +54,7 @@ def assign_group_multiple_cuts(row, variables, intervals, num_intervals):
 
     return group_number
 
+
 def assign_group_one_cut(row, variable, intervals, offset):
     """Assign a group number based on the value stored in row[variable]
 
@@ -82,6 +84,7 @@ def assign_group_one_cut(row, variable, intervals, offset):
         return -1
     return index + offset
 
+
 @njit
 def find_interval_index(value, intervals):
     """Given a set of cuts and a number, find in which interval is the number
@@ -105,11 +108,13 @@ def find_interval_index(value, intervals):
     if value < intervals[0]:
         return -1
 
-    for index, (min_value, max_value) in enumerate(zip(intervals[:-1], intervals[1:])):
-        if value >= min_value and value < max_value:
+    for index, (min_value,
+                max_value) in enumerate(zip(intervals[:-1], intervals[1:])):
+        if min_value <= value < max_value:
             return index
 
     return -1
+
 
 def extract_split_cut_sets(split_cuts):
     """Format the split_on variable (list of column names to be split)
@@ -126,6 +131,7 @@ def extract_split_cut_sets(split_cuts):
     """
     return re.split(r"[ \t]*;[ \t]*", split_cuts)
 
+
 def format_split_on(split_on):
     """Format the split_on variable (list of column names to be split)
 
@@ -140,6 +146,7 @@ def format_split_on(split_on):
     A list of uppercase column names
     """
     return [item.upper() for item in re.split(r"[, ;]+", split_on)]
+
 
 def format_splits(split_cuts_sets):
     """Format the splits variable (list of intervals to perform the splits.)
@@ -159,10 +166,13 @@ def format_splits(split_cuts_sets):
     Values outside these intervals will be assinged a -1
     """
     splits = [
-        np.array([float(re.sub(r"[\[\]]*", "", cut))
-                  for cut in re.split(r"[ \t]*[, ]+[ \t]*", item)],
+        np.array([
+            float(re.sub(r"[\[\]]*", "", cut))
+            for cut in re.split(r"[ \t]*[, ]+[ \t]*", item)
+        ],
                  dtype=float)
-        for item in split_cuts_sets]
+        for item in split_cuts_sets
+    ]
     return splits
 
 

@@ -1,7 +1,6 @@
 """ This module defines the class MeanStacker to compute the stack
 using the mean of the stacked values"""
 import logging
-import re
 
 from astropy.table import Table
 import numpy as np
@@ -15,7 +14,6 @@ from stacking.stackers.split_stacker_utils import (
     assign_group_multiple_cuts,
     assign_group_one_cut,
     extract_split_cut_sets,
-    find_interval_index,
     format_split_on,
     format_splits,
     retreive_group,
@@ -32,6 +30,7 @@ VALID_SPLIT_TYPES = [
     # thus, a spectrum can enter only one splits
     "AND"
 ]
+
 
 class SplitStacker(Stacker):
     """Abstract class to compute the mulitple stacks splitting on one
@@ -134,9 +133,9 @@ class SplitStacker(Stacker):
 
         self.split_catalogue_name = config.get("split catalogue name")
         if self.split_catalogue_name is None:
-            raise StackerError("Missing argument 'split catalogue name' required by "
-                               "SplitStacker")
-
+            raise StackerError(
+                "Missing argument 'split catalogue name' required by "
+                "SplitStacker")
 
         split_on = config.get("split on")
         if split_on is None:
@@ -156,7 +155,6 @@ class SplitStacker(Stacker):
                 "Expected one of '" + " ".join(VALID_SPLIT_TYPES) +
                 f"' Found: {self.split_type}'")
 
-
         split_cuts = config.get("split cuts")
         if split_cuts is None:
             raise StackerError("Missing argument 'split cuts' required by "
@@ -169,7 +167,7 @@ class SplitStacker(Stacker):
                 "Inconsistency found in reading the splits. The number of "
                 f"splitting variables is {len(self.split_on)}, but I found "
                 f"{len(split_cuts_sets)} sets of cuts. Read vaues are\n"
-                f"'split on' \= '{self.split_on}'\n'split cuts' \= '{split_cuts}'. "
+                f"'split on' = '{self.split_on}'\n'split cuts' = '{split_cuts}'. "
                 "Splitting variables are delimited by a semicolon (;), a comma"
                 "(,) or a white space. Cuts sets should be delimited by the "
                 "character ';'. Cut values within a given set should be delimited "
@@ -187,22 +185,27 @@ class SplitStacker(Stacker):
         if self.split_type == "OR":
             groups = []
             for index, variable in enumerate(self.split_on):
-                self.split_catalogue[f"GROUP_{index}"] = self.split_catalogue.apply(
-                    assign_group_one_cut,
-                    axis=1,
-                    args=(variable, self.splits[index], self.num_groups),)
+                self.split_catalogue[
+                    f"GROUP_{index}"] = self.split_catalogue.apply(
+                        assign_group_one_cut,
+                        axis=1,
+                        args=(variable, self.splits[index], self.num_groups),
+                    )
                 # keep grouping info
-                groups += [
-                    [variable, min_value, max_value, f"GROUP_{index}", index + self.num_groups]
-                    for index, (min_value, max_value) in enumerate(zip(
-                        self.splits[index][:-1], self.splits[index][1:]))
-                ]
+                groups += [[
+                    variable, min_value, max_value, f"GROUP_{index}",
+                    index + self.num_groups
+                ] for index, (min_value, max_value) in enumerate(
+                    zip(self.splits[index][:-1], self.splits[index][1:]))]
                 # update num_groups
                 self.num_groups += self.splits[index].size - 1
 
-            self.groups_info = pd.DataFrame(
-                data=groups,
-                columns=["VARIABLE", "MIN_VALUE", "MAX_VALUE", "COLNAME", "GROUP_NUM"])
+            self.groups_info = pd.DataFrame(data=groups,
+                                            columns=[
+                                                "VARIABLE", "MIN_VALUE",
+                                                "MAX_VALUE", "COLNAME",
+                                                "GROUP_NUM"
+                                            ])
         elif self.split_type == "AND":
             num_intervals = np.array([
                 self.splits[index].size - 1
@@ -212,7 +215,8 @@ class SplitStacker(Stacker):
             self.split_catalogue["GROUP"] = self.split_catalogue.apply(
                 assign_group_multiple_cuts,
                 axis=1,
-                args=(self.split_on, self.splits, num_intervals),)
+                args=(self.split_on, self.splits, num_intervals),
+            )
 
             self.num_groups = np.prod(num_intervals)
 
@@ -226,13 +230,17 @@ class SplitStacker(Stacker):
                         self.splits[index][variable_index],
                         self.splits[index][variable_index + 1]
                     ]
-                    group_number = (group_number - variable_index)//num_intervals_variable
+                    group_number = (group_number -
+                                    variable_index) // num_intervals_variable
                 groups.append(aux_groups)
 
             # columns of the data frame
             cols = ["GROUP_NUM"]
             for index in range(len(self.split_on)):
-                cols += [f"VARIABLE_{index}", f"MIN_VALUE_{index}", f"MAX_VALUE_{index}"]
+                cols += [
+                    f"VARIABLE_{index}", f"MIN_VALUE_{index}",
+                    f"MAX_VALUE_{index}"
+                ]
 
             self.groups_info = pd.DataFrame(data=groups, columns=cols)
 
@@ -257,18 +265,19 @@ class SplitStacker(Stacker):
         -----
         StackerError if file is not found
         """
-        self.logger.progress("Reading catalogue from %s", self.split_catalogue_name)
+        self.logger.progress("Reading catalogue from %s",
+                             self.split_catalogue_name)
         try:
             catalogue = Table.read(self.split_catalogue_name, hdu="CATALOG")
         except FileNotFoundError as error:
-            raise StackerError(
-                "SplitStacker: Could not find catalogue: "
-                f"{self.split_catalogue_name}") from error
+            raise StackerError("SplitStacker: Could not find catalogue: "
+                               f"{self.split_catalogue_name}") from error
 
         keep_columns = self.split_on + [self.specid_name]
 
         split_catalogue = catalogue[keep_columns].to_pandas()
-        split_catalogue.rename(columns={self.specid_name: "specid"}, inplace=True)
+        split_catalogue.rename(columns={self.specid_name: "specid"},
+                               inplace=True)
 
         return split_catalogue
 
@@ -294,26 +303,25 @@ class SplitStacker(Stacker):
 
             # select the spectra of this particular groups
             if self.split_type == "OR":
-                col = self.groups_info[
-                    self.groups_info["GROUP_NUM"] == group_number]["COLNAME"].values[0]
+                col = self.groups_info[self.groups_info["GROUP_NUM"] ==
+                                       group_number]["COLNAME"].values[0]
             elif self.split_type == "AND":
                 col = "GROUP_NUM"
 
+            # this should never enter unless new split types are not properly added
+            else:  # pragma: no cover
+                raise StackerError(
+                    f"Don't know what to do with split type {self.split_type}. "
+                    "This is one of the supported split types, maybe it "
+                    "was not properly coded. If you did the change yourself, check "
+                    "that you added the behaviour of the new mode to method `stack`. "
+                    "Otherwise contact 'stacking' developpers.")
+
             selected_spectra = [
-                spectrum
-                for spectrum in spectra
-                if retreive_group(
-                    spectrum.specid, catalogue["specid"].values, catalogue[col].values)
+                spectrum for spectrum in spectra if retreive_group(
+                    spectrum.specid, self.split_catalogue["specid"].values,
+                    self.split_catalogue[col].values)
             ]
 
             # run the stack
             stacker.stack(selected_spectra)
-
-        # this should never enter unless new split types are not properly added
-        else:  # pragma: no cover
-            raise StackerError(
-                f"Don't know what to do with split type {self.split_type}. "
-                "This is one of the supported split types, maybe it "
-                "was not properly coded. If you did the change yourself, check "
-                "that you added the behaviour of the new mode to method `stack`. "
-                "Otherwise contact 'stacking' developpers.")
