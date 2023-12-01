@@ -21,6 +21,7 @@ from stacking.stackers.split_stacker_utils import (
     retreive_group,
 )
 
+# TODO: remove this (not necessary as this is an abstrac class)
 ASSOCIATED_WRITER = "SplitWriter"
 
 VALID_SPLIT_TYPES = [
@@ -123,6 +124,8 @@ class SplitStacker(Stacker):
         Raise
         -----
         StackerError upon missing required variables
+        StackerError if variables are not properly formatted
+        StackerError if variables are not coherent
         """
         self.specid_name = config.get("specid name")
         if self.specid_name is None:
@@ -195,7 +198,7 @@ class SplitStacker(Stacker):
                         self.splits[index][:-1], self.splits[index][1:]))
                 ]
                 # update num_groups
-                self.num_groups += self.splits[index].size
+                self.num_groups += self.splits[index].size - 1
 
             self.groups_info = pd.DataFrame(
                 data=groups,
@@ -203,10 +206,10 @@ class SplitStacker(Stacker):
         elif self.split_type == "AND":
             num_intervals = np.array([
                 self.splits[index].size - 1
-                for index in range(len(split_on))
+                for index in range(len(self.split_on))
             ])
 
-            self.split_catalogue[f"GROUP_{index}"].apply(
+            self.split_catalogue["GROUP"] = self.split_catalogue.apply(
                 assign_group_multiple_cuts,
                 axis=1,
                 args=(self.split_on, self.splits, num_intervals),)
@@ -245,19 +248,29 @@ class SplitStacker(Stacker):
     def read_catalogue(self):
         """Read the catalogue to do the splits
 
+        Return
+        -----
+        split_catalogue: pd.DataFrame
+        The catalogue to be split
+
         Raise
         -----
-        ReaderError when no valid column for redshift is found when reading
-        the catalogue
-        ReaderError when 'BI max' is passed but HDU does not contain BI_CIV
-        field
+        StackerError if file is not found
         """
         self.logger.progress("Reading catalogue from %s", self.split_catalogue_name)
-        catalogue = Table.read(self.split_catalogue_name, hdu="CATALOG")
+        try:
+            catalogue = Table.read(self.split_catalogue_name, hdu="CATALOG")
+        except FileNotFoundError as error:
+            raise StackerError(
+                "SplitStacker: Could not find catalogue: "
+                f"{self.split_catalogue_name}") from error
 
         keep_columns = self.split_on + [self.specid_name]
 
-        return catalogue[keep_columns].to_pandas()
+        split_catalogue = catalogue[keep_columns].to_pandas()
+        split_catalogue.rename(columns={self.specid_name: "specid"}, inplace=True)
+
+        return split_catalogue
 
     def stack(self, spectra):
         """ Stack spectra
@@ -266,6 +279,10 @@ class SplitStacker(Stacker):
         ---------
         spectra: list of Spectrum
         The spectra to stack
+
+        Raise
+        -----
+        StackerError if the stackers have not been intialized by the child class
         """
         if len(self.stackers) != self.num_groups:
             raise StackerError(

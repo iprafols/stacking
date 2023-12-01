@@ -10,6 +10,7 @@ from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.split_stacker import SplitStacker
+from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest, highlight_print
 from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
@@ -17,6 +18,14 @@ from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
 
+
+SPLIT_STACKER_KWARGS = {
+    "specid name": "THING_ID",
+    "split catalogue name": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
+    "split on": "Z",
+    "split type": "OR",
+    "split cuts": "[1.1 1.2 1.3]",
+}
 
 class StackerTest(AbstractTest):
     """Test the stackers
@@ -124,6 +133,68 @@ class StackerTest(AbstractTest):
         self.check_missing_options(options_and_values, MedianStacker,
                                    StackerError, Stacker)
 
+    def test_split_stacker_assign_groups(self):
+        """Check method assign_groups from SplitStacker"""
+
+        # case: split_type == "OR"
+        out_file = f"{THIS_DIR}/results/split_stacker_assign_groups_or.txt"
+        test_file = f"{THIS_DIR}/data/split_stacker_assign_groups_or.txt"
+
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "split type": "OR",
+            "split on": "Z BI_CIV",
+            "split cuts": "[1.0 1.5 2.0 2.5 3.0]; [0.0 0.5 1.0 1.5]",
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitStacker(config["stacker"])
+
+        # __init__ calls the method assign_groups
+        # case "OR" should have one group column per variable
+        # expecting 5 columns: Z, BI_CIV, specid, GROUP_0 and GROUP_1
+        # the first three columns are added as __init__ also calls read_catalogue
+        self.assertTrue(stacker.split_catalogue.columns.size == 5)
+        self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
+        self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "specid")
+        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
+        self.assertTrue(stacker.split_catalogue.columns[4] == "GROUP_1")
+        self.assertTrue(stacker.split_catalogue.shape[0] == 79)
+
+        # save output and check against expectations
+        stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
+        self.compare_ascii_numeric(test_file, out_file)
+
+
+        # case: split_type == "AND"
+        out_file = f"{THIS_DIR}/results/split_stacker_assign_groups_and.txt"
+        test_file = f"{THIS_DIR}/data/split_stacker_assign_groups_and.txt"
+
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "split type": "AND",
+            "split on": "Z BI_CIV",
+            "split cuts": "[1.0 1.5 2.0 2.5 3.0]; [0.0 0.5 1.0 1.5]",
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitStacker(config["stacker"])
+
+        # __init__ calls the method assign_groups
+        # case "OR" should have one group column per variable
+        # expecting 5 columns: Z, BI_CIV, specid, GROUP
+        # the first three columns are added as __init__ also calls read_catalogue
+        self.assertTrue(stacker.split_catalogue.columns.size == 4)
+        self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
+        self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "specid")
+        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP")
+        self.assertTrue(stacker.split_catalogue.shape[0] == 79)
+
+        # save output and check against expectations
+        stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
+        self.compare_ascii_numeric(test_file, out_file)
+
+
     def test_split_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
@@ -136,6 +207,45 @@ class StackerTest(AbstractTest):
 
         self.check_missing_options(options_and_values, SplitStacker,
                                    StackerError, Stacker)
+
+    def test_split_stacker_read_catalogue(self):
+        """Check method read_catalogue from SplitStacker"""
+        # case 1: normal execution
+        config = create_split_stacker_config(SPLIT_STACKER_KWARGS)
+        stacker = SplitStacker(config["stacker"])
+
+        # __init__ calls the method read_catalogue
+        self.assertTrue(stacker.split_catalogue.columns.size == 3)
+        self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
+        self.assertTrue(stacker.split_catalogue.columns[1] == "specid")
+        # this third column is added as __init__ also calls method assing_groups
+        self.assertTrue(stacker.split_catalogue.columns[2] == "GROUP_0")
+        self.assertTrue(stacker.split_catalogue.shape[0] == 79)
+
+        # case 2: missing file
+        # calling read_catalogue should raise an error
+        config["stacker"]["split catalogue name"] = "missing.fits"
+        expected_message = "SplitStacker: Could not find catalogue: missing.fits"
+        with self.assertRaises(StackerError) as context_manager:
+            SplitStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_split_stacker_stack(self):
+        """Check method stack from SplitStacker"""
+        # case 1: initializing SplitStacker
+        # this should raise an error as this is an abstract class
+        config = create_split_stacker_config(SPLIT_STACKER_KWARGS)
+        stacker = SplitStacker(config["stacker"])
+        expected_message = (
+            "I expected 2 stackers but found 0. Make sure the member 'stackers' is "
+            "properly intialized in the child class"
+        )
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(NORMALIZED_SPECTRA)
+        self.compare_error_message(context_manager, expected_message)
+
+        # case 2: normal run intialized from a child class
+        # TODO: add test
 
     def test_stacker(self):
         """Test the abstract normalizer"""
@@ -176,6 +286,26 @@ class StackerTest(AbstractTest):
             Stacker(config["stacker"])
         self.compare_error_message(context_manager, expected_message)
 
+def create_split_stacker_config(stacker_kwargs):
+    """Create a configuration instance to run Dr16Reader
+
+    Arguments
+    ---------
+    reader_kwargs: dict
+    Keyword arguments to set the configuration run
+
+    Return
+    ------
+    config: ConfigParser
+    Run configuration
+    """
+    config = ConfigParser()
+    config.read_dict({"stacker": stacker_kwargs})
+    for key, value in defaults_split_stacker.items():
+        if key not in config["stacker"]:
+            config["stacker"][key] = str(value)
+
+    return config
 
 if __name__ == '__main__':
     unittest.main()
