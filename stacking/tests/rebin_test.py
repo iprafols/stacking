@@ -11,7 +11,7 @@ from stacking.rebin import defaults as defaults_rebin
 from stacking.rebin import Rebin, VALID_STEP_TYPES
 from stacking.rebin import find_bins as function_find_bins
 from stacking.rebin import rebin as function_rebin
-from stacking.tests.utils import SPECTRA, REBINNED_SPECTRA
+from stacking.tests.utils import SPECTRA
 from stacking.tests.abstract_test import AbstractTest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
