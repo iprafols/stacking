@@ -4,11 +4,14 @@ import os
 import unittest
 
 from astropy.io import fits
+import numpy as np
 
 from stacking.errors import RebinError
 from stacking.rebin import defaults as defaults_rebin
 from stacking.rebin import Rebin, VALID_STEP_TYPES
-from stacking.tests.utils import SPECTRA
+from stacking.rebin import find_bins as function_find_bins
+from stacking.rebin import rebin as function_rebin
+from stacking.tests.utils import SPECTRA, REBINNED_SPECTRA
 from stacking.tests.abstract_test import AbstractTest
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -90,6 +93,46 @@ class RebinTest(AbstractTest):
 
         # compare against expectations
         self.compare_fits(test_file, out_file)
+
+    def test_function_find_bins(self):
+        """Test function find_bins"""
+        wavelength = np.arange(50)
+        common_wavelength_grid = np.arange(0, 50, 2.5)
+        expected_bins = np.array([
+            0,  0,  1,  1,  2,  2,  2,  3,  3,  4,  4,  4,  5,  5,  6,  6,  6,
+            7,  7,  8,  8,  8,  9,  9, 10, 10, 10, 11, 11, 12, 12, 12, 13, 13,
+            14, 14, 14, 15, 15, 16, 16, 16, 17, 17, 18, 18, 18, 19, 19, 20
+        ])
+
+        # test function
+        bins_jit = function_find_bins(wavelength, common_wavelength_grid)
+        self.assertTrue(np.allclose(bins_jit, expected_bins))
+
+        bins_python = function_find_bins.py_func(wavelength, common_wavelength_grid)
+        self.assertTrue(np.allclose(bins_jit, bins_python))
+
+    def test_function_rebin(self):
+        """Test function rebin"""
+        wavelength = np.linspace(1000, 5000, 100)
+        flux = np.arange(wavelength.size)
+        ivar = np.arange(wavelength.size) * 0.01
+        common_wavelength_grid = np.linspace(1000, 5000, 10)
+        expected_rebin_flux = np.array([
+            0., 11.90909091, 22.45454545, 33.3030303, 44.22727273, 55.18181818,
+            66.15151515, 77.12987013, 88.11363636, 96.53022453])
+        expected_rebin_ivar = np.array([
+            0., 1.21, 2.42, 3.63, 4.84, 6.05, 7.26, 8.47, 9.68, 5.79])
+
+        # test function
+        rebinned_flux_jit, rebinned_ivar_jit = function_rebin(
+            flux, ivar, wavelength, common_wavelength_grid)
+        self.assertTrue(np.allclose(rebinned_flux_jit, expected_rebin_flux))
+        self.assertTrue(np.allclose(rebinned_ivar_jit, expected_rebin_ivar))
+
+        rebinned_flux_python, rebinned_ivar_python = function_rebin.py_func(
+            flux, ivar, wavelength, common_wavelength_grid)
+        self.assertTrue(np.allclose(rebinned_flux_jit, rebinned_flux_python))
+        self.assertTrue(np.allclose(rebinned_ivar_jit, rebinned_ivar_python))
 
     def test_rebin_invalid_step_type(self):
         """Check the behaviour when the step type is not valid"""
