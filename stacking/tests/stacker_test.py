@@ -206,7 +206,7 @@ class StackerTest(AbstractTest):
 
         expected_message = (
             "Inconsistency found in reading the splits. The number of "
-            f"splitting variables is 1, but I found "
+            "splitting variables is 1, but I found "
             "2 sets of cuts. Read vaues are\n"
             "'split on' = '['Z']'\n'split cuts' = '[1.0 1.5 2.0 2.5 3.0]; [0.0 0.5 1.0 1.5]'. "
             "Splitting variables are delimited by a semicolon (;), a comma"
