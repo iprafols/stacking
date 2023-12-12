@@ -105,9 +105,9 @@ class AbstractTest(unittest.TestCase):
             test_class(config["test"])
         except error_type as error:
             highlight_print()
-            print("Unexpected error found:")
-            print(str(error))
-            self.fail()
+            message = f"Unexpected error found:\n{str(error)}"
+            print(message)
+            self.fail(message)
 
     def compare_ascii(self, orig_file, new_file):
         """Compare two ascii files to check that they are equal
