@@ -99,16 +99,17 @@ class RebinTest(AbstractTest):
         wavelength = np.arange(50)
         common_wavelength_grid = np.arange(0, 50, 2.5)
         expected_bins = np.array([
-            0,  0,  1,  1,  2,  2,  2,  3,  3,  4,  4,  4,  5,  5,  6,  6,  6,
-            7,  7,  8,  8,  8,  9,  9, 10, 10, 10, 11, 11, 12, 12, 12, 13, 13,
-            14, 14, 14, 15, 15, 16, 16, 16, 17, 17, 18, 18, 18, 19, 19, 20
+            0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9,
+            9, 10, 10, 10, 11, 11, 12, 12, 12, 13, 13, 14, 14, 14, 15, 15, 16,
+            16, 16, 17, 17, 18, 18, 18, 19, 19, 20
         ])
 
         # test function
         bins_jit = function_find_bins(wavelength, common_wavelength_grid)
         self.assertTrue(np.allclose(bins_jit, expected_bins))
 
-        bins_python = function_find_bins.py_func(wavelength, common_wavelength_grid)
+        bins_python = function_find_bins.py_func(wavelength,
+                                                 common_wavelength_grid)
         self.assertTrue(np.allclose(bins_jit, bins_python))
 
     def test_function_rebin(self):
@@ -119,9 +120,10 @@ class RebinTest(AbstractTest):
         common_wavelength_grid = np.linspace(1000, 5000, 10)
         expected_rebin_flux = np.array([
             0., 11.90909091, 22.45454545, 33.3030303, 44.22727273, 55.18181818,
-            66.15151515, 77.12987013, 88.11363636, 96.53022453])
-        expected_rebin_ivar = np.array([
-            0., 1.21, 2.42, 3.63, 4.84, 6.05, 7.26, 8.47, 9.68, 5.79])
+            66.15151515, 77.12987013, 88.11363636, 96.53022453
+        ])
+        expected_rebin_ivar = np.array(
+            [0., 1.21, 2.42, 3.63, 4.84, 6.05, 7.26, 8.47, 9.68, 5.79])
 
         # test function
         rebinned_flux_jit, rebinned_ivar_jit = function_rebin(

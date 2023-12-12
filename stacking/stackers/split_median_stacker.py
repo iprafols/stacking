@@ -5,10 +5,10 @@ from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.median_stacker import defaults as defaults_median_stacker
 from stacking.stackers.median_stacker import accepted_options as accepted_options_median_stacker
 from stacking.stackers.median_stacker import required_options as required_options_median_stacker
-from stacking.stackers.split_stacker import (
-    SplitStacker, defaults, accepted_options, required_options)
-from stacking.utils import (
-    update_accepted_options, update_default_options, update_required_options)
+from stacking.stackers.split_stacker import (SplitStacker, defaults,
+                                             accepted_options, required_options)
+from stacking.utils import (update_accepted_options, update_default_options,
+                            update_required_options)
 
 accepted_options = update_accepted_options(accepted_options,
                                            accepted_options_median_stacker)

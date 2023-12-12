@@ -37,6 +37,7 @@ SPLIT_STACKER_OPTIONS_AND_VALUES = [
     ("split cuts", "[1.1 1.2 1.3]"),
 ]
 
+
 class StackerTest(AbstractTest):
     """Test the stackers
 
@@ -163,12 +164,9 @@ class StackerTest(AbstractTest):
         options_and_values = SPLIT_STACKER_OPTIONS_AND_VALUES.copy()
         options_and_values.append(("sigma_I", "0.05"))
 
-        self.check_missing_options(
-            options_and_values,
-            SplitMeanStacker,
-            StackerError,
-            [SplitStacker, MeanStacker, Stacker]
-        )
+        self.check_missing_options(options_and_values, SplitMeanStacker,
+                                   StackerError,
+                                   [SplitStacker, MeanStacker, Stacker])
 
     def test_split_median_stacker(self):
         """Check initialization of SplitMedianStacker"""
@@ -190,12 +188,9 @@ class StackerTest(AbstractTest):
         options_and_values = SPLIT_STACKER_OPTIONS_AND_VALUES.copy()
         options_and_values.append(("weighted", "False"))
 
-        self.check_missing_options(
-            options_and_values,
-            SplitMedianStacker,
-            StackerError,
-            [SplitStacker, MedianStacker, Stacker]
-        )
+        self.check_missing_options(options_and_values, SplitMedianStacker,
+                                   StackerError,
+                                   [SplitStacker, MedianStacker, Stacker])
 
     def test_split_stacker_assign_groups(self):
         """Check method assign_groups from SplitStacker"""
@@ -276,8 +271,7 @@ class StackerTest(AbstractTest):
             "Splitting variables are delimited by a semicolon (;), a comma"
             "(,) or a white space. Cuts sets should be delimited by the "
             "character ';'. Cut values within a given set should be delimited "
-            "by commas and/or whitespaces)"
-        )
+            "by commas and/or whitespaces)")
         with self.assertRaises(StackerError) as context_manager:
             SplitStacker(config["stacker"])
         self.compare_error_message(context_manager, expected_message)
@@ -291,16 +285,15 @@ class StackerTest(AbstractTest):
         expected_message = (
             "Invalid value for argument 'split on' required by SplitStacker. "
             "Expected one of '" + " ".join(VALID_SPLIT_TYPES) +
-            " Found: 'INVALID'"
-        )
+            " Found: 'INVALID'")
         with self.assertRaises(StackerError) as context_manager:
             SplitStacker(config["stacker"])
         self.compare_error_message(context_manager, expected_message)
 
     def test_split_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
-        self.check_missing_options(SPLIT_STACKER_OPTIONS_AND_VALUES, SplitStacker,
-                                   StackerError, Stacker)
+        self.check_missing_options(SPLIT_STACKER_OPTIONS_AND_VALUES,
+                                   SplitStacker, StackerError, Stacker)
 
     def test_split_stacker_read_catalogue(self):
         """Check method read_catalogue from SplitStacker"""
