@@ -74,7 +74,7 @@ class MergeStacker(Stacker):
         stack_list = config.get("stack list")
         if stack_list is None:
             raise StackerError("Missing argument 'stack list' required by "
-                               "MergeMeanStacker")
+                               "MergeStacker")
         self.stack_list = stack_list.split()
         for stack_file in self.stack_list:
             if not os.path.exists(stack_file):

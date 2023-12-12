@@ -10,9 +10,12 @@ from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.merge_mean_stacker import MergeMeanStacker
+from stacking.stackers.merge_median_stacker import MergeMedianStacker
+from stacking.stackers.merge_stacker import MergeStacker
 from stacking.stackers.split_mean_stacker import SplitMeanStacker
 from stacking.stackers.split_median_stacker import SplitMedianStacker
 from stacking.stackers.split_merge_mean_stacker import SplitMergeMeanStacker
+from stacking.stackers.split_merge_median_stacker import SplitMergeMedianStacker
 from stacking.stackers.split_stacker import SplitStacker, VALID_SPLIT_TYPES
 from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
@@ -40,7 +43,7 @@ SPLIT_STACKER_OPTIONS_AND_VALUES = [
 ]
 
 
-class StackerTest(AbstractTest):
+class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
     """Test the stackers
 
     Methods
@@ -215,9 +218,39 @@ class StackerTest(AbstractTest):
         options_and_values.append(
             ("stack list", f"{THIS_DIR}/data/standard_writer.fits.gz"))
 
-        self.check_missing_options(options_and_values, SplitMergeMeanStacker,
-                                   StackerError,
-                                   [SplitStacker, MergeMeanStacker, Stacker])
+        self.check_missing_options(
+            options_and_values, SplitMergeMeanStacker, StackerError,
+            [SplitStacker, MergeMeanStacker, MergeStacker, Stacker])
+
+    def test_split_merge_median_stacker(self):
+        """Check initialization of SplitMedianStacker"""
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "stack list": f"{THIS_DIR}/data/standard_writer.fits.gz",
+            "weighted": False,
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitMergeMedianStacker(config["stacker"])
+
+        self.assertTrue(isinstance(stacker, SplitMergeMedianStacker))
+        self.assertTrue(isinstance(stacker, SplitStacker))
+        self.assertTrue(len(stacker.stackers) == stacker.num_groups)
+        for item in stacker.stackers:
+            self.assertTrue(isinstance(item, MergeMedianStacker))
+
+    def test_split_merge_median_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = SPLIT_STACKER_OPTIONS_AND_VALUES.copy()
+        options_and_values += [
+            ("weighted", "False"),
+            ("stack list", f"{THIS_DIR}/data/standard_writer.fits.gz"),
+        ]
+
+        self.check_missing_options(options_and_values, SplitMergeMedianStacker,
+                                   StackerError, [
+                                       SplitStacker, MedianStacker,
+                                       MergeMedianStacker, MergeStacker, Stacker
+                                   ])
 
     def test_split_stacker_assign_groups(self):
         """Check method assign_groups from SplitStacker"""
