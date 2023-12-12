@@ -99,9 +99,9 @@ class UtilsTest(AbstractTest):
             (["3"], ["1", "2"], True),
             (["2"], ["1", "3"], True),
             (["1", "2"], ["3"], True),
+            (["0"], ["1", "2", "3"], True),
             (["2"], ["1", "2", "3"], False),
             (["0"], ["0", "1", "2", "3"], False),
-            (["4"], ["0", "1", "2", "3"], False),
         ]
 
         for new_options, expected_result, remove in cases:
