@@ -19,9 +19,6 @@ from stacking.stackers.split_stacker_utils import (
     retreive_group,
 )
 
-# TODO: remove this (not necessary as this is an abstrac class)
-ASSOCIATED_WRITER = "SplitWriter"
-
 VALID_SPLIT_TYPES = [
     # the split will be performed independently in the different variables,
     # thus, a spectrum can enter multiple splits
@@ -33,7 +30,7 @@ VALID_SPLIT_TYPES = [
 
 
 class SplitStacker(Stacker):
-    """Abstract class to compute the mulitple stacks splitting on one
+    """Abstract class to compute mulitple stacks splitting on one
     or more properties of the spectra.
 
     Methods
