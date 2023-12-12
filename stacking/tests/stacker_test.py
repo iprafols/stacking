@@ -9,8 +9,10 @@ from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.median_stacker import MedianStacker
+from stacking.stackers.merge_mean_stacker import MergeMeanStacker
 from stacking.stackers.split_mean_stacker import SplitMeanStacker
 from stacking.stackers.split_median_stacker import SplitMedianStacker
+from stacking.stackers.split_merge_mean_stacker import SplitMergeMeanStacker
 from stacking.stackers.split_stacker import SplitStacker, VALID_SPLIT_TYPES
 from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
@@ -191,6 +193,31 @@ class StackerTest(AbstractTest):
         self.check_missing_options(options_and_values, SplitMedianStacker,
                                    StackerError,
                                    [SplitStacker, MedianStacker, Stacker])
+
+    def test_split_merge_mean_stacker(self):
+        """Check initialization of SplitMeanStacker"""
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "stack list": f"{THIS_DIR}/data/standard_writer.fits.gz",
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitMergeMeanStacker(config["stacker"])
+
+        self.assertTrue(isinstance(stacker, SplitMergeMeanStacker))
+        self.assertTrue(isinstance(stacker, SplitStacker))
+        self.assertTrue(len(stacker.stackers) == stacker.num_groups)
+        for item in stacker.stackers:
+            self.assertTrue(isinstance(item, MergeMeanStacker))
+
+    def test_split_merge_mean_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = SPLIT_STACKER_OPTIONS_AND_VALUES.copy()
+        options_and_values.append(
+            ("stack list", f"{THIS_DIR}/data/standard_writer.fits.gz"))
+
+        self.check_missing_options(options_and_values, SplitMergeMeanStacker,
+                                   StackerError,
+                                   [SplitStacker, MergeMeanStacker, Stacker])
 
     def test_split_stacker_assign_groups(self):
         """Check method assign_groups from SplitStacker"""

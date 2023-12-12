@@ -30,7 +30,12 @@ class MergeStacker(Stacker):
     Attributes
     ----------
     (see Stacker in stacking/stacker.py)
+
+    stack_list: list of str
+    List of files containing the individual stacks to be merged
+
     stacks: list of (array of float, array of float)
+    Individual stacks to be merged
     """
 
     def __init__(self, config):
