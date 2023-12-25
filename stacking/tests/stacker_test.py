@@ -398,11 +398,41 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
             stacker.stack(NORMALIZED_SPECTRA)
         self.compare_error_message(context_manager, expected_message)
 
-        # case 2: normal run intialized from a child class
-        out_file = f"{THIS_DIR}/results/split_stacking.txt"
-        test_file = f"{THIS_DIR}/data/split_stacking.txt"
+        # case 2: normal run intialized from a child class; split_type = "OR"
+        out_file = f"{THIS_DIR}/results/split_stacking_or.txt"
+        test_file = f"{THIS_DIR}/data/split_stacking_or.txt"
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
         split_stacker_kwargs.update({
+            "split cuts": "[1.0 1.5 2.0]",
+            "sigma_I": 0.05,
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitMeanStacker(config["stacker"])
+        stacker.stack(NORMALIZED_SPECTRA)
+        self.assertTrue(len(stacker.stackers) == 2)
+
+        # save results
+        with open(out_file, "w", encoding="utf-8") as results:
+            results.write(
+                "# wavelength stacked_flux1 total_weight1 stacked_flux2 total_weight2\n"
+            )
+            for wavelength, stacked_flux1, stacked_weight1, stacked_flux2, stacked_weight2 in zip(
+                    COMMON_WAVELENGTH_GRID, stacker.stackers[0].stacked_flux,
+                    stacker.stackers[0].stacked_weight,
+                    stacker.stackers[1].stacked_flux,
+                    stacker.stackers[1].stacked_weight):
+                results.write(f"{wavelength} {stacked_flux1} {stacked_weight1} "
+                              f"{stacked_flux2} {stacked_weight2}\n")
+
+        # compare with test
+        self.compare_ascii_numeric(test_file, out_file)
+
+        # case 2: normal run intialized from a child class; split_type = "AND"
+        out_file = f"{THIS_DIR}/results/split_stacking_and.txt"
+        test_file = f"{THIS_DIR}/data/split_stacking_and.txt"
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "split type": "AND",
             "split cuts": "[1.0 1.5 2.0]",
             "sigma_I": 0.05,
         })

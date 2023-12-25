@@ -303,7 +303,7 @@ class SplitStacker(Stacker):
                 col = self.groups_info[self.groups_info["GROUP_NUM"] ==
                                        group_number]["COLNAME"].values[0]
             elif self.split_type == "AND":
-                col = "GROUP_NUM"
+                col = "GROUP"
 
             # this should never enter unless new split types are not properly added
             else:  # pragma: no cover
