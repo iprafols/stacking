@@ -120,6 +120,7 @@ class SplitStackerUtilsTest(AbstractTest):
         tests = [
             (5.0, -1),
             (5, -1),
+            (300, -1),
             (10.5, 0),
             (11.0, 1),
         ]
