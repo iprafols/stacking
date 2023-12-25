@@ -12,7 +12,7 @@ from stacking.stackers.split_stacker_utils import (
     find_interval_index,
     format_split_on,
     format_splits,
-    retreive_group,
+    retreive_group_number,
 )
 from stacking.tests.abstract_test import AbstractTest, highlight_print
 
@@ -225,18 +225,18 @@ class SplitStackerUtilsTest(AbstractTest):
                         f"{expectation}")
                     self.fail("Format splits: incorrect cuts")
 
-    def test_retreive_group(self):
-        """Test function retreive_group"""
+    def test_retreive_group_number(self):
+        """Test function retreive_group_number"""
         specid = 12345678
         specids = np.array(
             [31345346264346, 12345678, 4522457457457, 4574573543457], dtype=int)
         groups = np.array([-1, 0, 5, 1])
         expected_value = 0
 
-        output = retreive_group(specid, specids, groups)
+        output = retreive_group_number(specid, specids, groups)
         self.assertTrue(output == expected_value)
 
-        output = retreive_group.py_func(specid, specids, groups)
+        output = retreive_group_number.py_func(specid, specids, groups)
         self.assertTrue(output == expected_value)
 
 

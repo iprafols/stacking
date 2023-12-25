@@ -177,7 +177,7 @@ def format_splits(split_cuts_sets):
 
 
 @njit
-def retreive_group(specid, specid_list, groups_list):
+def retreive_group_number(specid, specid_list, groups_list):
     """Retreive the groups a specid belongs to
 
     Arguments

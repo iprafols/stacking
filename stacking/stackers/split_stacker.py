@@ -16,7 +16,7 @@ from stacking.stackers.split_stacker_utils import (
     extract_split_cut_sets,
     format_split_on,
     format_splits,
-    retreive_group,
+    retreive_group_number,
 )
 
 VALID_SPLIT_TYPES = [
@@ -191,8 +191,8 @@ class SplitStacker(Stacker):
                 # keep grouping info
                 groups += [[
                     variable, min_value, max_value, f"GROUP_{index}",
-                    index + self.num_groups
-                ] for index, (min_value, max_value) in enumerate(
+                    group_index + self.num_groups
+                ] for group_index, (min_value, max_value) in enumerate(
                     zip(self.splits[index][:-1], self.splits[index][1:]))]
                 # update num_groups
                 self.num_groups += self.splits[index].size - 1
@@ -296,7 +296,7 @@ class SplitStacker(Stacker):
                 f"{len(self.stackers)}. Make sure the member 'stackers' is "
                 "properly intialized in the child class")
 
-        for group_number, stacker in zip(self.num_groups, self.stackers):
+        for group_number, stacker in enumerate(self.stackers):
 
             # select the spectra of this particular groups
             if self.split_type == "OR":
@@ -315,9 +315,9 @@ class SplitStacker(Stacker):
                     "Otherwise contact 'stacking' developpers.")
 
             selected_spectra = [
-                spectrum for spectrum in spectra if retreive_group(
+                spectrum for spectrum in spectra if retreive_group_number(
                     spectrum.specid, self.split_catalogue["specid"].values,
-                    self.split_catalogue[col].values)
+                    self.split_catalogue[col].values) == group_number
             ]
 
             # run the stack

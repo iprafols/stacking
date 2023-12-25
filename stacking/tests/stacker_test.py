@@ -258,6 +258,8 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # case: split_type == "OR"
         out_file = f"{THIS_DIR}/results/split_stacker_assign_groups_or.txt"
         test_file = f"{THIS_DIR}/data/split_stacker_assign_groups_or.txt"
+        out_file_groups = f"{THIS_DIR}/results/split_stacker_assign_groups_or_groups_info.txt"
+        test_file_groups = f"{THIS_DIR}/data/split_stacker_assign_groups_or_groups_info.txt"
 
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
         split_stacker_kwargs.update({
@@ -283,10 +285,14 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # save output and check against expectations
         stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
         self.compare_ascii_numeric(test_file, out_file)
+        stacker.groups_info.to_csv(out_file_groups, sep=" ", index=False)
+        self.compare_ascii(test_file_groups, out_file_groups)
 
         # case: split_type == "AND"
         out_file = f"{THIS_DIR}/results/split_stacker_assign_groups_and.txt"
         test_file = f"{THIS_DIR}/data/split_stacker_assign_groups_and.txt"
+        out_file_groups = f"{THIS_DIR}/results/split_stacker_assign_groups_and_groups_info.txt"
+        test_file_groups = f"{THIS_DIR}/data/split_stacker_assign_groups_and_groups_info.txt"
 
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
         split_stacker_kwargs.update({
@@ -311,6 +317,8 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # save output and check against expectations
         stacker.split_catalogue.to_csv(out_file, sep=" ", index=False)
         self.compare_ascii_numeric(test_file, out_file)
+        stacker.groups_info.to_csv(out_file_groups, sep=" ", index=False)
+        self.compare_ascii(test_file_groups, out_file_groups)
 
     def test_split_stacker_inconsistent_split_cuts_and_split_on(self):
         """Check the behaviour when 'split cuts' is not consistent with
@@ -391,7 +399,33 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.compare_error_message(context_manager, expected_message)
 
         # case 2: normal run intialized from a child class
-        # TODO: add test
+        out_file = f"{THIS_DIR}/results/split_stacking.txt"
+        test_file = f"{THIS_DIR}/data/split_stacking.txt"
+        split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        split_stacker_kwargs.update({
+            "split cuts": "[1.0 1.5 2.0]",
+            "sigma_I": 0.05,
+        })
+        config = create_split_stacker_config(split_stacker_kwargs)
+        stacker = SplitMeanStacker(config["stacker"])
+        stacker.stack(NORMALIZED_SPECTRA)
+        self.assertTrue(len(stacker.stackers) == 2)
+
+        # save results
+        with open(out_file, "w", encoding="utf-8") as results:
+            results.write(
+                "# wavelength stacked_flux1 total_weight1 stacked_flux2 total_weight2\n"
+            )
+            for wavelength, stacked_flux1, stacked_weight1, stacked_flux2, stacked_weight2 in zip(
+                    COMMON_WAVELENGTH_GRID, stacker.stackers[0].stacked_flux,
+                    stacker.stackers[0].stacked_weight,
+                    stacker.stackers[1].stacked_flux,
+                    stacker.stackers[1].stacked_weight):
+                results.write(f"{wavelength} {stacked_flux1} {stacked_weight1} "
+                              f"{stacked_flux2} {stacked_weight2}\n")
+
+        # compare with test
+        self.compare_ascii_numeric(test_file, out_file)
 
     def test_stacker(self):
         """Test the abstract normalizer"""
