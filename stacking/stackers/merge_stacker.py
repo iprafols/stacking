@@ -12,8 +12,6 @@ from stacking.utils import update_accepted_options, update_required_options
 accepted_options = update_accepted_options(accepted_options, ["stack list"])
 required_options = update_required_options(required_options, ["stack list"])
 
-ASSOCIATED_WRITER = "StandardWriter"
-
 
 class MergeStacker(Stacker):
     """Abstract class to compute the satck using different partial runs

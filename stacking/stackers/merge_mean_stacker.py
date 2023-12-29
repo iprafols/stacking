@@ -5,7 +5,9 @@ import numpy as np
 from stacking.errors import StackerError
 from stacking.stackers.merge_stacker import MergeStacker
 from stacking.stackers.merge_stacker import (  # pylint: disable=unused-import
-    ASSOCIATED_WRITER, accepted_options, required_options, defaults)
+    accepted_options, required_options, defaults)
+
+ASSOCIATED_WRITER = "StandardWriter"
 
 
 class MergeMeanStacker(MergeStacker):
