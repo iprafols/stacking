@@ -3,6 +3,7 @@ from configparser import ConfigParser
 import os
 import unittest
 
+from astropy.io import fits
 import numpy as np
 
 from stacking.errors import StackerError
@@ -12,6 +13,7 @@ from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.merge_mean_stacker import MergeMeanStacker
 from stacking.stackers.merge_median_stacker import MergeMedianStacker
 from stacking.stackers.merge_stacker import MergeStacker
+from stacking.stackers.merge_stacker import defaults as defaults_merge_stacker
 from stacking.stackers.split_mean_stacker import SplitMeanStacker
 from stacking.stackers.split_median_stacker import SplitMedianStacker
 from stacking.stackers.split_merge_mean_stacker import SplitMergeMeanStacker
@@ -24,6 +26,16 @@ from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
+
+MERGE_STACKER_KWARGS = {
+    "stack list": (f"{THIS_DIR}/data/standard_writer.fits.gz "
+                   f"{THIS_DIR}/data/standard_writer.fits.gz")
+}
+
+MERGE_STACKER_OPTIONS_AND_VALUES = [
+    ("stack list", (f"{THIS_DIR}/data/standard_writer.fits.gz "
+                    f"{THIS_DIR}/data/standard_writer.fits.gz")),
+]
 
 SPLIT_STACKER_KWARGS = {
     "specid name": "THING_ID",
@@ -151,13 +163,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
     def test_merge_stacker(self):
         """Check that class MergeStacker"""
-        config = ConfigParser()
-        config.read_dict({
-            "stacker": {
-                "stack list": (f"{THIS_DIR}/data/standard_writer.fits.gz "
-                               f"{THIS_DIR}/data/standard_writer.fits.gz")
-            }
-        })
+        config = create_merge_stacker_config(MERGE_STACKER_KWARGS)
         stacker = MergeStacker(config["stacker"])
         expected_message = "Method 'stack' was not overloaded by child class"
         with self.assertRaises(StackerError) as context_manager:
@@ -194,13 +200,40 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
     def test_merge_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
-        options_and_values = [
-            ("stack list", (f"{THIS_DIR}/data/standard_writer.fits.gz "
-                            f"{THIS_DIR}/data/standard_writer.fits.gz")),
-        ]
+        self.check_missing_options(MERGE_STACKER_OPTIONS_AND_VALUES,
+                                   MergeStacker, StackerError, Stacker)
 
-        self.check_missing_options(options_and_values, MergeStacker,
-                                   StackerError, Stacker)
+    def test_merge_mean_stacker(self):
+        """Check that class MergeStacker"""
+        config = create_merge_stacker_config(MERGE_STACKER_KWARGS)
+        stacker = MergeMeanStacker(config["stacker"])
+
+        test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
+        hdu = fits.open(test_file)
+        test_flux = hdu["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        test_weight = hdu["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        hdu.close()
+        self.assertTrue(
+            np.allclose(stacker.stacked_flux, np.zeros(test_flux.size)))
+        self.assertTrue(
+            np.allclose(stacker.stacked_weight, np.zeros(test_flux.size)))
+
+        # case 1: passing spectra to method 'stack'
+        expected_message = (
+            "MergeMeanStacker expects the argument 'spectra' to be 'None'. "
+            "This means you probably called this class from "
+            "'run_stacking.py' and it should be called only with "
+            "'merge_stack_partial_runs.py'. Please double check your "
+            "configuration or contact stacking developers if the problem "
+            "persists")
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(NORMALIZED_SPECTRA)
+        self.compare_error_message(context_manager, expected_message)
+
+        # case 2: normal execution passing 'None' to method stack
+        stacker.stack(None)
+        self.assertTrue(np.allclose(stacker.stacked_flux, test_flux))
+        self.assertTrue(np.allclose(stacker.stacked_weight, test_weight * 2))
 
     def test_split_mean_stacker(self):
         """Check initialization of SplitMeanStacker"""
@@ -550,8 +583,30 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.compare_error_message(context_manager, expected_message)
 
 
+def create_merge_stacker_config(stacker_kwargs):
+    """Create a configuration instance to run MergeStacker
+
+    Arguments
+    ---------
+    reader_kwargs: dict
+    Keyword arguments to set the configuration run
+
+    Return
+    ------
+    config: ConfigParser
+    Run configuration
+    """
+    config = ConfigParser()
+    config.read_dict({"stacker": stacker_kwargs})
+    for key, value in defaults_merge_stacker.items():
+        if key not in config["stacker"]:
+            config["stacker"][key] = str(value)
+
+    return config
+
+
 def create_split_stacker_config(stacker_kwargs):
-    """Create a configuration instance to run Dr16Reader
+    """Create a configuration instance to run SplitStacker
 
     Arguments
     ---------
