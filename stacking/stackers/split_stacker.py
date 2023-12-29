@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from stacking.errors import StackerError
+from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
 from stacking.stacker import (  # pylint: disable=unused-import
     defaults, accepted_options, required_options)
@@ -296,6 +297,11 @@ class SplitStacker(Stacker):
                 f"{len(self.stackers)}. Make sure the member 'stackers' is "
                 "properly intialized in the child class")
 
+        self.stacked_flux = np.zeros(
+            (self.num_groups, Spectrum.common_wavelength_grid.size),
+            dtype=float)
+        self.stacked_weight = np.zeros_like(self.stacked_flux)
+
         for group_number, stacker in enumerate(self.stackers):
 
             # select the spectra of this particular groups
@@ -322,3 +328,6 @@ class SplitStacker(Stacker):
 
             # run the stack
             stacker.stack(selected_spectra)
+
+            self.stacked_flux[group_number] = stacker.stacked_flux
+            self.stacked_weight[group_number] = stacker.stacked_weight
