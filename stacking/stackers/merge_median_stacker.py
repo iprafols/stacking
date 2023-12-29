@@ -47,7 +47,7 @@ class MergeMedianStacker(MergeStacker, MedianStacker):
         """
         if spectra is not None:
             raise StackerError(
-                "MergeMediamStacker expects the argument 'spectra' "
+                "MergeMedianStacker expects the argument 'spectra' "
                 "to be 'None'. This means you probably called this class from "
                 "'run_stacking.py' and it should be called only with "
                 "'merge_stack_partial_runs.py'. Please double check your "

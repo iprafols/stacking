@@ -235,6 +235,65 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.assertTrue(np.allclose(stacker.stacked_flux, test_flux))
         self.assertTrue(np.allclose(stacker.stacked_weight, test_weight * 2))
 
+    def test_merge_mean_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        self.check_missing_options(MERGE_STACKER_OPTIONS_AND_VALUES,
+                                   MergeMeanStacker, StackerError, [MergeStacker, MeanStacker, Stacker])
+
+    def test_merge_median_stacker(self):
+        """Check that class MergeStacker"""
+        merge_median_stacker_kwargs = MERGE_STACKER_KWARGS.copy()
+        merge_median_stacker_kwargs.update({
+            "weighted": False
+        })
+        config = create_merge_stacker_config(merge_median_stacker_kwargs)
+        stacker = MergeMedianStacker(config["stacker"])
+
+        test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
+        hdu = fits.open(test_file)
+        test_flux = hdu["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        test_weight = hdu["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        hdu.close()
+        self.assertTrue(
+            np.allclose(stacker.stacked_flux, np.zeros(test_flux.size)))
+        self.assertTrue(
+            np.allclose(stacker.stacked_weight, np.zeros(test_flux.size)))
+
+        # case 1: passing spectra to method 'stack'
+        expected_message = (
+            "MergeMedianStacker expects the argument 'spectra' to be 'None'. "
+            "This means you probably called this class from "
+            "'run_stacking.py' and it should be called only with "
+            "'merge_stack_partial_runs.py'. Please double check your "
+            "configuration or contact stacking developers if the problem "
+            "persists")
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(NORMALIZED_SPECTRA)
+        self.compare_error_message(context_manager, expected_message)
+
+        # case 2: normal execution passing 'None' to method stack
+        stacker.stack(None)
+        self.assertTrue(np.allclose(stacker.stacked_flux, test_flux))
+        self.assertTrue(np.allclose(stacker.stacked_weight, test_weight * 2))
+
+        # case 3:
+        merge_median_stacker_kwargs = MERGE_STACKER_KWARGS.copy()
+        merge_median_stacker_kwargs.update({
+            "weighted": True
+        })
+        config = create_merge_stacker_config(merge_median_stacker_kwargs)
+        stacker = MergeMedianStacker(config["stacker"])
+        expected_message = "Not implemented"
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(None)
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_merge_median_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [("weighted", "False")] + MERGE_STACKER_OPTIONS_AND_VALUES.copy()
+        self.check_missing_options(options_and_values,
+                                   MergeMedianStacker, StackerError, [MergeStacker, MedianStacker, Stacker])
+
     def test_split_mean_stacker(self):
         """Check initialization of SplitMeanStacker"""
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
