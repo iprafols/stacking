@@ -67,7 +67,27 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
     test_mean_stacker_missing_options
     test_median_stacker
     test_median_stacker_missing_options
+    test_merge_stacker
+    test_merge_stacker_invalid_files
+    test_merge_stacker_missing_options
+    test_merge_mean_stacker
+    test_merge_mean_stacker_missing_options
+    test_merge_median_stacker
+    test_merge_median_stacker_missing_options
+    test_split_mean_stacker
+    test_split_mean_stacker_missing_options
+    test_split_median_stacker
+    test_split_median_stacker_missing_options
+    test_split_merge_mean_stacker
+    test_split_merge_mean_stacker_missing_options
+    test_split_merge_median_stacker
+    test_split_merge_median_stacker_missing_options
+    test_split_stacker_assign_groups
+    test_split_stacker_inconsistent_split_cuts_and_split_on
+    test_split_stacker_invalid_split_type
     test_split_stacker_missing_options
+    test_split_stacker_read_catalogue
+    test_split_stacker_stack
     test_stacker
     test_stacker_unset_spectrum
     """

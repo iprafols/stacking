@@ -26,13 +26,7 @@ class MergeStackerUtilsTest(AbstractTest):
     Methods
     -------
     (see AbstractTest in stacking/tests/abstract_test.py)
-    test_assign_group_multiple_cuts
-    test_assign_group_one_cut
-    test_extract_split_cut_sets
-    test_find_interval_index
-    test_format_split_on
-    test_format_splits
-    test_retreive_group
+    test_load_stacks
     """
 
     def test_load_stacks(self):
