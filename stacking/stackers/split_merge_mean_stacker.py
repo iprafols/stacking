@@ -21,6 +21,10 @@ required_options = update_required_options(required_options,
 ASSOCIATED_WRITER = "SplitWriter"
 
 
+# TODO: update this class
+# - Do this after the SplitWriter is written
+# - Create a new class called SplitMergeStack that loads the data
+# - Overwrite stack method to more efficiently perform the merge in all groups
 class SplitMergeMeanStacker(SplitStacker):
     """Class to compute mulitple stacks splitting on one
     or more properties of the spectra. Uses class MergeMeanStacker

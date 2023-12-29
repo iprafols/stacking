@@ -149,6 +149,59 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.check_missing_options(options_and_values, MedianStacker,
                                    StackerError, Stacker)
 
+    def test_merge_stacker(self):
+        """Check that class MergeStacker"""
+        config = ConfigParser()
+        config.read_dict({
+            "stacker": {
+                "stack list": (f"{THIS_DIR}/data/standard_writer.fits.gz "
+                               f"{THIS_DIR}/data/standard_writer.fits.gz")
+            }
+        })
+        stacker = MergeStacker(config["stacker"])
+        expected_message = "Method 'stack' was not overloaded by child class"
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(NORMALIZED_SPECTRA)
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_merge_stacker_invalid_files(self):
+        """Check that errors are raised when invalid files are passed to MergeStacker"""
+        # case 1: missing files
+        config = ConfigParser()
+        config.read_dict({
+            "stacker": {
+                "stack list": f"{THIS_DIR}/data/missing_file.fits.gz"
+            }
+        })
+        expected_message = (
+            f"Could not find file '{THIS_DIR}/data/missing_file.fits.gz' required by "
+            "MergeStacker")
+        with self.assertRaises(StackerError) as context_manager:
+            MergeStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
+
+        # case 1: invalid format
+        config = ConfigParser()
+        config.read_dict(
+            {"stacker": {
+                "stack list": f"{THIS_DIR}/data/mean_stacking.txt"
+            }})
+        expected_message = ("MergeStacker: Expected a fits file, found "
+                            f"{THIS_DIR}/data/mean_stacking.txt")
+        with self.assertRaises(StackerError) as context_manager:
+            MergeStacker(config["stacker"])
+        self.compare_error_message(context_manager, expected_message)
+
+    def test_merge_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("stack list", (f"{THIS_DIR}/data/standard_writer.fits.gz "
+                            f"{THIS_DIR}/data/standard_writer.fits.gz")),
+        ]
+
+        self.check_missing_options(options_and_values, MergeStacker,
+                                   StackerError, Stacker)
+
     def test_split_mean_stacker(self):
         """Check initialization of SplitMeanStacker"""
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
