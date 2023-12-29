@@ -238,14 +238,13 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
     def test_merge_mean_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
         self.check_missing_options(MERGE_STACKER_OPTIONS_AND_VALUES,
-                                   MergeMeanStacker, StackerError, [MergeStacker, MeanStacker, Stacker])
+                                   MergeMeanStacker, StackerError,
+                                   [MergeStacker, MeanStacker, Stacker])
 
     def test_merge_median_stacker(self):
         """Check that class MergeStacker"""
         merge_median_stacker_kwargs = MERGE_STACKER_KWARGS.copy()
-        merge_median_stacker_kwargs.update({
-            "weighted": False
-        })
+        merge_median_stacker_kwargs.update({"weighted": False})
         config = create_merge_stacker_config(merge_median_stacker_kwargs)
         stacker = MergeMedianStacker(config["stacker"])
 
@@ -278,9 +277,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
         # case 3:
         merge_median_stacker_kwargs = MERGE_STACKER_KWARGS.copy()
-        merge_median_stacker_kwargs.update({
-            "weighted": True
-        })
+        merge_median_stacker_kwargs.update({"weighted": True})
         config = create_merge_stacker_config(merge_median_stacker_kwargs)
         stacker = MergeMedianStacker(config["stacker"])
         expected_message = "Not implemented"
@@ -290,9 +287,11 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
     def test_merge_median_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
-        options_and_values = [("weighted", "False")] + MERGE_STACKER_OPTIONS_AND_VALUES.copy()
-        self.check_missing_options(options_and_values,
-                                   MergeMedianStacker, StackerError, [MergeStacker, MedianStacker, Stacker])
+        options_and_values = [("weighted", "False")
+                             ] + MERGE_STACKER_OPTIONS_AND_VALUES.copy()
+        self.check_missing_options(options_and_values, MergeMedianStacker,
+                                   StackerError,
+                                   [MergeStacker, MedianStacker, Stacker])
 
     def test_split_mean_stacker(self):
         """Check initialization of SplitMeanStacker"""
