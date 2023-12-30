@@ -33,9 +33,9 @@ class MergeStackerUtilsTest(AbstractTest):
         """Test function load_stacks"""
         test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
         hdu = fits.open(test_file)
-        test_wavelength = hdu["STACKED_SPECTRUM"].data["WAVELENGTH"]  # pylint: disable=no-member
-        test_flux = hdu["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
-        test_weight = hdu["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        test_wavelength = hdu["STACK"].data["WAVELENGTH"]  # pylint: disable=no-member
+        test_flux = hdu["STACK"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        test_weight = hdu["STACK"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
         hdu.close()
 
         # case 1: normal execution

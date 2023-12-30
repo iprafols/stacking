@@ -31,9 +31,9 @@ def load_stacks(stack_list):
         hdul = fits.open(file)
 
         # disabling pylint no-members as they are false positives here
-        wavelength = hdul["STACKED_SPECTRUM"].data["WAVELENGTH"]  # pylint: disable=no-member
-        flux = hdul["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
-        weight = hdul["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        wavelength = hdul["STACK"].data["WAVELENGTH"]  # pylint: disable=no-member
+        flux = hdul["STACK"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        weight = hdul["STACK"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
 
         hdul.close()
 

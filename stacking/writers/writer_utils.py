@@ -13,7 +13,7 @@ def get_primary_hdu(stacker):
     ---------
     stacker: Stacker
     The used stacker
-    
+
     Return
     ------
     primary_hdu: fits.hdu.image.PrimaryHDU
@@ -23,7 +23,7 @@ def get_primary_hdu(stacker):
     primary_hdu = fits.PrimaryHDU()
     now = datetime.now()
     primary_hdu.header["COMMENT"] = (
-        f"Stacked spectrum computed using class {type(stacker)}"
+        f"Stacked spectrum computed using class {stacker.__class__.__name__}"
         f" of code stacking")
     primary_hdu.header["VERSION"] = (__version__, "Code version")
     primary_hdu.header["DATETIME"] = (now.strftime("%Y-%m-%dT%H:%M:%S"),

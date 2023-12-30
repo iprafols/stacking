@@ -50,6 +50,9 @@ class SplitStacker(Stacker):
     logger: logging.Logger
     Logger object
 
+    groups_info: pd.DataFrame
+    DataFrame containing the group information
+
     num_groups: int
     Number of groups the data is split on
 
@@ -274,7 +277,7 @@ class SplitStacker(Stacker):
         keep_columns = self.split_on + [self.specid_name]
 
         split_catalogue = catalogue[keep_columns].to_pandas()
-        split_catalogue.rename(columns={self.specid_name: "specid"},
+        split_catalogue.rename(columns={self.specid_name: "SPECID"},
                                inplace=True)
 
         return split_catalogue
@@ -298,7 +301,7 @@ class SplitStacker(Stacker):
                 "properly intialized in the child class")
 
         self.stacked_flux = np.zeros(
-            (self.num_groups, Spectrum.common_wavelength_grid.size),
+            (Spectrum.common_wavelength_grid.size, self.num_groups),
             dtype=float)
         self.stacked_weight = np.zeros_like(self.stacked_flux)
 
@@ -322,12 +325,12 @@ class SplitStacker(Stacker):
 
             selected_spectra = [
                 spectrum for spectrum in spectra if retreive_group_number(
-                    spectrum.specid, self.split_catalogue["specid"].values,
+                    spectrum.specid, self.split_catalogue["SPECID"].values,
                     self.split_catalogue[col].values) == group_number
             ]
 
             # run the stack
             stacker.stack(selected_spectra)
 
-            self.stacked_flux[group_number] = stacker.stacked_flux
-            self.stacked_weight[group_number] = stacker.stacked_weight
+            self.stacked_flux[:, group_number] = stacker.stacked_flux
+            self.stacked_weight[:, group_number] = stacker.stacked_weight

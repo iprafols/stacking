@@ -182,7 +182,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
                                    StackerError, Stacker)
 
     def test_merge_stacker(self):
-        """Check that class MergeStacker"""
+        """Check the class MergeStacker"""
         config = create_merge_stacker_config(MERGE_STACKER_KWARGS)
         stacker = MergeStacker(config["stacker"])
         expected_message = "Method 'stack' was not overloaded by child class"
@@ -224,14 +224,14 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
                                    MergeStacker, StackerError, Stacker)
 
     def test_merge_mean_stacker(self):
-        """Check that class MergeStacker"""
+        """Check the class MergeStacker"""
         config = create_merge_stacker_config(MERGE_STACKER_KWARGS)
         stacker = MergeMeanStacker(config["stacker"])
 
         test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
         hdu = fits.open(test_file)
-        test_flux = hdu["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
-        test_weight = hdu["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        test_flux = hdu["STACK"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        test_weight = hdu["STACK"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
         hdu.close()
         self.assertTrue(
             np.allclose(stacker.stacked_flux, np.zeros(test_flux.size)))
@@ -262,7 +262,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
                                    [MergeStacker, MeanStacker, Stacker])
 
     def test_merge_median_stacker(self):
-        """Check that class MergeStacker"""
+        """Check the class MergeStacker"""
         merge_median_stacker_kwargs = MERGE_STACKER_KWARGS.copy()
         merge_median_stacker_kwargs.update({"weighted": False})
         config = create_merge_stacker_config(merge_median_stacker_kwargs)
@@ -270,8 +270,8 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
         test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
         hdu = fits.open(test_file)
-        test_flux = hdu["STACKED_SPECTRUM"].data["STACKED_FLUX"]  # pylint: disable=no-member
-        test_weight = hdu["STACKED_SPECTRUM"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        test_flux = hdu["STACK"].data["STACKED_FLUX"]  # pylint: disable=no-member
+        test_weight = hdu["STACK"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
         hdu.close()
         self.assertTrue(
             np.allclose(stacker.stacked_flux, np.zeros(test_flux.size)))
@@ -436,12 +436,12 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
         # __init__ calls the method assign_groups
         # case "OR" should have one group column per variable
-        # expecting 5 columns: Z, BI_CIV, specid, GROUP_0 and GROUP_1
+        # expecting 5 columns: Z, BI_CIV, SPECID, GROUP_0 and GROUP_1
         # the first three columns are added as __init__ also calls read_catalogue
         self.assertTrue(stacker.split_catalogue.columns.size == 5)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
         self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
-        self.assertTrue(stacker.split_catalogue.columns[2] == "specid")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "SPECID")
         self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
         self.assertTrue(stacker.split_catalogue.columns[4] == "GROUP_1")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
@@ -469,12 +469,12 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
         # __init__ calls the method assign_groups
         # case "OR" should have one group column per variable
-        # expecting 5 columns: Z, BI_CIV, specid, GROUP
+        # expecting 5 columns: Z, BI_CIV, SPECID, GROUP
         # the first three columns are added as __init__ also calls read_catalogue
         self.assertTrue(stacker.split_catalogue.columns.size == 4)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
         self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
-        self.assertTrue(stacker.split_catalogue.columns[2] == "specid")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "SPECID")
         self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
 
@@ -536,7 +536,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # __init__ calls the method read_catalogue
         self.assertTrue(stacker.split_catalogue.columns.size == 3)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
-        self.assertTrue(stacker.split_catalogue.columns[1] == "specid")
+        self.assertTrue(stacker.split_catalogue.columns[1] == "SPECID")
         # this third column is added as __init__ also calls method assing_groups
         self.assertTrue(stacker.split_catalogue.columns[2] == "GROUP_0")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
@@ -575,13 +575,13 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         stacker.stack(NORMALIZED_SPECTRA)
         self.assertTrue(len(stacker.stackers) == 2)
         self.assertTrue(stacker.stacked_flux is not None)
-        self.assertEqual(stacker.stacked_flux.shape[0], 2)
-        self.assertEqual(stacker.stacked_flux.shape[1],
+        self.assertEqual(stacker.stacked_flux.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
+        self.assertEqual(stacker.stacked_flux.shape[1], 2)
         self.assertTrue(stacker.stacked_weight is not None)
-        self.assertEqual(stacker.stacked_weight.shape[0], 2)
-        self.assertEqual(stacker.stacked_weight.shape[1],
+        self.assertEqual(stacker.stacked_weight.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
+        self.assertEqual(stacker.stacked_weight.shape[1], 2)
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
@@ -612,13 +612,13 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         stacker.stack(NORMALIZED_SPECTRA)
         self.assertTrue(len(stacker.stackers) == 2)
         self.assertTrue(stacker.stacked_flux is not None)
-        self.assertEqual(stacker.stacked_flux.shape[0], 2)
-        self.assertEqual(stacker.stacked_flux.shape[1],
+        self.assertEqual(stacker.stacked_flux.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
+        self.assertEqual(stacker.stacked_flux.shape[1], 2)
         self.assertTrue(stacker.stacked_weight is not None)
-        self.assertEqual(stacker.stacked_weight.shape[0], 2)
-        self.assertEqual(stacker.stacked_weight.shape[1],
+        self.assertEqual(stacker.stacked_weight.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
+        self.assertEqual(stacker.stacked_weight.shape[1], 2)
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:

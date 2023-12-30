@@ -6,9 +6,10 @@ import unittest
 
 from stacking.errors import WriterError
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.utils import stacker
+from stacking.tests.utils import stacker, split_stacker
 from stacking.writer import Writer, ACCEPTED_SAVE_FORMATS
 from stacking.writer import defaults as defaults_writer
+from stacking.writers.split_writer import SplitWriter
 from stacking.writers.standard_writer import StandardWriter
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +23,7 @@ WRITER_KWARGS = {
 
 
 class WriterTest(AbstractTest):
-    """Test the normalizers.
+    """Test the writers.
 
     Methods
     -------
@@ -49,6 +50,25 @@ class WriterTest(AbstractTest):
         writer = StandardWriter(config["writer"])
 
         writer.write_results(stacker)
+
+        self.compare_fits(test_file, out_dir + out_file)
+
+    def test_split_writer(self):
+        """Test the class SplitWriter"""
+        out_dir = f"{THIS_DIR}/results/"
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        out_file = "split_writer.fits.gz"
+        test_file = f"{THIS_DIR}/data/split_writer.fits.gz"
+
+        config = create_writer_config({
+            "output directory": out_dir,
+            "output file": out_file,
+            "overwrite": "True",
+        })
+        writer = SplitWriter(config["writer"])
+
+        writer.write_results(split_stacker)
 
         self.compare_fits(test_file, out_dir + out_file)
 

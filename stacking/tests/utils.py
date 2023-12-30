@@ -17,6 +17,8 @@ from stacking.rebin import defaults as defaults_rebin
 from stacking.spectrum import Spectrum
 from stacking.stackers.mean_stacker import MeanStacker
 from stacking.stackers.mean_stacker import defaults as defaults_mean_stacker
+from stacking.stackers.split_mean_stacker import SplitMeanStacker
+from stacking.stackers.split_mean_stacker import defaults as defaults_split_mean_stacker
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
@@ -60,6 +62,29 @@ for key, value in defaults_multiple_regions_normalization.items():
 for key, value in defaults_mean_stacker.items():
     if key not in config["stacker"]:
         config["stacker"][key] = str(value)
+
+config_split_stacker = ConfigParser()
+config_split_stacker.read_dict({
+    "stacker": {
+        "num processors":
+            1,
+        "specid name":
+            "THING_ID",
+        "split catalogue name":
+            f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
+        "split on":
+            "Z",
+        "split type":
+            "OR",
+        "split cuts":
+            "[1.0 1.5 2.0]",
+        "sigma_I":
+            0.05,
+    }
+})
+for key, value in defaults_split_mean_stacker.items():
+    if key not in config["stacker"]:
+        config_split_stacker["stacker"][key] = str(value)
 
 # read spectra
 reader = Dr16Reader(config["reader"])
@@ -133,6 +158,10 @@ for spectrum in NORMALIZED_SPECTRA:
 # stacker
 stacker = MeanStacker(config["stacker"])
 stacker.stack(NORMALIZED_SPECTRA)
+
+# split stacker
+split_stacker = SplitMeanStacker(config_split_stacker["stacker"])
+split_stacker.stack(NORMALIZED_SPECTRA)
 
 # Resets
 # this must happen at the very end of the module

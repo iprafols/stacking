@@ -33,30 +33,59 @@ class SplitWriter(Writer):
         # primary HDU
         primary_hdu = get_primary_hdu(stacker)
 
-        # splits info
-        cols_splits = []
+        # metadata spectra
+        cols_metadata = []
         for col, dtype in zip(stacker.split_catalogue.columns,
                               stacker.split_catalogue.dtypes):
-            if "float" in dtype:
-                cols_splits.append(
+            if dtype in ["float32", "float64"]:
+                cols_metadata.append(
                     fits.Column(name=col,
                                 format="E",
                                 disp="F7.3",
                                 array=stacker.split_catalogue[col].values))
-            elif "int" in dtype:
+            elif dtype in ["int32", "int64"]:
+                cols_metadata.append(
+                    fits.Column(name=col,
+                                format="K",
+                                disp="I10",
+                                array=stacker.split_catalogue[col].values))
+            else:
+                cols_metadata.append(
+                    fits.Column(name=col,
+                                format="20A",
+                                disp="A20",
+                                array=stacker.split_catalogue[col].values))
+        hdu_metadata = fits.BinTableHDU.from_columns(cols_metadata,
+                                                   name="METADATA_SPECTRA")
+        # TODO: add description of columns
+
+
+        # groups info
+        cols_splits = []
+        for col, dtype in zip(stacker.groups_info.columns,
+                              stacker.groups_info.dtypes):
+            if dtype in ["float32", "float64"]:
+                cols_splits.append(
+                    fits.Column(name=col,
+                                format="E",
+                                disp="F7.3",
+                                array=stacker.groups_info[col].values))
+            elif dtype in ["int32", "int64"]:
                 cols_splits.append(
                     fits.Column(name=col,
                                 format="K",
-                                disp="K",
-                                array=stacker.split_catalogue[col].values))
+                                disp="I10",
+                                array=stacker.groups_info[col].values))
             else:
                 cols_splits.append(
                     fits.Column(name=col,
                                 format="20A",
-                                disp="20A",
-                                array=stacker.split_catalogue[col].values))
+                                disp="A20",
+                                array=stacker.groups_info[col].values))
         hdu_splits = fits.BinTableHDU.from_columns(cols_splits,
-                                                   name="SPLITS_INFO")
+                                                   name="GROUPS_INFO")
+        hdu_splits.header["NGROUPS"] = stacker.num_groups
+        # TODO: add description of columns
 
         # fluxes and weights
         cols_spectra = [
@@ -74,8 +103,8 @@ class SplitWriter(Writer):
                         array=stacker.stacked_weight),
         ]
         hdu = fits.BinTableHDU.from_columns(cols_spectra,
-                                            name="STACKED_SPECTRA")
+                                            name="STACK")
         # TODO: add description of columns
 
-        hdul = fits.HDUList([primary_hdu, hdu_splits, hdu])
+        hdul = fits.HDUList([primary_hdu, hdu, hdu_splits, hdu_metadata,])
         hdul.writeto(filename, overwrite=self.overwrite, checksum=True)
