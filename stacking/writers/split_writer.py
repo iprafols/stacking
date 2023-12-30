@@ -1,6 +1,7 @@
 """ This module defines the class SplitWriter to write stack results using splits"""
 from astropy.io import fits
 
+from stacking.errors import WriterError
 from stacking.spectrum import Spectrum
 from stacking.writer import Writer
 from stacking.writer import (  # pylint: disable=unused-import
@@ -49,12 +50,15 @@ class SplitWriter(Writer):
                                 format="K",
                                 disp="I10",
                                 array=stacker.split_catalogue[col].values))
-            else:
-                cols_metadata.append(
-                    fits.Column(name=col,
-                                format="20A",
-                                disp="A20",
-                                array=stacker.split_catalogue[col].values))
+            # this should never enter unless new splits types are added
+            # (e.g. using characters)
+            else:  # pragma: no cover
+                raise WriterError(
+                    f"Don't know what to do with type {dtype}. "
+                    "I was expecting splits to be either 'float' or 'int'."
+                    "If you changed this yourself, check that you added the "
+                    "new behaviour to method `write_results`. "
+                    "Otherwise contact 'stacking' developpers.")
         hdu_metadata = fits.BinTableHDU.from_columns(cols_metadata,
                                                      name="METADATA_SPECTRA")
         # TODO: add description of columns
