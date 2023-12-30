@@ -64,6 +64,7 @@ def load_stacks(stack_list):
 
     return stacks
 
+
 def load_splits_info(stack_list):
     """ Load split info from previous runs
 
@@ -95,7 +96,8 @@ def load_splits_info(stack_list):
     for file in stack_list:
         # read data from file
         groups_info_file = Table.read(file, hdu="GROUPS_INFO").to_pandas()
-        partial_split_catalogue_file = Table.read(file, hdu="METADATA_SPECTRA").to_pandas()
+        partial_split_catalogue_file = Table.read(
+            file, hdu="METADATA_SPECTRA").to_pandas()
         hdul = fits.open(file)
         # disabling pylint no-members as they are false positives here
         num_groups_file = hdul["GROUPS_INFO"].header["NGROUPS"]  # pylint: disable=no-member
@@ -120,7 +122,6 @@ def load_splits_info(stack_list):
 
         # add catalogue to list
         partial_split_catalogues.append(partial_split_catalogue_file)
-
 
     split_catalogue = pd.concat(partial_split_catalogues)
 

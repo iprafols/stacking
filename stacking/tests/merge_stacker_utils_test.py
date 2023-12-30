@@ -18,6 +18,7 @@ os.environ["THIS_DIR"] = THIS_DIR
 
 STACK_LIST = [f"{THIS_DIR}/data/standard_writer.fits.gz"] * 2
 
+
 class MergeStackerUtilsTest(AbstractTest):
     """Test the MergeStacker utils
 
@@ -27,13 +28,14 @@ class MergeStackerUtilsTest(AbstractTest):
     test_load_splits_info
     test_load_stacks
     """
+
     def test_load_splits_info(self):
         """Test function load_splits_info"""
         test_file = f"{THIS_DIR}/data/split_writer.fits.gz"
         hdu = fits.open(test_file)
-        test_z = list(hdu["METADATA_SPECTRA"].data["Z"])*2  # pylint: disable=no-member
-        test_specid = list(hdu["METADATA_SPECTRA"].data["SPECID"])*2  # pylint: disable=no-member
-        test_group0 = list(hdu["METADATA_SPECTRA"].data["GROUP_0"])*2  # pylint: disable=no-member
+        test_z = list(hdu["METADATA_SPECTRA"].data["Z"]) * 2  # pylint: disable=no-member
+        test_specid = list(hdu["METADATA_SPECTRA"].data["SPECID"]) * 2  # pylint: disable=no-member
+        test_group0 = list(hdu["METADATA_SPECTRA"].data["GROUP_0"]) * 2  # pylint: disable=no-member
 
         hdu.close()
 
@@ -53,7 +55,7 @@ class MergeStackerUtilsTest(AbstractTest):
         self.assertTrue(all(groups_info["COLNAME"] == b"GROUP_0"))
         self.assertTrue(np.allclose(groups_info["GROUP_NUM"], [0, 1]))
         self.assertEqual(num_groups, 2)
-        self.assertEqual(split_catalogue.shape[0], 79*2)
+        self.assertEqual(split_catalogue.shape[0], 79 * 2)
         self.assertEqual(split_catalogue.shape[1], 3)
         self.assertTrue("Z" in split_catalogue.columns)
         self.assertTrue("SPECID" in split_catalogue.columns)
@@ -65,8 +67,7 @@ class MergeStackerUtilsTest(AbstractTest):
         # case 2: wrong num_groups
         expected_message = (
             "Error loading splits info. I expected all the files to have "
-            "the same number of groups but found different values: 2 and 3"
-        )
+            "the same number of groups but found different values: 2 and 3")
         with self.assertRaises(StackerError) as context_manager:
             load_splits_info([
                 f"{THIS_DIR}/data/split_writer.fits.gz",
@@ -83,15 +84,13 @@ class MergeStackerUtilsTest(AbstractTest):
             "        1.5        2.0  b'GROUP_0'          1\nInfo 2:\n"
             "  VARIABLE  MIN_VALUE  MAX_VALUE     COLNAME  GROUP_NUM\n0     b'Z'"
             "        1.0        1.5  b'GROUP_0'          1\n1     b'Z'        "
-            "1.5        2.0  b'GROUP_0'          1"
-        )
+            "1.5        2.0  b'GROUP_0'          1")
         with self.assertRaises(StackerError) as context_manager:
             load_splits_info([
                 f"{THIS_DIR}/data/split_writer.fits.gz",
                 f"{THIS_DIR}/data/split_writer_wrong_groups_info.fits.gz",
             ])
         self.compare_error_message(context_manager, expected_message)
-
 
     def test_load_stacks(self):
         """Test function load_stacks"""
@@ -153,6 +152,7 @@ class MergeStackerUtilsTest(AbstractTest):
         with self.assertRaises(StackerError) as context_manager:
             load_stacks(STACK_LIST)
         self.compare_error_message(context_manager, expected_message)
+
 
 if __name__ == '__main__':
     unittest.main()

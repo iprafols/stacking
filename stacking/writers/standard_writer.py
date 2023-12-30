@@ -48,8 +48,7 @@ class StandardWriter(Writer):
                         disp="F7.3",
                         array=stacker.stacked_weight),
         ]
-        hdu = fits.BinTableHDU.from_columns(cols_spectrum,
-                                            name="STACK")
+        hdu = fits.BinTableHDU.from_columns(cols_spectrum, name="STACK")
         # TODO: add description of columns
 
         hdul = fits.HDUList([primary_hdu, hdu])

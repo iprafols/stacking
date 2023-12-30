@@ -31,6 +31,7 @@ class MergeSplitStacker(MergeStacker):
     split_catalogue: pd.DataFrame
     The catalogue to be split
     """
+
     def __init__(self, config):
         """Initialize class instance
 
@@ -41,4 +42,5 @@ class MergeSplitStacker(MergeStacker):
         """
         super().__init__(config)
 
-        self.groups_info, self.num_groups, self.split_catalogue = load_splits_info(self.stack_list)
+        self.groups_info, self.num_groups, self.split_catalogue = load_splits_info(
+            self.stack_list)

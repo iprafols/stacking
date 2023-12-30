@@ -56,9 +56,8 @@ class SplitWriter(Writer):
                                 disp="A20",
                                 array=stacker.split_catalogue[col].values))
         hdu_metadata = fits.BinTableHDU.from_columns(cols_metadata,
-                                                   name="METADATA_SPECTRA")
+                                                     name="METADATA_SPECTRA")
         # TODO: add description of columns
-
 
         # groups info
         cols_splits = []
@@ -102,9 +101,13 @@ class SplitWriter(Writer):
                         disp="F7.3",
                         array=stacker.stacked_weight),
         ]
-        hdu = fits.BinTableHDU.from_columns(cols_spectra,
-                                            name="STACK")
+        hdu = fits.BinTableHDU.from_columns(cols_spectra, name="STACK")
         # TODO: add description of columns
 
-        hdul = fits.HDUList([primary_hdu, hdu, hdu_splits, hdu_metadata,])
+        hdul = fits.HDUList([
+            primary_hdu,
+            hdu,
+            hdu_splits,
+            hdu_metadata,
+        ])
         hdul.writeto(filename, overwrite=self.overwrite, checksum=True)

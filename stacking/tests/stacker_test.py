@@ -315,76 +315,74 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
                                    StackerError,
                                    [MergeStacker, MedianStacker, Stacker])
 
+    def test_merge_split_mean_stacker(self):
+        """Check initialization of MergeSplitMeanStacker"""
+        split_stacker_kwargs = {
+            "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
+        }
+        config = create_merge_stacker_config(split_stacker_kwargs)
+        stacker = MergeSplitMeanStacker(config["stacker"])
 
-        def test_merge_split_mean_stacker(self):
-            """Check initialization of MergeSplitMeanStacker"""
-            split_stacker_kwargs = {
-                "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
-            }
-            config = create_merge_stacker_config(split_stacker_kwargs)
-            stacker = MergeSplitMeanStacker(config["stacker"])
+        self.assertTrue(isinstance(stacker, MergeSplitMeanStacker))
+        self.assertTrue(isinstance(stacker, MergeSplitStacker))
+        self.assertTrue(isinstance(stacker, MergeMeanStacker))
 
-            self.assertTrue(isinstance(stacker, MergeSplitMeanStacker))
-            self.assertTrue(isinstance(stacker, MergeSplitStacker))
-            self.assertTrue(isinstance(stacker, MergeMeanStacker))
+    def test_merge_split_mean_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
+                            f"{THIS_DIR}/data/split_writer.fits.gz")),
+        ]
 
-        def test_merge_split_mean_stacker_missing_options(self):
-            """Check that errors are raised when required options are missing"""
-            options_and_values = [
-                ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
-                                f"{THIS_DIR}/data/split_writer.fits.gz")),
-            ]
+        self.check_missing_options(
+            options_and_values, MergeSplitMeanStacker, StackerError,
+            [MergeSplitStacker, MergeMeanStacker, MergeStacker, Stacker])
 
-            self.check_missing_options(
-                options_and_values,
-                MergeSplitMeanStacker, StackerError,
-                [MergeSplitStacker, MergeMeanStacker, MergeStacker, Stacker])
+    def test_merge_split_median_stacker(self):
+        """Check initialization of MergeSplitMedianStacker"""
+        split_stacker_kwargs = {
+            "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
+            "weighted": False,
+        }
+        config = create_merge_stacker_config(split_stacker_kwargs)
+        stacker = MergeSplitMedianStacker(config["stacker"])
 
-        def test_merge_split_median_stacker(self):
-            """Check initialization of MergeSplitMedianStacker"""
-            split_stacker_kwargs = {
-                "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
-                "weighted": False,
-            }
-            config = create_merge_stacker_config(split_stacker_kwargs)
-            stacker = MergeSplitMedianStacker(config["stacker"])
+        self.assertTrue(isinstance(stacker, MergeSplitMedianStacker))
+        self.assertTrue(isinstance(stacker, MergeSplitStacker))
+        self.assertTrue(isinstance(stacker, MergeMedianStacker))
 
-            self.assertTrue(isinstance(stacker, MergeSplitMedianStacker))
-            self.assertTrue(isinstance(stacker, MergeSplitStacker))
-            self.assertTrue(isinstance(stacker, MergeMedianStacker))
+    def test_merge_split_median_stacker_missing_options(self):
+        """Check that errors are raised when required options are missing"""
+        options_and_values = [
+            ("weighted", "False"),
+            ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
+                            f"{THIS_DIR}/data/split_writer.fits.gz")),
+        ]
 
-        def test_merge_split_median_stacker_missing_options(self):
-            """Check that errors are raised when required options are missing"""
-            options_and_values = [
-                ("weighted", "False"),
-                ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
-                                f"{THIS_DIR}/data/split_writer.fits.gz")),
-            ]
+        self.check_missing_options(options_and_values, MergeSplitMedianStacker,
+                                   StackerError, [
+                                       SplitStacker, MedianStacker,
+                                       MergeMedianStacker, MergeStacker, Stacker
+                                   ])
 
-            self.check_missing_options(options_and_values, MergeSplitMedianStacker,
-                                       StackerError, [
-                                           SplitStacker, MedianStacker,
-                                           MergeMedianStacker, MergeStacker, Stacker
-                                       ])
+    def test_merge_split_stacker(self):
+        """Check initialization of MergeSplitStacker"""
+        split_stacker_kwargs = {
+            "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
+        }
+        config = create_merge_stacker_config(split_stacker_kwargs)
+        stacker = MergeSplitStacker(config["stacker"])
 
-        def test_merge_split_stacker(self):
-            """Check initialization of MergeSplitStacker"""
-            split_stacker_kwargs = {
-                "stack list": f"{THIS_DIR}/data/split_writer.fits.gz",
-            }
-            config = create_merge_stacker_config(split_stacker_kwargs)
-            stacker = MergeSplitStacker(config["stacker"])
+        self.assertTrue(isinstance(stacker, MergeSplitStacker))
+        self.assertTrue(isinstance(stacker, MergeStacker))
+        self.assertTrue(isinstance(stacker.groups_info, pd.DataFrame))
+        self.assertTrue(isinstance(stacker.split_catalogue, pd.DataFrame))
+        self.assertTrue(isinstance(stacker.num_groups, int))
 
-            self.assertTrue(isinstance(stacker, MergeSplitStacker))
-            self.assertTrue(isinstance(stacker, MergeStacker))
-            self.assertTrue(isinstance(stacker.groups_info, pd.DataFrame))
-            self.assertTrue(isinstance(stacker.split_catalogue, pd.DataFrame))
-            self.assertTrue(isinstance(stacker.num_groups, int))
-
-            expected_message = "Method 'stack' was not overloaded by child class"
-            with self.assertRaises(StackerError) as context_manager:
-                stacker.stack(NORMALIZED_SPECTRA)
-            self.compare_error_message(context_manager, expected_message)
+        expected_message = "Method 'stack' was not overloaded by child class"
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.stack(NORMALIZED_SPECTRA)
+        self.compare_error_message(context_manager, expected_message)
 
     def test_split_mean_stacker(self):
         """Check initialization of SplitMeanStacker"""

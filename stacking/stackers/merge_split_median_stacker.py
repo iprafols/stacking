@@ -8,7 +8,8 @@ from stacking.stackers.merge_median_stacker import (
 from stacking.stackers.merge_median_stacker import (
     required_options as required_options_merge_median_stacker)
 from stacking.stackers.merge_split_stacker import (MergeSplitStacker, defaults,
-                                             accepted_options, required_options)
+                                                   accepted_options,
+                                                   required_options)
 from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
