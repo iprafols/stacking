@@ -14,6 +14,7 @@ class StandardWriter(Writer):
     Methods
     -------
     (see Writer in stacking/writer.py)
+    write_results
 
     Attributes
     ----------
@@ -49,7 +50,19 @@ class StandardWriter(Writer):
                         array=stacker.stacked_weight),
         ]
         hdu = fits.BinTableHDU.from_columns(cols_spectrum, name="STACK")
-        # TODO: add description of columns
+        desc = {
+            "TTYPE1": "wavelength array",
+            "TFORM1": "data format of field: float (32-bit)",
+            "TDISP1": "display format for column",
+            "TTYPE2": "normalized stacked flux",
+            "TFORM2": "data format of field: float (32-bit)",
+            "TDISP2": "display format for column",
+            "TTYPE3": "total weight in stack flux",
+            "TFORM3": "data format of field: float (32-bit)",
+            "TDISP3": "display format for column",
+        }
+        for key, value in desc.items():
+            hdu.header.comments[key] = value
 
         hdul = fits.HDUList([primary_hdu, hdu])
         hdul.writeto(filename, overwrite=self.overwrite, checksum=True)

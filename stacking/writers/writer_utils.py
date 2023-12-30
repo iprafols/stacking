@@ -5,6 +5,11 @@ from astropy.io import fits
 
 from stacking._version import __version__
 
+COLUMNS_DESCRIPTION = {
+    "Z": "redshift",
+    "SPECID": "spectru, id",
+}
+
 
 def get_primary_hdu(stacker):
     """Prepare the primary HDU

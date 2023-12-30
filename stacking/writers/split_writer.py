@@ -1,4 +1,6 @@
 """ This module defines the class SplitWriter to write stack results using splits"""
+import logging
+
 from astropy.io import fits
 
 from stacking.errors import WriterError
@@ -6,7 +8,7 @@ from stacking.spectrum import Spectrum
 from stacking.writer import Writer
 from stacking.writer import (  # pylint: disable=unused-import
     defaults, accepted_options, required_options)
-from stacking.writers.writer_utils import get_primary_hdu
+from stacking.writers.writer_utils import get_primary_hdu, COLUMNS_DESCRIPTION
 
 
 class SplitWriter(Writer):
@@ -15,11 +17,27 @@ class SplitWriter(Writer):
     Methods
     -------
     (see Writer in stacking/writer.py)
+    __init__
+    write_results
 
     Attributes
     ----------
-    (see Writer in stacking/writer.py
+    (see Writer in stacking/writer.py)
+
+    logger: logging.Logger
+    Logger object
     """
+
+    def __init__(self, config):
+        """Initialize class instance
+
+        Arguments
+        ---------
+        config: configparser.SectionProxy
+        Parsed options to initialize class
+        """
+        self.logger = logging.getLogger(__name__)
+        super().__init__(config)
 
     def write_results(self, stacker):
         """Write the results
@@ -47,7 +65,7 @@ class SplitWriter(Writer):
             elif dtype in ["int32", "int64"]:
                 cols_metadata.append(
                     fits.Column(name=col,
-                                format="K",
+                                format="J",
                                 disp="I10",
                                 array=stacker.split_catalogue[col].values))
             # this should never enter unless new splits types are added
@@ -61,7 +79,40 @@ class SplitWriter(Writer):
                     "Otherwise contact 'stacking' developpers.")
         hdu_metadata = fits.BinTableHDU.from_columns(cols_metadata,
                                                      name="METADATA_SPECTRA")
-        # TODO: add description of columns
+        for key in hdu_metadata.header:
+            if key.startswith("TDISP"):
+                hdu_metadata.header.comments[key] = "display format for column"
+            elif key.startswith("TFORM"):
+                if hdu_metadata.header[key].endswith("A"):
+                    hdu_metadata.header.comments[
+                        key] = f"data format of field: str ({hdu_metadata.header[key][:-1]} chars)"
+                elif hdu_metadata.header[key] == "E":
+                    hdu_metadata.header.comments[
+                        key] = "data format of field: float (32-bit)"
+                elif hdu_metadata.header[key] == "J":
+                    hdu_metadata.header.comments[
+                        key] = "data format of field: int (32-bit)"
+                # this should never enter unless new variables need to be saved
+                # with double precision
+                else:  # pragma: no cover
+                    raise WriterError(
+                        "Error writing fits file. Cannot assign comment for field "
+                        f"{key}. Please review changes in method `write_results` "
+                        "or contact 'stacking' developpers.")
+            elif key.startswith("TTYPE"):
+                if hdu_metadata.header[key].startswith("GROUP"):
+                    hdu_metadata.header.comments[key] = "group number"
+                elif hdu_metadata.header[key] in COLUMNS_DESCRIPTION:
+                    hdu_metadata.header.comments[key] = COLUMNS_DESCRIPTION.get(
+                        hdu_metadata.header[key])
+                else:
+                    message = (
+                        "I don't know which comment to add to field "
+                        f"{hdu_metadata.header.comments[key]}. I will leave it"
+                        "empty. If you want it added, add its description to "
+                        "variable `COLUMNS_DESCRIPTION` in file `writers/writer_utils.py`"
+                        "and rerun.")
+                    self.logger.warning(message)
 
         # groups info
         cols_splits = []
@@ -76,7 +127,7 @@ class SplitWriter(Writer):
             elif dtype in ["int32", "int64"]:
                 cols_splits.append(
                     fits.Column(name=col,
-                                format="K",
+                                format="J",
                                 disp="I10",
                                 array=stacker.groups_info[col].values))
             else:
@@ -87,8 +138,43 @@ class SplitWriter(Writer):
                                 array=stacker.groups_info[col].values))
         hdu_splits = fits.BinTableHDU.from_columns(cols_splits,
                                                    name="GROUPS_INFO")
-        hdu_splits.header["NGROUPS"] = stacker.num_groups
-        # TODO: add description of columns
+        hdu_splits.header["NGROUPS"] = (stacker.num_groups, "Number of groups")
+        for key in hdu_splits.header:
+            if key.startswith("TDISP"):
+                hdu_splits.header.comments[key] = "display format for column"
+            elif key.startswith("TFORM"):
+                if hdu_splits.header[key].endswith("A"):
+                    hdu_splits.header.comments[
+                        key] = f"data format of field: str ({hdu_splits.header[key][:-1]} chars)"
+                elif hdu_splits.header[key] == "E":
+                    hdu_splits.header.comments[
+                        key] = "data format of field: float (32-bit)"
+                elif hdu_splits.header[key] == "J":
+                    hdu_splits.header.comments[
+                        key] = "data format of field: int (32-bit)"
+                # this should never enter unless new variables need to be saved
+                # with double precision
+                else:  # pragma: no cover
+                    raise WriterError(
+                        "Error writing fits file. Cannot assign comment for field "
+                        f"{key}. Please review changes in method `write_results` "
+                        "or contact 'stacking' developpers.")
+            elif key.startswith("TTYPE"):
+                if hdu_splits.header[key].startswith("VARIABLE"):
+                    hdu_splits.header.comments[
+                        key] = "variable used to perform the split"
+                elif hdu_splits.header[key].startswith("MIN_VALUE"):
+                    hdu_splits.header.comments[
+                        key] = "minimum value to enter the split (included)"
+                elif hdu_splits.header[key].startswith("MAX_VALUE"):
+                    hdu_splits.header.comments[
+                        key] = "maximum value to enter the split (excluded)"
+                elif hdu_splits.header[key] == "COLNAME":
+                    hdu_splits.header.comments[
+                        key] = "Relevant group column for the split"
+                elif hdu_splits.header[key] == "GROUP_NUM":
+                    hdu_splits.header.comments[
+                        key] = "Group number for the split"
 
         # fluxes and weights
         cols_spectra = [
@@ -106,7 +192,31 @@ class SplitWriter(Writer):
                         array=stacker.stacked_weight),
         ]
         hdu = fits.BinTableHDU.from_columns(cols_spectra, name="STACK")
-        # TODO: add description of columns
+        desc = {
+            "TTYPE1":
+                "wavelength array",
+            "TFORM1":
+                "data format of field: float (32-bit)",
+            "TDISP1":
+                "display format for column",
+            "TTYPE2":
+                "normalized stacked flux arrays",
+            "TFORM2":
+                f"data format of field: {stacker.num_groups} * float (32-bit)",
+            "TDISP2":
+                "display format for column",
+            "TTYPE3":
+                "total weight in stack flux arrays",
+            "TFORM3":
+                f"data format of field: {stacker.num_groups} * float (32-bit)",
+            "TDISP3":
+                "display format for column",
+        }
+        for key, value in desc.items():
+            hdu.header.comments[key] = value
+        hdu.header["COMMENT"] = (
+            "To access arrays for split n do `data['STACKED_FLUX'][:,n]` and "
+            "`data['STACKED_WEIGHT'][:,n]`")
 
         hdul = fits.HDUList([
             primary_hdu,
