@@ -108,6 +108,7 @@ class SplitStacker(Stacker):
 
         # add groups
         self.num_groups = None
+        self.groups_info = None
         self.assing_groups()
 
         # This needs to be defined in the child class

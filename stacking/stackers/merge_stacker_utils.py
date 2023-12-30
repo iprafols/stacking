@@ -1,7 +1,9 @@
 """ This module defines the abstract class MergeStacker to compute the stack
 using different partial runs"""
 from astropy.io import fits
+from astropy.table import Table
 import numpy as np
+import pandas as pd
 
 from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
@@ -61,3 +63,65 @@ def load_stacks(stack_list):
         stacks.append((flux, weight))
 
     return stacks
+
+def load_splits_info(stack_list):
+    """ Load split info from previous runs
+
+    Arguments
+    ---------
+    stack_list: list of str
+    Fits files containing the stacks. All files should have the same wavelength
+    grid
+
+    Return
+    ------
+    groups_info: pd.DataFrame
+    DataFrame containing the group information
+
+    num_groups: int
+    Number of groups the data is split on
+
+    split_catalogue: pd.DataFrame
+    The catalogue to be split
+
+    Raise
+    -----
+    StackerError if
+    """
+    groups_info = None
+    num_groups = None
+    partial_split_catalogues = []
+
+    for file in stack_list:
+        # read data from file
+        groups_info_file = Table.read(file, hdu="GROUPS_INFO").to_pandas()
+        partial_split_catalogue_file = Table.read(file, hdu="METADATA_SPECTRA").to_pandas()
+        hdul = fits.open(file)
+        # disabling pylint no-members as they are false positives here
+        num_groups_file = hdul["GROUPS_INFO"].header["NGROUPS"]  # pylint: disable=no-member
+        hdul.close()
+
+        # now check that files are compatible
+        if groups_info is None:
+            groups_info = groups_info_file
+            num_groups = num_groups_file
+        else:
+            if num_groups != num_groups_file:
+                raise StackerError(
+                    "Error loading splits info. I expected all the files to have "
+                    "the same number of groups but found different values: "
+                    f"{num_groups} and {num_groups_file}")
+            if not groups_info.equals(groups_info_file):
+                raise StackerError(
+                    "Error loading splits info. I expected all the files to have "
+                    "the same splits, but found different configurations. \n"
+                    f"Info 1:\n{groups_info.to_string()}\nInfo 2:\n"
+                    f"{groups_info_file.to_string()}")
+
+        # add catalogue to list
+        partial_split_catalogues.append(partial_split_catalogue_file)
+
+
+    split_catalogue = pd.concat(partial_split_catalogues)
+
+    return groups_info, num_groups, split_catalogue

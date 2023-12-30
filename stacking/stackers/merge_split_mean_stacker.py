@@ -7,7 +7,7 @@ from stacking.stackers.merge_mean_stacker import (
     accepted_options as accepted_options_merge_mean_stacker)
 from stacking.stackers.merge_mean_stacker import (
     required_options as required_options_merge_mean_stacker)
-from stacking.stackers.split_stacker import (SplitStacker, defaults,
+from stacking.stackers.merge_split_stacker import (MergeSplitStacker, defaults,
                                              accepted_options, required_options)
 from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
@@ -21,38 +21,17 @@ required_options = update_required_options(required_options,
 ASSOCIATED_WRITER = "SplitWriter"
 
 
-# TODO: update this class
-# - Do this after the SplitWriter is written
-# - Create a new class called SplitMergeStack that loads the data
-# - Overwrite stack method to more efficiently perform the merge in all groups
-class SplitMergeMeanStacker(SplitStacker):
+class MergeSplitMeanStacker(MergeSplitStacker, MergeMeanStacker):
     """Class to compute mulitple stacks splitting on one
     or more properties of the spectra. Uses class MergeMeanStacker
 
     Methods
     -------
-    (see Stacker in stacking/stacker.py)
-    __init__
+    (see MergeSplitStacker in stacking/stackers/merge_split_stacker.py)
+    (see MergeMeanStacker in stacking/stackers/merge_mean_stacker.py)
 
     Attributes
     ----------
-    (see Stacker in stacking/stacker.py)
-
-    stackers: list of Stacker
-    Stacker instances that will contain the stacked spectra for each of the groups
-    Must be initialized by the child class
+    (see MergeSplitStacker in stacking/stackers/merge_split_stacker.py)
+    (see MergeMeanStacker in stacking/stackers/merge_mean_stacker.py)
     """
-
-    def __init__(self, config):
-        """Initialize class instance
-
-        Arguments
-        ---------
-        config: configparser.SectionProxy
-        Parsed options to initialize class
-        """
-        super().__init__(config)
-
-        self.stackers = [
-            MergeMeanStacker(config) for _ in range(self.num_groups)
-        ]
