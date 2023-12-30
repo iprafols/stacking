@@ -25,12 +25,12 @@ class SplitMeanStacker(SplitStacker):
 
     Methods
     -------
-    (see Stacker in stacking/stacker.py)
+    (see SplitStacker in stacking/stackers/split_stacker.py)
     __init__
 
     Attributes
     ----------
-    (see Stacker in stacking/stacker.py)
+    (see SplitStacker in stacking/stackers/split_stacker.py)
 
     stackers: list of Stacker
     Stacker instances that will contain the stacked spectra for each of the groups

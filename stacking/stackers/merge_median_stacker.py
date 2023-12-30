@@ -30,11 +30,13 @@ class MergeMedianStacker(MergeStacker, MedianStacker):
     Methods
     -------
     (see MergeStacker in stacking/stacker.py)
+    (see MedianStacker in stacking/stackers/median_stacker.py)
     stack
 
     Attributes
     ----------
     (see MergeStacker in stacking/stacker.py)
+    (see MedianStacker in stacking/stackers/median_stacker.py)
     """
 
     def stack(self, spectra):
