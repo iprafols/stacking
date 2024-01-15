@@ -1,6 +1,6 @@
 """This file defines variables needed for different tests"""
 from configparser import ConfigParser
-from copy import copy
+from copy import copy, deepcopy
 import os
 
 import numpy as np
@@ -74,17 +74,21 @@ config_split_stacker.read_dict({
             f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
         "split on":
             "Z",
-        "split type":
-            "OR",
         "split cuts":
             "[1.0 1.5 2.0]",
         "sigma_I":
             0.05,
     }
 })
+config_split_stacker_or = deepcopy(config_split_stacker)
+config_split_stacker_or["stacker"]["split type"] = "OR"
+config_split_stacker_and = deepcopy(config_split_stacker)
+config_split_stacker_and["stacker"]["split type"] = "AND"
 for key, value in defaults_split_mean_stacker.items():
-    if key not in config["stacker"]:
-        config_split_stacker["stacker"][key] = str(value)
+    if key not in config_split_stacker_or["stacker"]:
+        config_split_stacker_or["stacker"][key] = str(value)
+    if key not in config_split_stacker_and["stacker"]:
+        config_split_stacker_and["stacker"][key] = str(value)
 
 # read spectra
 reader = Dr16Reader(config["reader"])
@@ -160,8 +164,10 @@ stacker = MeanStacker(config["stacker"])
 stacker.stack(NORMALIZED_SPECTRA)
 
 # split stacker
-split_stacker = SplitMeanStacker(config_split_stacker["stacker"])
-split_stacker.stack(NORMALIZED_SPECTRA)
+split_stacker_or = SplitMeanStacker(config_split_stacker_or["stacker"])
+split_stacker_or.stack(NORMALIZED_SPECTRA)
+split_stacker_and = SplitMeanStacker(config_split_stacker_and["stacker"])
+split_stacker_and.stack(NORMALIZED_SPECTRA)
 
 # Resets
 # this must happen at the very end of the module

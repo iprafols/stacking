@@ -83,10 +83,7 @@ class SplitWriter(Writer):
             if key.startswith("TDISP"):
                 hdu_metadata.header.comments[key] = "display format for column"
             elif key.startswith("TFORM"):
-                if hdu_metadata.header[key].endswith("A"):
-                    hdu_metadata.header.comments[
-                        key] = f"data format of field: str ({hdu_metadata.header[key][:-1]} chars)"
-                elif hdu_metadata.header[key] == "E":
+                if hdu_metadata.header[key] == "E":
                     hdu_metadata.header.comments[
                         key] = "data format of field: float (32-bit)"
                 elif hdu_metadata.header[key] == "J":

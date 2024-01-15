@@ -6,7 +6,7 @@ import unittest
 
 from stacking.errors import WriterError
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.utils import stacker, split_stacker
+from stacking.tests.utils import stacker, split_stacker_or, split_stacker_and
 from stacking.writer import Writer, ACCEPTED_SAVE_FORMATS
 from stacking.writer import defaults as defaults_writer
 from stacking.writers.split_writer import SplitWriter
@@ -58,8 +58,41 @@ class WriterTest(AbstractTest):
         out_dir = f"{THIS_DIR}/results/"
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
-        out_file = "split_writer.fits.gz"
-        test_file = f"{THIS_DIR}/data/split_writer.fits.gz"
+
+        # case 1: split type = 'or'
+        out_file = "split_writer_or.fits.gz"
+        test_file = f"{THIS_DIR}/data/split_writer_or.fits.gz"
+
+        config = create_writer_config({
+            "output directory": out_dir,
+            "output file": out_file,
+            "overwrite": "True",
+        })
+        writer = SplitWriter(config["writer"])
+        writer.write_results(split_stacker_or)
+        self.compare_fits(test_file, out_dir + out_file)
+
+        # case 1: split type = 'and'
+        out_file = "split_writer_and.fits.gz"
+        test_file = f"{THIS_DIR}/data/split_writer_and.fits.gz"
+
+        config = create_writer_config({
+            "output directory": out_dir,
+            "output file": out_file,
+            "overwrite": "True",
+        })
+        writer = SplitWriter(config["writer"])
+        writer.write_results(split_stacker_and)
+        self.compare_fits(test_file, out_dir + out_file)
+
+    def test_split_writer_no_column_desc(self):
+        """Test the class SplitWriter when a some fields do not have
+        column description"""
+        out_dir = f"{THIS_DIR}/results/"
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        out_file = "split_writer_no_column_desc.fits.gz"
+        test_file = f"{THIS_DIR}/data/split_writer_no_column_desc.fits.gz"
 
         config = create_writer_config({
             "output directory": out_dir,
@@ -68,7 +101,13 @@ class WriterTest(AbstractTest):
         })
         writer = SplitWriter(config["writer"])
 
-        writer.write_results(split_stacker)
+        # modify catalogue in stacker so that some column names are not
+        # in variable COLUMNS_DESCRIPTION
+        split_stacker_mod = copy(split_stacker_or)
+        split_stacker_mod.split_catalogue.rename(columns={"Z": "MISSING"},
+                                                 inplace=True)
+
+        writer.write_results(split_stacker_mod)
 
         self.compare_fits(test_file, out_dir + out_file)
 

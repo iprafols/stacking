@@ -450,6 +450,13 @@ class AbstractTest(unittest.TestCase):
 
                 self.report_fits_mismatch_header(orig_file, new_file,
                                                  orig_header, new_header, key)
+            if orig_header.comments[key] != new_header.comments[key]:
+                self.report_fits_mismatch_header(orig_file,
+                                                 new_file,
+                                                 orig_header,
+                                                 new_header,
+                                                 key,
+                                                 comments=True)
         for key in new_header:
             if key not in orig_header:
                 self.report_fits_mismatch_header(orig_file,
@@ -545,7 +552,8 @@ class AbstractTest(unittest.TestCase):
                                     orig_header,
                                     new_header,
                                     key,
-                                    missing_key=None):
+                                    missing_key=None,
+                                    comments=False):
         """Print messages to give more details on a mismatch when comparing
         headers in fits files
 
@@ -568,6 +576,10 @@ class AbstractTest(unittest.TestCase):
 
         missing_key: "new", "orig" or None - Default: None
         HDU where the key is missing. None if it is present in both
+
+        comments: bool - Default: False
+        True if the problem is with the header comment related to this key
+        False if the problem is with the header value related to this key
         """
         report_mismatch(orig_file, new_file)
 
@@ -576,8 +588,13 @@ class AbstractTest(unittest.TestCase):
                 print(f"\n For header {orig_header['EXTNAME']}")
             else:
                 print("For nameless header (possibly a PrimaryHDU)")
-            print(f"Different values found for key {key}: "
-                  f"\norig: {orig_header[key]}, \nnew: {new_header[key]}")
+            if comments:
+                print(f"Different comments found for key {key}: "
+                      f"\norig: {orig_header.comments[key]}, \nnew: "
+                      f"{new_header.comments[key]}")
+            else:
+                print(f"Different values found for key {key}: "
+                      f"\norig: {orig_header[key]}, \nnew: {new_header[key]}")
 
         else:
             print(f"key {key} missing in {missing_key} header")
