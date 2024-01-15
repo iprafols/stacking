@@ -172,6 +172,13 @@ class SplitWriter(Writer):
                 elif hdu_splits.header[key] == "GROUP_NUM":
                     hdu_splits.header.comments[
                         key] = "Group number for the split"
+                # this should never enter unless new variables need to be saved
+                # and are not correctly added
+                else:  # pragma: no cover
+                    raise WriterError(
+                        "Error writing fits file. Cannot assign comment for field "
+                        f"{key}. Please review changes in method `write_results` "
+                        "or contact 'stacking' developpers.")
 
         # fluxes and weights
         cols_spectra = [
