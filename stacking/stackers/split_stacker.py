@@ -9,8 +9,7 @@ import pandas as pd
 from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
 from stacking.stacker import Stacker
-from stacking.stacker import (  # pylint: disable=unused-import
-    defaults, accepted_options, required_options)
+from stacking.stacker import defaults, accepted_options, required_options
 from stacking.stackers.split_stacker_utils import (
     assign_group_multiple_cuts,
     assign_group_one_cut,
@@ -19,6 +18,8 @@ from stacking.stackers.split_stacker_utils import (
     format_splits,
     retreive_group_number,
 )
+from stacking.utils import (update_accepted_options, update_default_options,
+                            update_required_options)
 
 VALID_SPLIT_TYPES = [
     # the split will be performed independently in the different variables,
@@ -28,6 +29,15 @@ VALID_SPLIT_TYPES = [
     # thus, a spectrum can enter only one splits
     "AND"
 ]
+
+accepted_options = update_accepted_options(accepted_options, [
+    "specid name", "split catalogue name", "split on", "split cuts",
+    "split type"
+])
+defaults = update_default_options(defaults, {"split type": "OR"})
+required_options = update_required_options(
+    required_options,
+    ["specid name", "split catalogue name", "split on", "split cuts"])
 
 
 class SplitStacker(Stacker):
