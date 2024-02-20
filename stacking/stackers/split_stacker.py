@@ -31,13 +31,17 @@ VALID_SPLIT_TYPES = [
 ]
 
 accepted_options = update_accepted_options(accepted_options, [
-    "specid name", "split catalogue name", "split on", "split cuts",
-    "split type"
+    "catalogue HDU name", "specid name", "split catalogue name", "split on",
+    "split cuts", "split type"
 ])
-defaults = update_default_options(defaults, {"split type": "OR"})
-required_options = update_required_options(
-    required_options,
-    ["specid name", "split catalogue name", "split on", "split cuts"])
+defaults = update_default_options(defaults, {
+    "split type": "OR",
+    "catalogue HDU name": "CATALOG",
+})
+required_options = update_required_options(required_options, [
+    "catalogue HDU name", "specid name", "split catalogue name", "split on",
+    "split cuts"
+])
 
 
 class SplitStacker(Stacker):
@@ -56,6 +60,10 @@ class SplitStacker(Stacker):
     Attributes
     ----------
     (see Stacker in stacking/stacker.py)
+
+    catalogue_hdu_name: str
+    Name of the HDU in `split_catalogue_name` that contains the actual catalogue
+    to split
 
     logger: logging.Logger
     Logger object
@@ -106,6 +114,7 @@ class SplitStacker(Stacker):
         self.logger = logging.getLogger(__name__)
         super().__init__(config)
 
+        self.catalogue_hdu_name = None
         self.specid_name = None
         self.split_catalogue_name = None
         self.split_on = None
@@ -138,6 +147,12 @@ class SplitStacker(Stacker):
         StackerError if variables are not properly formatted
         StackerError if variables are not coherent
         """
+        self.catalogue_hdu_name = config.get("catalogue HDU name")
+        if self.catalogue_hdu_name is None:
+            raise StackerError(
+                "Missing argument 'catalogue HDU name' required by "
+                "SplitStacker")
+
         self.specid_name = config.get("specid name")
         if self.specid_name is None:
             raise StackerError("Missing argument 'specid name' required by "
@@ -280,7 +295,8 @@ class SplitStacker(Stacker):
         self.logger.progress("Reading catalogue from %s",
                              self.split_catalogue_name)
         try:
-            catalogue = Table.read(self.split_catalogue_name, hdu="CATALOG")
+            catalogue = Table.read(self.split_catalogue_name,
+                                   hdu=self.catalogue_hdu_name)
         except FileNotFoundError as error:
             raise StackerError("SplitStacker: Could not find catalogue: "
                                f"{self.split_catalogue_name}") from error

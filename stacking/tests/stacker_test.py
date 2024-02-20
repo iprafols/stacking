@@ -48,6 +48,7 @@ SPLIT_STACKER_KWARGS = {
 }
 
 SPLIT_STACKER_OPTIONS_AND_VALUES = [
+    ("catalogue HDU name", "CATALOG"),
     ("specid name", "THING_ID"),
     ("split catalogue name",
      f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
