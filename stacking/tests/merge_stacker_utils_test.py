@@ -33,9 +33,9 @@ class MergeStackerUtilsTest(AbstractTest):
         """Test function load_splits_info"""
         test_file = f"{THIS_DIR}/data/split_writer.fits.gz"
         hdu = fits.open(test_file)
-        test_z = list(hdu["METADATA_SPECTRA"].data["Z"]) * 2  # pylint: disable=no-member
-        test_specid = list(hdu["METADATA_SPECTRA"].data["SPECID"]) * 2  # pylint: disable=no-member
-        test_group0 = list(hdu["METADATA_SPECTRA"].data["GROUP_0"]) * 2  # pylint: disable=no-member
+        test_z = list(hdu["METADATA_SPECTRA"].data["Z"])  # pylint: disable=no-member
+        test_specid = list(hdu["METADATA_SPECTRA"].data["SPECID"])  # pylint: disable=no-member
+        test_group0 = list(hdu["METADATA_SPECTRA"].data["GROUP_0"])  # pylint: disable=no-member
 
         hdu.close()
 
@@ -55,7 +55,7 @@ class MergeStackerUtilsTest(AbstractTest):
         self.assertTrue(all(groups_info["COLNAME"] == b"GROUP_0"))
         self.assertTrue(np.allclose(groups_info["GROUP_NUM"], [0, 1]))
         self.assertEqual(num_groups, 2)
-        self.assertEqual(split_catalogue.shape[0], 79 * 2)
+        self.assertEqual(split_catalogue.shape[0], 79)
         self.assertEqual(split_catalogue.shape[1], 3)
         self.assertTrue("Z" in split_catalogue.columns)
         self.assertTrue("SPECID" in split_catalogue.columns)
