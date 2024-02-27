@@ -105,7 +105,7 @@ class SplitWriter(Writer):
                 else:
                     message = (
                         "I don't know which comment to add to field "
-                        f"{hdu_metadata.header.comments[key]}. I will leave it"
+                        f"{hdu_metadata.header[key]}. I will leave it"
                         "empty. If you want it added, add its description to "
                         "variable `COLUMNS_DESCRIPTION` in file `writers/writer_utils.py`"
                         "and rerun.")

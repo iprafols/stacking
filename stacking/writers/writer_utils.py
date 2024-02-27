@@ -6,8 +6,10 @@ from astropy.io import fits
 from stacking._version import __version__
 
 COLUMNS_DESCRIPTION = {
+    "LOG_MBH": "log10 of black hole mass",
     "Z": "redshift",
-    "SPECID": "spectru, id",
+    "SPECID": "spectrum id",
+    "REDSHIFT": "redshift",
 }
 
 

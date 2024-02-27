@@ -208,6 +208,8 @@ class SplitStacker(Stacker):
         the split. Else, it split_type is AND-like, then assing a single group
         number
         """
+        self.logger.progress("Assigning groups")
+
         self.num_groups = 0
         if self.split_type == "OR":
             groups = []
@@ -280,6 +282,8 @@ class SplitStacker(Stacker):
                 "that you added the behaviour of the new mode to method `assing_groups`. "
                 "Otherwise contact 'stacking' developpers.")
 
+        self.logger.progress("Groups assigned")
+
     def read_catalogue(self):
         """Read the catalogue to do the splits
 
@@ -294,6 +298,7 @@ class SplitStacker(Stacker):
         """
         self.logger.progress("Reading catalogue from %s",
                              self.split_catalogue_name)
+        self.logger.progress("Reading HDU '%s'", self.catalogue_hdu_name)
         try:
             catalogue = Table.read(self.split_catalogue_name,
                                    hdu=self.catalogue_hdu_name)
@@ -306,6 +311,8 @@ class SplitStacker(Stacker):
         split_catalogue = catalogue[keep_columns].to_pandas()
         split_catalogue.rename(columns={self.specid_name: "SPECID"},
                                inplace=True)
+
+        self.logger.progress("Catalogue read")
 
         return split_catalogue
 

@@ -210,10 +210,12 @@ class StackingInterface:
         """ Stack spectra """
         if self.stack_spectra_flag:
             start_time = time.time()
-            self.logger.info("Stacking data")
 
+            self.logger.info("Initilalizing stacker")
             stacker_type, stacker_arguments = self.config.stacker
             self.stacker = stacker_type(stacker_arguments)
+
+            self.logger.info("Stacking data")
             self.stacker.stack(self.spectra)
 
             end_time = time.time()
