@@ -91,12 +91,12 @@ def load_splits_info(stack_list):
     """
     groups_info = None
     num_groups = None
-    partial_split_catalogues = []
+    split_catalogue = None
 
     for file in stack_list:
         # read data from file
         groups_info_file = Table.read(file, hdu="GROUPS_INFO").to_pandas()
-        partial_split_catalogue_file = Table.read(
+        split_catalogue_file = Table.read(
             file, hdu="METADATA_SPECTRA").to_pandas()
         hdul = fits.open(file)
         # disabling pylint no-members as they are false positives here
@@ -107,6 +107,7 @@ def load_splits_info(stack_list):
         if groups_info is None:
             groups_info = groups_info_file
             num_groups = num_groups_file
+            split_catalogue = split_catalogue_file
         else:
             if num_groups != num_groups_file:
                 raise StackerError(
@@ -119,10 +120,11 @@ def load_splits_info(stack_list):
                     "the same splits, but found different configurations. \n"
                     f"Info 1:\n{groups_info.to_string()}\nInfo 2:\n"
                     f"{groups_info_file.to_string()}")
-
-        # add catalogue to list
-        partial_split_catalogues.append(partial_split_catalogue_file)
-
-    split_catalogue = pd.concat(partial_split_catalogues)
+            if not split_catalogue.equals(split_catalogue_file):
+                raise StackerError(
+                    "Error loading splits info. I expected all the files to have "
+                    "the same spliting catalogue, but found different configurations. \n"
+                    f"Info 1:\n{split_catalogues.to_string()}\nInfo 2:\n"
+                    f"{split_catalogue_file.to_string()}")
 
     return groups_info, num_groups, split_catalogue
