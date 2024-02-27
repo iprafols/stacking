@@ -3,7 +3,6 @@ using different partial runs"""
 from astropy.io import fits
 from astropy.table import Table
 import numpy as np
-import pandas as pd
 
 from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
@@ -96,8 +95,8 @@ def load_splits_info(stack_list):
     for file in stack_list:
         # read data from file
         groups_info_file = Table.read(file, hdu="GROUPS_INFO").to_pandas()
-        split_catalogue_file = Table.read(
-            file, hdu="METADATA_SPECTRA").to_pandas()
+        split_catalogue_file = Table.read(file,
+                                          hdu="METADATA_SPECTRA").to_pandas()
         hdul = fits.open(file)
         # disabling pylint no-members as they are false positives here
         num_groups_file = hdul["GROUPS_INFO"].header["NGROUPS"]  # pylint: disable=no-member
@@ -124,7 +123,7 @@ def load_splits_info(stack_list):
                 raise StackerError(
                     "Error loading splits info. I expected all the files to have "
                     "the same spliting catalogue, but found different configurations. \n"
-                    f"Info 1:\n{split_catalogues.to_string()}\nInfo 2:\n"
+                    f"Info 1:\n{split_catalogue.to_string()}\nInfo 2:\n"
                     f"{split_catalogue_file.to_string()}")
 
     return groups_info, num_groups, split_catalogue
