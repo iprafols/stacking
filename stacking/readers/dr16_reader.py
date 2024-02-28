@@ -313,7 +313,7 @@ class Dr16Reader(Reader):
                              self.z_min, np.sum(keep_rows))
         keep_rows &= catalogue['Z'] < self.z_max
         self.logger.progress("and z < %.2f         : nb object in cat = %d",
-                             self.z_min, np.sum(keep_rows))
+                             self.z_max, np.sum(keep_rows))
 
         ## BAL visual
         if not self.keep_bal and self.max_balnicity_index is None:
