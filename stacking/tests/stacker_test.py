@@ -455,12 +455,13 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # case "OR" should have one group column per variable
         # expecting 5 columns: Z, BI_CIV, SPECID, GROUP_0 and GROUP_1
         # the first three columns are added as __init__ also calls read_catalogue
-        self.assertTrue(stacker.split_catalogue.columns.size == 5)
+        self.assertTrue(stacker.split_catalogue.columns.size == 6)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
         self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
         self.assertTrue(stacker.split_catalogue.columns[2] == "SPECID")
-        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
-        self.assertTrue(stacker.split_catalogue.columns[4] == "GROUP_1")
+        self.assertTrue(stacker.split_catalogue.columns[3] == "IN_STACK")
+        self.assertTrue(stacker.split_catalogue.columns[4] == "GROUP_0")
+        self.assertTrue(stacker.split_catalogue.columns[5] == "GROUP_1")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
 
         # save output and check against expectations
@@ -488,11 +489,12 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # case "OR" should have one group column per variable
         # expecting 5 columns: Z, BI_CIV, SPECID, GROUP
         # the first three columns are added as __init__ also calls read_catalogue
-        self.assertTrue(stacker.split_catalogue.columns.size == 4)
+        self.assertTrue(stacker.split_catalogue.columns.size == 5)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
         self.assertTrue(stacker.split_catalogue.columns[1] == "BI_CIV")
         self.assertTrue(stacker.split_catalogue.columns[2] == "SPECID")
-        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP")
+        self.assertTrue(stacker.split_catalogue.columns[3] == "IN_STACK")
+        self.assertTrue(stacker.split_catalogue.columns[4] == "GROUP")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
 
         # save output and check against expectations
@@ -551,11 +553,12 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         stacker = SplitStacker(config["stacker"])
 
         # __init__ calls the method read_catalogue
-        self.assertTrue(stacker.split_catalogue.columns.size == 3)
+        self.assertTrue(stacker.split_catalogue.columns.size == 4)
         self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
         self.assertTrue(stacker.split_catalogue.columns[1] == "SPECID")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "IN_STACK")
         # this third column is added as __init__ also calls method assing_groups
-        self.assertTrue(stacker.split_catalogue.columns[2] == "GROUP_0")
+        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
         self.assertTrue(stacker.split_catalogue.shape[0] == 79)
 
         # case 2: missing file

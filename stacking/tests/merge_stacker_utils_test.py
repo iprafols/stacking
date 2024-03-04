@@ -36,6 +36,7 @@ class MergeStackerUtilsTest(AbstractTest):
         test_z = list(hdu["METADATA_SPECTRA"].data["Z"])  # pylint: disable=no-member
         test_specid = list(hdu["METADATA_SPECTRA"].data["SPECID"])  # pylint: disable=no-member
         test_group0 = list(hdu["METADATA_SPECTRA"].data["GROUP_0"])  # pylint: disable=no-member
+        test_in_stack = list(hdu["METADATA_SPECTRA"].data["IN_STACK"])  # pylint: disable=no-member
 
         hdu.close()
 
@@ -56,13 +57,15 @@ class MergeStackerUtilsTest(AbstractTest):
         self.assertTrue(np.allclose(groups_info["GROUP_NUM"], [0, 1]))
         self.assertEqual(num_groups, 2)
         self.assertEqual(split_catalogue.shape[0], 79)
-        self.assertEqual(split_catalogue.shape[1], 3)
+        self.assertEqual(split_catalogue.shape[1], 4)
         self.assertTrue("Z" in split_catalogue.columns)
         self.assertTrue("SPECID" in split_catalogue.columns)
         self.assertTrue("GROUP_0" in split_catalogue.columns)
+        self.assertTrue("IN_STACK" in split_catalogue.columns)
         self.assertTrue(np.allclose(split_catalogue["Z"], test_z))
         self.assertTrue(np.allclose(split_catalogue["SPECID"], test_specid))
         self.assertTrue(np.allclose(split_catalogue["GROUP_0"], test_group0))
+        self.assertTrue(np.allclose(split_catalogue["IN_STACK"], test_in_stack))
 
         # case 2: wrong num_groups
         expected_message = (

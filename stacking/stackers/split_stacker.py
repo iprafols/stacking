@@ -311,6 +311,7 @@ class SplitStacker(Stacker):
         split_catalogue = catalogue[keep_columns].to_pandas()
         split_catalogue.rename(columns={self.specid_name: "SPECID"},
                                inplace=True)
+        split_catalogue["IN_STACK"] = False
 
         self.logger.progress("Catalogue read")
 
@@ -368,3 +369,11 @@ class SplitStacker(Stacker):
 
             self.stacked_flux[:, group_number] = stacker.stacked_flux
             self.stacked_weight[:, group_number] = stacker.stacked_weight
+
+            # update statistics
+            selected_specids = [
+                spectrum.specid for spectrum in selected_spectra
+            ]
+            self.split_catalogue.loc[
+                self.split_catalogue["SPECID"].isin(selected_specids),
+                "IN_STACK"] = True

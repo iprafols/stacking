@@ -119,11 +119,16 @@ def load_splits_info(stack_list):
                     "the same splits, but found different configurations. \n"
                     f"Info 1:\n{groups_info.to_string()}\nInfo 2:\n"
                     f"{groups_info_file.to_string()}")
-            if not split_catalogue.equals(split_catalogue_file):
+            # All columns except for IN_STACK should be the same
+            cols = [col for col in split_catalogue.columns if col != "IN_STACK"]
+            if not split_catalogue[cols].equals(split_catalogue_file[cols]):  # pylint: disable=unsubscriptable-object
                 raise StackerError(
                     "Error loading splits info. I expected all the files to have "
                     "the same spliting catalogue, but found different configurations. \n"
                     f"Info 1:\n{split_catalogue.to_string()}\nInfo 2:\n"
                     f"{split_catalogue_file.to_string()}")
+            # update column IN_STACK
+            split_catalogue["IN_STACK"] = split_catalogue[  # pylint: disable=unsubscriptable-object,unsupported-assignment-operation
+                "IN_STACK"] | split_catalogue_file["IN_STACK"]
 
     return groups_info, num_groups, split_catalogue

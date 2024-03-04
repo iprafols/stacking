@@ -68,6 +68,13 @@ class SplitWriter(Writer):
                                 format="J",
                                 disp="I10",
                                 array=stacker.split_catalogue[col].values))
+            elif dtype in ["bool"]:
+                cols_metadata.append(
+                    fits.Column(name=col,
+                                format="L",
+                                disp="L1",
+                                array=stacker.split_catalogue[col].values))
+
             # this should never enter unless new splits types are added
             # (e.g. using characters)
             else:  # pragma: no cover
@@ -89,6 +96,9 @@ class SplitWriter(Writer):
                 elif hdu_metadata.header[key] == "J":
                     hdu_metadata.header.comments[
                         key] = "data format of field: int (32-bit)"
+                elif hdu_metadata.header[key] == "L":
+                    hdu_metadata.header.comments[
+                        key] = "data format of field: boolean"
                 # this should never enter unless new variables need to be saved
                 # with double precision
                 else:  # pragma: no cover
