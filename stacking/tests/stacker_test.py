@@ -123,6 +123,30 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # compare with test
         self.compare_ascii_numeric(test_file, out_file)
 
+    def run_split_stacker_read_catalogue(self, stacker_kwargs):
+        """Initialize a split and read the split catalogue
+        ("{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"). Check that the
+        catalogue is properly loaded
+
+        Arguments
+        ---------
+        stacker_kwargs: dict
+        Dictionary with the stacker initalization options. In particular the
+        "split catalogue name" shoul be pointing to
+        "{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"
+        """
+        config = create_split_stacker_config(stacker_kwargs)
+        stacker = SplitStacker(config["stacker"])
+
+        # __init__ calls the method read_catalogue
+        self.assertTrue(stacker.split_catalogue.columns.size == 4)
+        self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
+        self.assertTrue(stacker.split_catalogue.columns[1] == "SPECID")
+        self.assertTrue(stacker.split_catalogue.columns[2] == "IN_STACK")
+        # this third column is added as __init__ also calls method assing_groups
+        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
+        self.assertTrue(stacker.split_catalogue.shape[0] == 79)
+
     def test_mean_stacker(self):
         """Test the class MeanStacker"""
         out_file = f"{THIS_DIR}/results/mean_stacking.txt"
@@ -549,25 +573,32 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
     def test_split_stacker_read_catalogue(self):
         """Check method read_catalogue from SplitStacker"""
         # case 1: normal execution
-        config = create_split_stacker_config(SPLIT_STACKER_KWARGS)
-        stacker = SplitStacker(config["stacker"])
-
-        # __init__ calls the method read_catalogue
-        self.assertTrue(stacker.split_catalogue.columns.size == 4)
-        self.assertTrue(stacker.split_catalogue.columns[0] == "Z")
-        self.assertTrue(stacker.split_catalogue.columns[1] == "SPECID")
-        self.assertTrue(stacker.split_catalogue.columns[2] == "IN_STACK")
-        # this third column is added as __init__ also calls method assing_groups
-        self.assertTrue(stacker.split_catalogue.columns[3] == "GROUP_0")
-        self.assertTrue(stacker.split_catalogue.shape[0] == 79)
+        self.run_split_stacker_read_catalogue(SPLIT_STACKER_KWARGS)
 
         # case 2: missing file
         # calling read_catalogue should raise an error
+        config = create_split_stacker_config(SPLIT_STACKER_KWARGS)
         config["stacker"]["split catalogue name"] = "missing.fits"
         expected_message = "SplitStacker: Could not find catalogue: missing.fits"
         with self.assertRaises(StackerError) as context_manager:
             SplitStacker(config["stacker"])
         self.compare_error_message(context_manager, expected_message)
+
+        # case 3: access HDU by number (correct execution)
+        stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        stacker_kwargs["catalogue HDU name or number"] = "1"
+        self.run_split_stacker_read_catalogue(stacker_kwargs)
+
+        # case 4: acess HDU by number, wrong number
+        # calling read_catalogue should raise an error
+        stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
+        stacker_kwargs["catalogue HDU name or number"] = "99"
+        print(stacker_kwargs)
+        expected_message = "SplitStacker: Problem reading HDU 99"
+        # uncomment this when astropy raises errors instead of warnings
+        #with self.assertRaises(StackerError) as context_manager:
+        #    self.run_split_stacker_read_catalogue(stacker_kwargs)
+        #self.compare_error_message(context_manager, expected_message)
 
     def test_split_stacker_stack(self):
         """Check method stack from SplitStacker"""

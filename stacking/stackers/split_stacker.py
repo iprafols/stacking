@@ -304,7 +304,11 @@ class SplitStacker(Stacker):
         try:
             catalogue = Table.read(self.split_catalogue_name,
                                    hdu=self.catalogue_hdu_name_or_number)
-        except KeyError:
+        # we are currently not accessing this as astropy reads the first HDU
+        # when it does not find the correct key. However, we do not delete this
+        # check as it is currently raining a DeprecationWarning that will soon
+        # turn to an error
+        except KeyError: # pragma: no cover
             self.logger.warning(
                 "Error reading HDU '%s'. Maybe it is was a name but rather a "
                 "number. I will try this and come back to you",
@@ -315,7 +319,7 @@ class SplitStacker(Stacker):
                                            self.catalogue_hdu_name_or_number))
             except ValueError as error:
                 raise StackerError(
-                    "SplitStacker: Problem readin HDU: "
+                    "SplitStacker: Problem reading HDU "
                     f"{self.catalogue_hdu_name_or_number}") from error
             self.logger.ok_warning("Catalogue read properly")
 
