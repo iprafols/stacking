@@ -95,6 +95,25 @@ class MergeStackerUtilsTest(AbstractTest):
             ])
         self.compare_error_message(context_manager, expected_message)
 
+        # case 3: wrong split_catalogue
+        expected_message = (
+            "Error loading splits info. I expected all the files to have "
+            "the same spliting catalogue, but found different configurations. \n"
+            "Info 1:\n          Z     SPECID  IN_STACK  GROUP_0\n"
+            "0  1.478620  427104307      True        0\n"
+            "1  2.304159  427513857     False       -1\n"
+            "2  2.272401  427878017     False       -1\n"
+            "Info 2:\n          Z     SPECID  IN_STACK  GROUP_0\n"
+            "0  1.478620  427104307      True        0\n"
+            "1  2.304159  427513857     False        0\n"
+            "2  2.272401  427878017     False        0")
+        with self.assertRaises(StackerError) as context_manager:
+            load_splits_info([
+                f"{THIS_DIR}/data/split_writer_small_split_catalogue.fits.gz",
+                f"{THIS_DIR}/data/split_writer_wrong_split_catalogue.fits.gz",
+            ])
+        self.compare_error_message(context_manager, expected_message)
+
     def test_load_stacks(self):
         """Test function load_stacks"""
         test_file = f"{THIS_DIR}/data/standard_writer.fits.gz"
