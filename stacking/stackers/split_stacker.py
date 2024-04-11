@@ -31,16 +31,16 @@ VALID_SPLIT_TYPES = [
 ]
 
 accepted_options = update_accepted_options(accepted_options, [
-    "catalogue HDU name", "specid name", "split catalogue name", "split on",
-    "split cuts", "split type"
+    "catalogue HDU name or number", "specid name", "split catalogue name",
+    "split on", "split cuts", "split type"
 ])
 defaults = update_default_options(defaults, {
     "split type": "OR",
-    "catalogue HDU name": "CATALOG",
+    "catalogue HDU name or number": "CATALOG",
 })
 required_options = update_required_options(required_options, [
-    "catalogue HDU name", "specid name", "split catalogue name", "split on",
-    "split cuts"
+    "catalogue HDU name or number", "specid name", "split catalogue name",
+    "split on", "split cuts"
 ])
 
 
@@ -61,7 +61,7 @@ class SplitStacker(Stacker):
     ----------
     (see Stacker in stacking/stacker.py)
 
-    catalogue_hdu_name: str
+    catalogue_hdu_name_or_number: str
     Name of the HDU in `split_catalogue_name` that contains the actual catalogue
     to split
 
@@ -114,7 +114,7 @@ class SplitStacker(Stacker):
         self.logger = logging.getLogger(__name__)
         super().__init__(config)
 
-        self.catalogue_hdu_name = None
+        self.catalogue_hdu_name_or_number = None
         self.specid_name = None
         self.split_catalogue_name = None
         self.split_on = None
@@ -147,10 +147,11 @@ class SplitStacker(Stacker):
         StackerError if variables are not properly formatted
         StackerError if variables are not coherent
         """
-        self.catalogue_hdu_name = config.get("catalogue HDU name")
-        if self.catalogue_hdu_name is None:
+        self.catalogue_hdu_name_or_number = config.get(
+            "catalogue HDU name or number")
+        if self.catalogue_hdu_name_or_number is None:
             raise StackerError(
-                "Missing argument 'catalogue HDU name' required by "
+                "Missing argument 'catalogue HDU name or number' required by "
                 "SplitStacker")
 
         self.specid_name = config.get("specid name")
@@ -298,10 +299,26 @@ class SplitStacker(Stacker):
         """
         self.logger.progress("Reading catalogue from %s",
                              self.split_catalogue_name)
-        self.logger.progress("Reading HDU '%s'", self.catalogue_hdu_name)
+        self.logger.progress("Reading HDU '%s'",
+                             self.catalogue_hdu_name_or_number)
         try:
             catalogue = Table.read(self.split_catalogue_name,
-                                   hdu=self.catalogue_hdu_name)
+                                   hdu=self.catalogue_hdu_name_or_number)
+        except KeyError:
+            self.logger.warning(
+                "Error reading HDU '%s'. Maybe it is was a name but rather a "
+                "number. I will try this and come back to you",
+                self.catalogue_hdu_name_or_number)
+            try:
+                catalogue = Table.read(self.split_catalogue_name,
+                                       hdu=int(
+                                           self.catalogue_hdu_name_or_number))
+            except ValueError as error:
+                raise StackerError(
+                    "SplitStacker: Problem readin HDU: "
+                    f"{self.catalogue_hdu_name_or_number}") from error
+            self.logger.ok_warning("Catalogue read properly")
+
         except FileNotFoundError as error:
             raise StackerError("SplitStacker: Could not find catalogue: "
                                f"{self.split_catalogue_name}") from error
