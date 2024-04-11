@@ -159,5 +159,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# OS folder related files
+**/.DS_Store
+
 # Package specific ignores
 stacking/tests/results
