@@ -106,11 +106,11 @@ class NormalizerTest(AbstractTest):
     def test_multiple_regions_normalization(self):
         """Test the class MultipleRegionsNormalization"""
         test_dir = f"{THIS_DIR}/data/multiple_regions_normalization/"
+        out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
 
         for num_processors in [0, 1, 2]:
-            out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
-            if not os.path.exists(out_dir):
-                os.makedirs(out_dir)
             spectra = [copy(spectrum) for spectrum in REBINNED_SPECTRA]
 
             normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
@@ -129,7 +129,7 @@ class NormalizerTest(AbstractTest):
             ]
 
             # save results
-            with open(f"{out_dir}normalized_fluxes.txt", "w",
+            with open(f"{out_dir}normalized_fluxes_num_processors.txt", "w",
                       encoding="utf-8") as results:
                 results.write("# ")
                 for spectrum in spectra:

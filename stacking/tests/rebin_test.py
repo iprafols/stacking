@@ -9,7 +9,8 @@ import numpy as np
 from stacking.errors import RebinError
 from stacking.rebin import defaults as defaults_rebin
 from stacking.rebin import Rebin, VALID_STEP_TYPES
-from stacking.rebin import find_bins as function_find_bins
+from stacking.rebin import find_bins_lin as function_find_bins_lin
+from stacking.rebin import find_bins_log as function_find_bins_log
 from stacking.rebin import rebin as function_rebin
 from stacking.tests.utils import SPECTRA
 from stacking.tests.abstract_test import AbstractTest
@@ -94,7 +95,7 @@ class RebinTest(AbstractTest):
         # compare against expectations
         self.compare_fits(test_file, out_file)
 
-    def test_function_find_bins(self):
+    def test_function_find_bins_lin(self):
         """Test function find_bins"""
         wavelength = np.arange(50)
         common_wavelength_grid = np.arange(0, 50, 2.5)
@@ -105,11 +106,37 @@ class RebinTest(AbstractTest):
         ])
 
         # test function
-        bins_jit = function_find_bins(wavelength, common_wavelength_grid)
+        bins_jit = function_find_bins_lin(wavelength, common_wavelength_grid)
         self.assertTrue(np.allclose(bins_jit, expected_bins))
 
-        bins_python = function_find_bins.py_func(wavelength,
-                                                 common_wavelength_grid)
+        bins_python = function_find_bins_lin.py_func(wavelength,
+                                                     common_wavelength_grid)
+        self.assertTrue(np.allclose(bins_jit, bins_python))
+
+    def test_function_find_bins_log(self):
+        """Test function find_bins"""
+        log_wavelength = np.array([
+            3.5562825, 3.5563225, 3.5565825, 3.5566225, 3.5568825, 3.5569225,
+            3.5571825, 3.5572225, 3.5574825, 3.5575225
+        ])
+        common_log_wavelength_grid = np.array([
+            3.5562, 3.5564, 3.5566, 3.5568, 3.5570, 3.5572, 3.5574, 3.5576
+        ])
+        expected_bins = np.array([
+            0, 1, 2, 2, 3, 4, 5, 5, 6, 7
+        ])
+
+        wavelength = 10**log_wavelength
+        common_wavelength_grid = 10**common_log_wavelength_grid
+
+        # test function
+        bins_jit = function_find_bins_log(wavelength, common_wavelength_grid)
+        for i1, i2 in zip(bins_jit, expected_bins):
+            print(i1, i2, np.isclose(i1, i2))
+        self.assertTrue(np.allclose(bins_jit, expected_bins))
+
+        bins_python = function_find_bins_log.py_func(wavelength,
+                                                     common_wavelength_grid)
         self.assertTrue(np.allclose(bins_jit, bins_python))
 
     def test_function_rebin(self):
@@ -127,12 +154,13 @@ class RebinTest(AbstractTest):
 
         # test function
         rebinned_flux_jit, rebinned_ivar_jit = function_rebin(
-            flux, ivar, wavelength, common_wavelength_grid)
+            flux, ivar, wavelength, common_wavelength_grid,
+            function_find_bins_lin)
         self.assertTrue(np.allclose(rebinned_flux_jit, expected_rebin_flux))
         self.assertTrue(np.allclose(rebinned_ivar_jit, expected_rebin_ivar))
 
         rebinned_flux_python, rebinned_ivar_python = function_rebin.py_func(
-            flux, ivar, wavelength, common_wavelength_grid)
+            flux, ivar, wavelength, common_wavelength_grid, function_find_bins_lin)
         self.assertTrue(np.allclose(rebinned_flux_jit, rebinned_flux_python))
         self.assertTrue(np.allclose(rebinned_ivar_jit, rebinned_ivar_python))
 

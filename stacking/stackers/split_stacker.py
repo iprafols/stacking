@@ -308,7 +308,7 @@ class SplitStacker(Stacker):
         # when it does not find the correct key. However, we do not delete this
         # check as it is currently raining a DeprecationWarning that will soon
         # turn to an error
-        except KeyError: # pragma: no cover
+        except KeyError:  # pragma: no cover
             self.logger.warning(
                 "Error reading HDU '%s'. Maybe it is was a name but rather a "
                 "number. I will try this and come back to you",
