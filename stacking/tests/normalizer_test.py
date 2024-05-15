@@ -129,7 +129,8 @@ class NormalizerTest(AbstractTest):
             ]
 
             # save results
-            with open(f"{out_dir}normalized_fluxes_num_processors.txt", "w",
+            with open(f"{out_dir}normalized_fluxes_num_processors.txt",
+                      "w",
                       encoding="utf-8") as results:
                 results.write("# ")
                 for spectrum in spectra:
