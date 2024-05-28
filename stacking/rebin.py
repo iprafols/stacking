@@ -83,15 +83,19 @@ class Rebin:
                 spectrum.ivar,
                 wavelength,
                 self.common_wavelength_grid,
-                find_bins_lin,
             )
         elif self.step_type == "log":
             rebinned_flux, rebinned_ivar = rebin(
                 spectrum.flux,
                 spectrum.ivar,
+                # the log10 is needed since we are assuming the wavelength
+                # solution to have constant step in the logarithm of the
+                # wavelength
                 np.log10(wavelength),
+                # in this case this contains the logarithm of the wavelength
+                # this is done to avoid computing the logarithm of this variable
+                # many times over
                 self.common_wavelength_grid,
-                find_bins_log,
             )
         # this should never enter unless new step types are not properly added
         else:  # pragma: no cover
@@ -201,7 +205,7 @@ class Rebin:
 
 
 @njit()
-def find_bins_lin(original_array, grid_array):
+def find_bins(original_array, grid_array):
     """For each element in original_array, find the corresponding bin in grid_array
 
     This function assumes that wavelength grid that is evenly spaced on wavelength
@@ -225,36 +229,8 @@ def find_bins_lin(original_array, grid_array):
     return found_bin
 
 
-@njit()
-def find_bins_log(original_array, grid_array):
-    """For each element in original_array, find the corresponding bin in grid_array
-
-    This function assumes that wavelength grid that is evenly spaced on the
-    logarithm of the wavelength
-
-    Arguments
-    ---------
-    original_array: array of float
-    Read array
-
-    grid_array: array of float
-    Common array
-
-    Return
-    ------
-    found_bin: array of int
-    An array of size original_array.size filled with values smaller than
-    grid_array.size with the bins correspondance
-    """
-    aux = np.log10(grid_array[:2])
-    step = aux[1] - aux[0]
-    found_bin = ((np.log10(original_array) - aux[0]) / step + 0.5).astype(
-        np.int64)
-    return found_bin
-
-
 @njit
-def rebin(flux, ivar, wavelength, common_wavelength_grid, find_bins):
+def rebin(flux, ivar, wavelength, common_wavelength_grid):
     """Rebin the arrays and update control variables
     Rebinned arrays are flux, ivar, lambda_ or log_lambda, and
     transmission_correction. Control variables are mean_snr
@@ -272,13 +248,6 @@ def rebin(flux, ivar, wavelength, common_wavelength_grid, find_bins):
 
     common_wavelength_grid: array of float
     The common wavelength grid (in Angstroms)
-
-    find_bins: function
-    Function that, for each element in original_array, finds the
-    corresponding bin in grid_array. Signature must be
-    find_bins(original_array, grid_array)
-    Expected to be one of the two functions find_bins_log or find_bins_lin
-    defined in this module
 
     Return
     ------
