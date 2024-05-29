@@ -348,11 +348,12 @@ class NormalizerTest(AbstractTest):
 
     def test_multiple_regions_normalization_missing_options(self):
         """Check that errors are raised when required options are missing"""
-        options_and_values = [("intervals",
-                               "1300 - 1500, 2000 - 2600, 4400 - 4800"),
-                              ("log directory", f"{THIS_DIR}/results/"),
-                              ("main interval", "1"), ("num processors", "1"),
-                              ("save format", "fits.gz"), ("sigma_I", "0.05")]
+        options_and_values = [
+            ("intervals", "1300 - 1500, 2000 - 2600, 4400 - 4800"),
+            ("log directory", f"{THIS_DIR}/results/"), ("main interval", "1"),
+            ("min norm sn", "0.05"), ("num processors", "1"),
+            ("save format", "fits.gz"), ("sigma_I", "0.05")
+        ]
 
         self.check_missing_options(options_and_values,
                                    MultipleRegionsNormalization,

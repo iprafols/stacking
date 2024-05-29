@@ -181,13 +181,13 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
                  "chosen interval"]] = norm_factors.apply(
                      select_final_normalisation_factor,
                      axis=1,
-                     args=(CORRECTION_FACTORS,),
+                     args=(CORRECTION_FACTORS, 0.05),
                      result_type='expand',
                  )
 
         self.compare_df(
-            results,
-            NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]])
+            NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]],
+            results)
 
 
 if __name__ == '__main__':

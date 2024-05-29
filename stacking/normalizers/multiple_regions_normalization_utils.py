@@ -240,7 +240,7 @@ def save_norm_intervals_ascii(filename, intervals):
             results.write(f"{intervals[index, 0]} {intervals[index, 1]}\n")
 
 
-def select_final_normalisation_factor(row, correction_factors, min_nrom_sn):
+def select_final_normalisation_factor(row, correction_factors, min_norm_sn):
     """ Select the final normalisation factor
 
     This function should be called using pd.apply with axis=1
@@ -255,7 +255,7 @@ def select_final_normalisation_factor(row, correction_factors, min_nrom_sn):
     correction_factors: array of float
     Correction factors to correct the chosen normalisation factors
 
-    min_nrom_sn: float
+    min_norm_sn: float
     Minimum signal to noise in the normalization interval. Intervals with lower
     signal to noise values are not selected and nans are returned
 
@@ -278,7 +278,7 @@ def select_final_normalisation_factor(row, correction_factors, min_nrom_sn):
             f"norm factor {selected_interval}"] * correction_factors[
                 selected_interval]
         norm_sn = row[f"norm S/N {selected_interval}"]
-        if norm_sn < min_nrom_sn:
+        if norm_sn < min_norm_sn:
             norm_factor = np.nan
             norm_sn = np.nan
             selected_interval = -1
