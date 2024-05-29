@@ -159,9 +159,8 @@ class MultipleRegionsNormalization(Normalizer):
 
         self.min_nrom_sn = config.getfloat("min norm sn")
         if self.min_nrom_sn is None:
-            raise NormalizerError(
-                "Missing argument 'min norm sn' required by "
-                "MultipleRegionsNormalization")
+            raise NormalizerError("Missing argument 'min norm sn' required by "
+                                  "MultipleRegionsNormalization")
         if self.min_nrom_sn < 0:
             raise NormalizerError(
                 "Invalid value for 'min norm sn'. Expected a positive number. "

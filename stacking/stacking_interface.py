@@ -205,7 +205,7 @@ class StackingInterface:
             self.stack_spectra_flag = True
             self.write_results_flag = True
         # # this should never enter unless new run types are not properly added
-        else: # pragma: no cover
+        else:  # pragma: no cover
             raise StackingError("Unrecognised run type. Expeced one of " +
                                 " ".join(ACCEPTED_RUN_TYPES) +
                                 f"Found {self.config.run_type}")
