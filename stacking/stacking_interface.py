@@ -198,13 +198,17 @@ class StackingInterface:
             self.stack_spectra_flag = False
             self.write_results_flag = False
         # merge stack from partial runs
-        # not using else in case we add more modes in the future
-        elif self.config.run_type == "merge stack":  # pragma: no cover
+        elif self.config.run_type == "merge stack":
             self.normalize_spectra_flag = False
             self.read_data_flag = False
             self.rebin_data_flag = False
             self.stack_spectra_flag = True
             self.write_results_flag = True
+        # # this should never enter unless new run types are not properly added
+        else: # pragma: no cover
+            raise StackingError("Unrecognised run type. Expeced one of " +
+                                " ".join(ACCEPTED_RUN_TYPES) +
+                                f"Found {self.config.run_type}")
 
     def stack_spectra(self):
         """ Stack spectra """

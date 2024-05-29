@@ -22,13 +22,14 @@ from stacking.normalizers.multiple_regions_normalization_utils import (
 
 accepted_options = update_accepted_options(accepted_options, [
     "intervals", "load norm factors from", "log directory", "main interval",
-    "num processors", "save format", "sigma_I"
+    "min nrom sn", "num processors", "save format", "sigma_I"
 ])
 required_options = update_required_options(required_options, ["log directory"])
 defaults = update_default_options(
     defaults, {
         "intervals": "1300 - 1500, 2000 - 2600, 4400 - 4800",
         "main interval": 1,
+        "min norm sn": 0.05,
         "save format": "fits.gz",
         "sigma_I": 0.05,
     })
@@ -155,6 +156,16 @@ class MultipleRegionsNormalization(Normalizer):
                 f"{self.main_interval} as main interval, but I only read "
                 f"{len(self.intervals)} intervals (keep in mind the zero-based "
                 "indexing in python)")
+
+        self.min_nrom_sn = config.getfloat("min norm sn")
+        if self.min_nrom_sn is None:
+            raise NormalizerError(
+                "Missing argument 'min norm sn' required by "
+                "MultipleRegionsNormalization")
+        if self.min_nrom_sn < 0:
+            raise NormalizerError(
+                "Invalid value for 'min norm sn'. Expected a positive number. "
+                f"Found: {self.min_nrom_sn}")
 
         self.num_processors = config.getint("num processors")
         if self.num_processors is None:
@@ -396,6 +407,6 @@ class MultipleRegionsNormalization(Normalizer):
                            "chosen interval"]] = self.norm_factors.apply(
                                select_final_normalisation_factor,
                                axis=1,
-                               args=(self.correction_factors,),
+                               args=(self.correction_factors, self.min_nrom_sn),
                                result_type='expand',
                            )
