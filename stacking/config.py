@@ -163,7 +163,7 @@ class Config:
                      logging_level_file=self.logging_level_file)
 
     def __format_section(self, section_name, modules_folder, check_type):
-        """Format the a section of the parser into usable data
+        """Format a section of the parser into usable data
 
         Arguments
         ---------
@@ -192,7 +192,7 @@ class Config:
             raise ConfigError(f"Missing section [{section_name}]")
         section = self.config[section_name]
 
-        # first load the data class
+        # first load the relevant class
         name = section.get("type")
         if name is None:
             raise ConfigError(f"In section [{section_name}], variable 'type' "

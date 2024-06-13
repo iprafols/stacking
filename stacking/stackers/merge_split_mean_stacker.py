@@ -1,5 +1,6 @@
-""" This module defines the class MeanStacker to compute the stack
-using the mean of the stacked values"""
+""" This module defines the class MergeSplitMeanStacker to compute multiple
+stacks splitting on one or more properties of the spectra using the mean of the
+different partial runs"""
 
 from stacking.stackers.merge_mean_stacker import MergeMeanStacker
 from stacking.stackers.merge_mean_stacker import defaults as defaults_merge_mean_stacker
@@ -23,7 +24,7 @@ ASSOCIATED_WRITER = "SplitWriter"
 
 
 class MergeSplitMeanStacker(MergeSplitStacker, MergeMeanStacker):
-    """Class to compute mulitple stacks splitting on one
+    """Class to compute multiple stacks splitting on one
     or more properties of the spectra. Uses class MergeMeanStacker
 
     Methods

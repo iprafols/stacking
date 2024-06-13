@@ -1,5 +1,6 @@
-""" This module defines the class MeanStacker to compute the stack
-using the mean of the stacked values"""
+""" This module defines the class SplitMedianStacker to compute multiple
+stacks splitting on one or more properties of the spectra using the mean of the
+stacked values"""
 
 from stacking.stackers.median_stacker import MedianStacker
 from stacking.stackers.median_stacker import defaults as defaults_median_stacker
@@ -20,7 +21,7 @@ ASSOCIATED_WRITER = "SplitWriter"
 
 
 class SplitMedianStacker(SplitStacker):
-    """Class to compute mulitple stacks splitting on one
+    """Class to compute multiple stacks splitting on one
     or more properties of the spectra. Uses class MedianStacker
 
     Methods

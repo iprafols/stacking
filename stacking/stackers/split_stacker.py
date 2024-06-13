@@ -1,5 +1,6 @@
-""" This module defines the class MeanStacker to compute the stack
-using the mean of the stacked values"""
+""" This module defines the class SplitStacker to compute multiple
+stacks splitting on one or more properties of the spectra"""
+
 import logging
 
 from astropy.table import Table

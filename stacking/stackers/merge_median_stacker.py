@@ -1,5 +1,5 @@
-""" This module defines the class MergeMeanStacker to compute the stack
-using the mean of the different partial runs"""
+""" This module defines the class MergeMedianStacker to compute the stack
+using the median of the different partial runs"""
 import numpy as np
 
 from stacking.errors import StackerError
