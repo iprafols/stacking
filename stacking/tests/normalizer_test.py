@@ -42,6 +42,7 @@ class NormalizerTest(AbstractTest):
     test_multiple_regions_normalization_compute_correction_factors_errors
     test_multiple_regions_normalization_compute_norm_factors
     test_multiple_regions_normalization_invalid_intervals
+    test_multiple_regions_normalization_invalid_min_norm_sn
     test_multiple_regions_normalization_invalid_save_format
     test_multiple_regions_normalization_invalid_sigma_i
     test_multiple_regions_normalization_load_norm_factors
@@ -254,6 +255,17 @@ class NormalizerTest(AbstractTest):
         expected_message = (
             "Invalid value for 'main interval'. Expected a positive integer. "
             "Found: -1")
+        self.run_multiple_regions_normalization_with_errors(
+            normalizer_kwargs, expected_message)
+
+    def test_multiple_regions_normalization_invalid_min_norm_sn(self):
+        """Check the behaviour when the save format is not valid"""
+        normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
+        normalizer_kwargs.update({"min norm sn": "-1.0"})
+
+        expected_message = (
+            "Invalid value for 'min norm sn'. Expected a positive number. "
+            "Found: -1.0")
         self.run_multiple_regions_normalization_with_errors(
             normalizer_kwargs, expected_message)
 

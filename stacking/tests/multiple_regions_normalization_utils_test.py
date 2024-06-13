@@ -176,18 +176,32 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
         """Test function select_final_normalisation_factor"""
         norm_factors = copy(NORM_FACTORS)
 
-        results = pd.DataFrame()
-        results[["norm factor", "norm S/N",
-                 "chosen interval"]] = norm_factors.apply(
-                     select_final_normalisation_factor,
-                     axis=1,
-                     args=(CORRECTION_FACTORS, 0.05),
-                     result_type='expand',
-                 )
+        cases = {
+            "normal run": 0.05,
+            "very large S/N requirement": 100,
+        }
 
-        self.compare_df(
-            NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]],
-            results)
+        for case_name, min_nrom_sn in cases.items():
+            results = pd.DataFrame()
+            results[["norm factor", "norm S/N",
+                     "chosen interval"]] = norm_factors.apply(
+                         select_final_normalisation_factor,
+                         axis=1,
+                         args=(CORRECTION_FACTORS, min_nrom_sn),
+                         result_type='expand',
+                     )
+            if case_name == "normal run":
+                self.compare_df(
+                    NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]],
+                    results)
+            else:
+                comp = copy(NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]])
+                comp["norm factor"] = np.nan
+                comp["norm S/N"] = np.nan
+                comp["chosen interval"] = -1.0
+                self.compare_df(
+                    comp[["norm factor", "norm S/N", "chosen interval"]],
+                    results)
 
 
 if __name__ == '__main__':
