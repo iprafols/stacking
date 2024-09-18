@@ -52,7 +52,10 @@ class BootstrapSplitMeanStacker(BootstrapStacker):
 
         self.main_stacker = SplitMeanStacker(config)
         # TODO: Parallelize this
+        # this is currently too slow
         self.bootstrap_stackers = [
-            SplitMeanStacker(config, groups_info=self.main_stacker.groups_info, split_catalogue=self.main_stacker.split_catalogue) 
+            SplitMeanStacker(config,
+                             groups_info=self.main_stacker.groups_info,
+                             split_catalogue=self.main_stacker.split_catalogue)
             for _ in range(self.num_bootstrap)
         ]

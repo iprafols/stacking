@@ -357,8 +357,9 @@ class Dr16Reader(Reader):
             mjd = row["MJD"]
             fiberid = row["FIBERID"]
 
-            filename = (f"{self.input_directory}/{plate:04d}/spec-{plate:04d}-{mjd}-"
-                        f"{fiberid:04d}.fits")
+            filename = (
+                f"{self.input_directory}/{plate:04d}/spec-{plate:04d}-{mjd}-"
+                f"{fiberid:04d}.fits")
             try:
                 hdul = fitsio.FITS(filename)
             except IOError:

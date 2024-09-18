@@ -54,6 +54,8 @@ class SplitMeanStacker(SplitStacker):
         If not None, then the catalogue will be read from split_catalogue_name
         Otherwise, this must be pandas DataFrame with the previously read catalogue
         """
-        super().__init__(config, groups_info=groups_info, split_catalogue=split_catalogue)
+        super().__init__(config,
+                         groups_info=groups_info,
+                         split_catalogue=split_catalogue)
 
         self.stackers = [MeanStacker(config) for _ in range(self.num_groups)]
