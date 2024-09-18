@@ -1,4 +1,4 @@
-""" This module defines the class SplitWriter to write stack results using splits"""
+""" This module defines the class StandardWriter to write the stack results"""
 from astropy.io import fits
 
 from stacking.writer import Writer
@@ -9,21 +9,17 @@ from stacking.writers.writer_utils import (get_groups_info_hdu,
                                            get_split_stack_hdu)
 
 
-class SplitWriter(Writer):
-    """Class to write the satck results using splits
+class BootstrapSplitWriter(Writer):
+    """Class to write the satck results
 
     Methods
     -------
-    (see Writer in stacking/writer.py)
-    __init__
+    (see StandardWriter in stacking/writer.py)
     write_results
 
     Attributes
     ----------
-    (see Writer in stacking/writer.py)
-
-    logger: logging.Logger
-    Logger object
+    (see StandardWriter in stacking/writer.py
     """
 
     def write_results(self, stacker):
@@ -46,12 +42,15 @@ class SplitWriter(Writer):
         hdu_splits = get_groups_info_hdu(stacker)
 
         # fluxes and weights
-        hdu = get_split_stack_hdu(stacker)
+        hdu = get_split_stack_hdu(stacker, write_errors=True)
 
-        hdul = fits.HDUList([
-            primary_hdu,
-            hdu,
-            hdu_splits,
-            hdu_metadata,
-        ])
+        # bootstrap HDUs
+        bootstrap_hdus = [
+            get_split_stack_hdu(bootstrap_stacker,
+                                hdu_name=f"BOOTSTRAP_{index}") for index,
+            bootstrap_stacker in enumerate(stacker.bootstrap_stackers)
+        ]
+
+        hdul = fits.HDUList([primary_hdu, hdu, hdu_splits, hdu_metadata] +
+                            bootstrap_hdus)
         hdul.writeto(filename, overwrite=self.overwrite, checksum=True)

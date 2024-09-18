@@ -104,13 +104,21 @@ class SplitStacker(Stacker):
     Must be initialized by the child class
     """
 
-    def __init__(self, config):
+    def __init__(self, config, groups_info=None, split_catalogue=None):
         """Initialize class instance
 
         Arguments
         ---------
         config: configparser.SectionProxy
         Parsed options to initialize class
+
+        groups_info: pd.DataFrame or None - default: None
+        If not None, then the groups information will be computed upon initialization. 
+        Otherwise, this must be pandas DataFrame with the previously computed information
+
+        split_catalogue: pd.DataFrame or None - default: None
+        If not None, then the catalogue will be read from split_catalogue_name
+        Otherwise, this must be pandas DataFrame with the previously read catalogue
         """
         self.logger = logging.getLogger(__name__)
         super().__init__(config)
@@ -124,12 +132,19 @@ class SplitStacker(Stacker):
         self.__parse_config(config)
 
         # read the catalogue
-        self.split_catalogue = self.read_catalogue()
+        if split_catalogue is None:
+            self.split_catalogue = self.read_catalogue()
+        else:
+            self.split_catalogue = split_catalogue
 
         # add groups
-        self.num_groups = None
-        self.groups_info = None
-        self.assing_groups()
+        if groups_info is None:
+            self.num_groups = None
+            self.groups_info = None
+            self.assing_groups()
+        else:
+            self.num_groups = groups_info.shape[0]
+            self.groups_info = groups_info
 
         # This needs to be defined in the child class
         self.stackers = []

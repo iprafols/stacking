@@ -3,13 +3,16 @@ using different partial runs"""
 import os
 
 from stacking.errors import StackerError
-from stacking.stacker import Stacker, accepted_options, required_options
-from stacking.stacker import (  # pylint: disable=unused-import
-    defaults)
+from stacking.stacker import Stacker, accepted_options, defaults, required_options
 from stacking.stackers.merge_stacker_utils import load_stacks
-from stacking.utils import update_accepted_options, update_required_options
+from stacking.utils import (update_accepted_options, update_default_options,
+                            update_required_options)
 
-accepted_options = update_accepted_options(accepted_options, ["stack list"])
+accepted_options = update_accepted_options(accepted_options,
+                                           ["hdu name", "stack list"])
+defaults = update_default_options(defaults, {
+    "hdu name": "STACK",
+})
 required_options = update_required_options(required_options, ["stack list"])
 
 
@@ -30,7 +33,8 @@ class MergeStacker(Stacker):
     List of files containing the individual stacks to be merged
 
     stacks: list of (array of float, array of float)
-    Individual stacks to be merged
+    Individual stacks to be merged. Each item contains a tuple with the flux
+    and weight arrays
     """
 
     def __init__(self, config):
@@ -48,9 +52,10 @@ class MergeStacker(Stacker):
         super().__init__(config)
 
         self.stack_list = None
+        self.hdu_name = None
         self.__parse_config(config)
 
-        self.stacks = load_stacks(self.stack_list)
+        self.stacks = load_stacks(self.stack_list, hdu_name=self.hdu_name)
 
     def __parse_config(self, config):
         """Parse the configuration options
@@ -66,6 +71,11 @@ class MergeStacker(Stacker):
         StackerError if the stacking files are missing
         StackerError if the stacking files are not fits files
         """
+        self.hdu_name = config.get("hdu name")
+        if self.hdu_name is None:
+            raise StackerError("Missing argument 'hdu name' required by "
+                               "MergeStacker")
+
         stack_list = config.get("stack list")
         if stack_list is None:
             raise StackerError("Missing argument 'stack list' required by "

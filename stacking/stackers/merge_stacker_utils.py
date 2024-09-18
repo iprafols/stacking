@@ -8,7 +8,7 @@ from stacking.errors import StackerError
 from stacking.spectrum import Spectrum
 
 
-def load_stacks(stack_list):
+def load_stacks(stack_list, hdu_name="STACK"):
     """ Load stacks from previous runs
 
     Arguments
@@ -16,6 +16,9 @@ def load_stacks(stack_list):
     stack_list: list of str
     Fits files containing the stacks. All files should have the same wavelength
     grid
+
+    hdu_name: str - Default: "STACK"
+    Name of the HDU containing the spectra to load
 
     Return
     ------
@@ -32,9 +35,9 @@ def load_stacks(stack_list):
         hdul = fits.open(file)
 
         # disabling pylint no-members as they are false positives here
-        wavelength = hdul["STACK"].data["WAVELENGTH"]  # pylint: disable=no-member
-        flux = hdul["STACK"].data["STACKED_FLUX"]  # pylint: disable=no-member
-        weight = hdul["STACK"].data["STACKED_WEIGHT"]  # pylint: disable=no-member
+        wavelength = hdul[hdu_name].data["WAVELENGTH"]  # pylint: disable=no-member
+        flux = hdul[hdu_name].data["STACKED_FLUX"]  # pylint: disable=no-member
+        weight = hdul[hdu_name].data["STACKED_WEIGHT"]  # pylint: disable=no-member
 
         hdul.close()
 

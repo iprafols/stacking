@@ -357,7 +357,7 @@ class Dr16Reader(Reader):
             mjd = row["MJD"]
             fiberid = row["FIBERID"]
 
-            filename = (f"{self.input_directory}/{plate}/spec-{plate}-{mjd}-"
+            filename = (f"{self.input_directory}/{plate:04d}/spec-{plate:04d}-{mjd}-"
                         f"{fiberid:04d}.fits")
             try:
                 hdul = fitsio.FITS(filename)
@@ -383,7 +383,7 @@ class Dr16Reader(Reader):
         num_read_total = 0
         for (plate, mjd), group in zip(grouped_catalogue.groups.keys,
                                        grouped_catalogue.groups):
-            spplate = f"{self.input_directory}/{plate}/spPlate-{plate:04d}-{mjd}.fits"
+            spplate = f"{self.input_directory}/{plate:04d}/spPlate-{plate:04d}-{mjd}.fits"
             try:
                 hdul = fitsio.FITS(spplate)
                 header = hdul[0].read_header()

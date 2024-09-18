@@ -38,14 +38,22 @@ class SplitMedianStacker(SplitStacker):
     Must be initialized by the child class
     """
 
-    def __init__(self, config):
+    def __init__(self, config, groups_info=None, split_catalogue=None):
         """Initialize class instance
 
         Arguments
         ---------
         config: configparser.SectionProxy
         Parsed options to initialize class
+
+        groups_info: pd.DataFrame or None
+        If not None, then the groups information will be computed upon initialization. 
+        Otherwise, this must be pandas DataFrame with the previously computed information
+
+        split_catalogue: pd.DataFrame or None
+        If not None, then the catalogue will be read from split_catalogue_name
+        Otherwise, this must be pandas DataFrame with the previously read catalogue
         """
-        super().__init__(config)
+        super().__init__(config, groups_info=groups_info, split_catalogue=split_catalogue)
 
         self.stackers = [MedianStacker(config) for _ in range(self.num_groups)]

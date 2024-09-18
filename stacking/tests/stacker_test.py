@@ -35,6 +35,7 @@ MERGE_STACKER_KWARGS = {
 }
 
 MERGE_STACKER_OPTIONS_AND_VALUES = [
+    ("hdu name", "STACK"),
     ("stack list", (f"{THIS_DIR}/data/standard_writer.fits.gz "
                     f"{THIS_DIR}/data/standard_writer.fits.gz")),
 ]
@@ -223,6 +224,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         config = ConfigParser()
         config.read_dict({
             "stacker": {
+                "hdu name": "STACK",
                 "stack list": f"{THIS_DIR}/data/missing_file.fits.gz"
             }
         })
@@ -235,10 +237,12 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
 
         # case 1: invalid format
         config = ConfigParser()
-        config.read_dict(
-            {"stacker": {
+        config.read_dict({
+            "stacker": {
+                "hdu name": "STACK",
                 "stack list": f"{THIS_DIR}/data/mean_stacking.txt"
-            }})
+            }
+        })
         expected_message = ("MergeStacker: Expected a fits file, found "
                             f"{THIS_DIR}/data/mean_stacking.txt")
         with self.assertRaises(StackerError) as context_manager:
@@ -355,6 +359,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
     def test_merge_split_mean_stacker_missing_options(self):
         """Check that errors are raised when required options are missing"""
         options_and_values = [
+            ("hdu name", "STACK"),
             ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
                             f"{THIS_DIR}/data/split_writer.fits.gz")),
         ]
@@ -380,6 +385,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         """Check that errors are raised when required options are missing"""
         options_and_values = [
             ("weighted", "False"),
+            ("hdu name", "STACK"),
             ("stack list", (f"{THIS_DIR}/data/split_writer.fits.gz "
                             f"{THIS_DIR}/data/split_writer.fits.gz")),
         ]

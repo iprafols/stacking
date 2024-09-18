@@ -7,18 +7,17 @@ from stacking.writer import (  # pylint: disable=unused-import
 from stacking.writers.writer_utils import get_primary_hdu, get_simple_stack_hdu
 
 
-class StandardWriter(Writer):
+class BootstrapWriter(Writer):
     """Class to write the satck results
 
     Methods
     -------
-    (see Writer in stacking/writer.py)
-    get_stack_hdu
+    (see StandardWriter in stacking/writer.py)
     write_results
 
     Attributes
     ----------
-    (see Writer in stacking/writer.py
+    (see StandardWriter in stacking/writer.py
     """
 
     def write_results(self, stacker):
@@ -35,7 +34,14 @@ class StandardWriter(Writer):
         primary_hdu = get_primary_hdu(stacker)
 
         # stack HDU
-        hdu = get_simple_stack_hdu(stacker)
+        hdu = get_simple_stack_hdu(stacker.main_stacker, write_errors=True)
 
-        hdul = fits.HDUList([primary_hdu, hdu])
+        # bootstrap HDUs
+        bootstrap_hdus = [
+            get_simple_stack_hdu(bootstrap_stacker,
+                                 hdu_name=f"BOOTSTRAP_{index}") for index,
+            bootstrap_stacker in enumerate(stacker.bootstrap_stackers)
+        ]
+
+        hdul = fits.HDUList([primary_hdu, hdu] + bootstrap_hdus)
         hdul.writeto(filename, overwrite=self.overwrite, checksum=True)

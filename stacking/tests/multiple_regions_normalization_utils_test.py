@@ -192,10 +192,12 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
                      )
             if case_name == "normal run":
                 self.compare_df(
-                    NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]],
-                    results)
+                    NORM_FACTORS[["norm factor", "norm S/N",
+                                  "chosen interval"]], results)
             else:
-                comp = copy(NORM_FACTORS[["norm factor", "norm S/N", "chosen interval"]])
+                comp = copy(
+                    NORM_FACTORS[["norm factor", "norm S/N",
+                                  "chosen interval"]])
                 comp["norm factor"] = np.nan
                 comp["norm S/N"] = np.nan
                 comp["chosen interval"] = -1.0

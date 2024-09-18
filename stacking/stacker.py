@@ -45,7 +45,28 @@ class Stacker:
                 "Spectrum.common_wavelength_grid must be set to initialize any "
                 "Stacker instances")
         self.stacked_flux = np.zeros(Spectrum.common_wavelength_grid.size)
+        self.stacked_error = np.zeros(Spectrum.common_wavelength_grid.size)
         self.stacked_weight = np.zeros(Spectrum.common_wavelength_grid.size)
+
+    def set_stacked_error(self, stacked_error):
+        """ Set the stacked error
+
+        Arguments
+        ---------
+        stacked_error: np.array
+        The stacked error
+
+        Raise
+        -----
+        StackerError if the shape of the passed array does not match the
+        existing array
+        """
+        if stacked_error.shape != self.stacked_error.shape:
+            raise StackerError(
+                "Invalid array when attempting to set the stack error. Shapes "
+                f"do not match. Expected {self.stacked_error.shape}. Found "
+                f"{stacked_error.shape}")
+        self.stacked_error = stacked_error
 
     def stack(self, spectra):
         """ Stack spectra
