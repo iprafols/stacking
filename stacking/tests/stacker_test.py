@@ -24,7 +24,8 @@ from stacking.stackers.split_stacker import SplitStacker, VALID_SPLIT_TYPES
 from stacking.stackers.split_stacker import defaults as defaults_split_stacker
 from stacking.stacker import Stacker
 from stacking.tests.abstract_test import AbstractTest
-from stacking.tests.utils import COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA
+from stacking.tests.utils import (COMMON_WAVELENGTH_GRID, NORMALIZED_SPECTRA,
+                                  config_split_stacker_or, split_stacker_or)
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ["THIS_DIR"] = THIS_DIR
@@ -533,6 +534,20 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         stacker.groups_info.to_csv(out_file_groups, sep=" ", index=False)
         self.compare_ascii(test_file_groups, out_file_groups)
 
+    def test_split_stacker_fast_init(self):
+        """Check the initialization of the splitStacker when catalogue and groups_info 
+        are passed to the constructor"""
+        # case: split_type == "OR"
+        stacker = SplitStacker(config_split_stacker_or["stacker"],
+                               groups_info=split_stacker_or.groups_info,
+                               split_catalogue=split_stacker_or.split_catalogue)
+
+        self.assertTrue(
+            stacker.split_catalogue.equals(split_stacker_or.split_catalogue))
+        self.assertTrue(stacker.groups_info.equals(
+            split_stacker_or.groups_info))
+        self.assertTrue(stacker.num_groups == split_stacker_or.num_groups)
+
     def test_split_stacker_inconsistent_split_cuts_and_split_on(self):
         """Check the behaviour when 'split cuts' is not consistent with
         'split on'
@@ -693,7 +708,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.compare_ascii_numeric(test_file, out_file)
 
     def test_stacker(self):
-        """Test the abstract normalizer"""
+        """Test the abstract stacker"""
         config = ConfigParser()
         config.read_dict({"stacker": {}})
         stacker = Stacker(config["stacker"])
@@ -714,8 +729,22 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
             stacker.stack(NORMALIZED_SPECTRA)
         self.compare_error_message(context_manager, expected_message)
 
+    def test_stacker_set_stacked_error(self):
+        """Test the method set_stacked_error from Stacker"""
+        config = ConfigParser()
+        config.read_dict({"stacker": {}})
+        stacker = Stacker(config["stacker"])
+
+        self.assertTrue(
+            np.allclose(stacker.stacked_error,
+                        np.zeros_like(stacker.stacked_flux)))
+        stacker.set_stacked_error(np.arange(stacker.stacked_error.size))
+        self.assertTrue(
+            np.allclose(stacker.stacked_error,
+                        np.arange(stacker.stacked_error.size)))
+
     def test_stacker_unset_spectrum(self):
-        """Test the abstract normalizer"""
+        """Test the abstract stacker when Spectrum is not set"""
         config = ConfigParser()
         config.read_dict({"stacker": {}})
 
