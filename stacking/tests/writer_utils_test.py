@@ -77,6 +77,10 @@ class WriterUtilsTest(AbstractTest):
         for key in hdu.header:
             self.assertTrue(key in HEADER_KEYS_METADATA)
         self.assertTrue(hdu.data.shape == (79,))
+        print(hdu.header)
+        print(split_stacker_or.split_catalogue.columns)
+        print(hdu.data["Z"])
+        print(split_stacker_or.split_catalogue["Z"])
         self.assertTrue(
             np.allclose(hdu.data["Z"], split_stacker_or.split_catalogue["Z"]))
         self.assertTrue(
