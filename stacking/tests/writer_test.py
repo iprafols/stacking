@@ -1,6 +1,6 @@
 """This file contains writer tests"""
 from configparser import ConfigParser
-from copy import copy
+from copy import copy, deepcopy
 import os
 import unittest
 
@@ -103,7 +103,7 @@ class WriterTest(AbstractTest):
 
         # modify catalogue in stacker so that some column names are not
         # in variable COLUMNS_DESCRIPTION
-        split_stacker_mod = copy(split_stacker_or)
+        split_stacker_mod = deepcopy(split_stacker_or)
         split_stacker_mod.split_catalogue.rename(columns={"Z": "MISSING"},
                                                  inplace=True)
 
