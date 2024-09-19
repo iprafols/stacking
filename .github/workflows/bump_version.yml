@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.PAT_IPR_TOKEN_ACTION }}
 
     - name: Setup git
       run: |
@@ -44,5 +46,5 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.PAT_MW_TOKEN_ACTION }}
+        github_token: ${{ secrets.PAT_IPR_TOKEN_ACTION }}
         tags: true
