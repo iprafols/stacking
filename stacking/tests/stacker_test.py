@@ -735,6 +735,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         config.read_dict({"stacker": {}})
         stacker = Stacker(config["stacker"])
 
+        # case 1: normal execution
         self.assertTrue(
             np.allclose(stacker.stacked_error,
                         np.zeros_like(stacker.stacked_flux)))
@@ -742,6 +743,14 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         self.assertTrue(
             np.allclose(stacker.stacked_error,
                         np.arange(stacker.stacked_error.size)))
+
+        # case 2: error in size
+        expected_message = (
+            "Invalid array when attempting to set the stack error. Shapes do not match. "
+            "Expected (6989,). Found (10,)")
+        with self.assertRaises(StackerError) as context_manager:
+            stacker.set_stacked_error(np.arange(10))
+        self.compare_error_message(context_manager, expected_message)
 
     def test_stacker_unset_spectrum(self):
         """Test the abstract stacker when Spectrum is not set"""
