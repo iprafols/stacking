@@ -8,8 +8,13 @@ from stacking.stacker import defaults, accepted_options
 from stacking.stacker import required_options  # pylint: disable=unused-import
 from stacking.utils import (update_accepted_options, update_default_options)
 
-accepted_options = update_accepted_options(accepted_options,
-                                           ["num booststrap", "random seed"])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "num booststrap": "Number of bootstrap realizations. **Type: int**",
+        "random seed": "Seed for the random number generator. **Type: int**",
+    })
 defaults = update_default_options(defaults, {
     "num bootstrap": 100,
     "random seed": 65375475,

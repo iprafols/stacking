@@ -91,17 +91,67 @@ class UtilsTest(AbstractTest):
     def test_update_accepted_options(self):
         """Test function update_accepted_options"""
 
-        accepted_options = ["1", "2", "3"]
+        accepted_options = {
+            "1": "first option",
+            "2": "second option",
+            "3": "third option",
+        }
 
         cases = [
             # (new_options, expected_result, remove?)
-            (["1"], ["2", "3"], True),
-            (["3"], ["1", "2"], True),
-            (["2"], ["1", "3"], True),
-            (["1", "2"], ["3"], True),
-            (["0"], ["1", "2", "3"], True),
-            (["2"], ["1", "2", "3"], False),
-            (["0"], ["0", "1", "2", "3"], False),
+            ({
+                "1": "first option"
+            }, {
+                "2": "second option",
+                "3": "third option"
+            }, True),
+            ({
+                "3": "third option"
+            }, {
+                "1": "first option",
+                "2": "second option"
+            }, True),
+            ({
+                "2": "second option"
+            }, {
+                "1": "first option",
+                "3": "third option"
+            }, True),
+            ({
+                "1": "first option",
+                "2": "second option"
+            }, {
+                "3": "third option"
+            }, True),
+            ({
+                "0": "zeroth option"
+            }, {
+                "1": "first option",
+                "2": "second option",
+                "3": "third option"
+            }, True),
+            ({
+                "2": "second option"
+            }, {
+                "1": "first option",
+                "2": "second option",
+                "3": "third option"
+            }, False),
+            ({
+                "2": "modified option"
+            }, {
+                "1": "first option",
+                "2": "modified option",
+                "3": "third option"
+            }, False),
+            ({
+                "0": "zeroth option"
+            }, {
+                "0": "zeroth option",
+                "1": "first option",
+                "2": "second option",
+                "3": "third option"
+            }, False),
         ]
 
         for new_options, expected_result, remove in cases:

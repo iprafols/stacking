@@ -182,7 +182,7 @@ class ConfigTest(AbstractTest):
         in_file = f"{THIS_DIR}/data/config_tests/config_invalid_general_options.ini"
         expected_message = (
             "Unrecognised option in section [general]. Found: 'invalid'. "
-            f"Accepted options are {accepted_general_options}")
+            f"Accepted options are {list(accepted_general_options.keys())}")
         self.check_error(in_file, expected_message)
 
         # check 'log' in general section
@@ -194,10 +194,11 @@ class ConfigTest(AbstractTest):
 
         # check other sections
         in_file = f"{THIS_DIR}/data/config_tests/config_invalid_options.ini"
+        keys_list = list(accepted_options.keys()) + list(
+            accepted_section_options.keys())
         expected_message = (
             "Unrecognised option in section [reader]. Found: 'invalid'. "
-            f"Accepted options are {accepted_options + accepted_section_options}"
-        )
+            f"Accepted options are {keys_list}")
         self.check_error(in_file, expected_message)
 
         # check 'type' in writer section

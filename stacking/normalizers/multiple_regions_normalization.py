@@ -20,10 +20,31 @@ from stacking.normalizers.multiple_regions_normalization_utils import (
     save_norm_factors_ascii, save_norm_factors_fits, save_norm_intervals_ascii,
     select_final_normalisation_factor)
 
-accepted_options = update_accepted_options(accepted_options, [
-    "intervals", "load norm factors from", "log directory", "main interval",
-    "min nrom sn", "num processors", "save format", "sigma_I"
-])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "intervals": (
+            "Normalzation intervals. Expected format is 'start0 - end0, start1 - "
+            "end1, ..., startN - endN' where startX and endX are positive numbers. "
+            "**Type: str**"),
+        "load norm factors from":
+            "Folder where the normalization factors are stored. **Type: str**",
+        "log directory": (
+            "Directory where log data is saved. Normalization factors will be saved "
+            "there. **Type: str**"),
+        "main interval":
+            "Number of main normalization interval. **Type: int**",
+        "min nrom sn":
+            "Minimum S/N for the normalization factor to be considered. **Type: float**",
+        "num processors":
+            "Number of processors to use. **Type: int**",
+        "save format":
+            "Saving format, e.g. 'csv', 'txt', 'fits' or 'fits.gz'. **Type: str**",
+        "sigma_I": (
+            "Additional variance added to the inverse variance of the spectra to suppress "
+            "the brightest pixels. **Type: float**"),
+    })
 required_options = update_required_options(required_options, ["log directory"])
 defaults = update_default_options(
     defaults, {

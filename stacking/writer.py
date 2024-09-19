@@ -2,7 +2,12 @@
 
 from stacking.errors import WriterError
 
-accepted_options = ["output directory", "output file", "overwrite"]
+accepted_options = {
+    # option: description
+    "output directory": "Directory to save the results. **Type: str**",
+    "output file": "Filename to save the results. **Type: str**",
+    "overwrite": "Overwrite the output file if it exists. **Type: bool**"
+}
 required_options = ["output directory", "output file"]
 defaults = {}
 

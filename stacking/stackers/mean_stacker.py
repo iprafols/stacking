@@ -9,7 +9,14 @@ from stacking.utils import update_accepted_options, update_default_options
 
 ASSOCIATED_WRITER = "StandardWriter"
 
-accepted_options = update_accepted_options(accepted_options, ["sigma_I"])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "sigma_I":
+            ("Additional variance added to the inverse variance of the spectra "
+             "to suppress the brightest pixels. **Type: float**"),
+    })
 defaults = update_default_options(defaults, {
     "sigma_I": 0.05,
 })
@@ -26,6 +33,10 @@ class MeanStacker(Stacker):
     Attributes
     ----------
     (see Stacker in stacking/stacker.py)
+
+    sigma_i2: float
+    Additional variance added to the inverse variance of the spectra to suppress the 
+    brightest pixels
     """
 
     def __init__(self, config):

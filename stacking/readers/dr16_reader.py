@@ -15,10 +15,39 @@ from stacking.spectrum import Spectrum
 from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
-accepted_options = update_accepted_options(accepted_options, [
-    "best obs", "drq catalogue", "keep BAL", "max Balnicity Index",
-    "max num spec", "read mode", "skip N first spec", "spAll", "z min", "z max"
-])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "best obs": (
+            "If True, reads only the best observation for quasars with repeated "
+            "observations. **Type: bool**"),
+        "drq catalogue":
+            "Filename of the DRQ catalogue. **Type: str**",
+        "keep BAL": (
+            "If False, remove the quasars flagged as having a Broad Absorption Line. "
+            "Ignored if max_balnicity_index is not None. **Type: bool**"),
+        "max Balnicity Index": (
+            "Maximum value allowed for the Balnicity Index to keep the quasar. None for "
+            "no maximum. **Type: float or None**"),
+        "max num spec": (
+            "Maximum number of spectra to load. None for no maximum. Multiple spectra "
+            "comming from the same line of sight are not counted here. **Type: int or None**"
+        ),
+        "read mode": (
+            "Reading mode. Currently supported reading modes are 'spplate' and 'spec'. "
+            "**Type: str**"),
+        "skip N first spec":
+            "Skip the N first spectra in the catalogue. **Type: int**",
+        "spAll":
+            "Path to the spAll file required for multiple observations. **Type: str**",
+        "z min": (
+            "Minimum redshift. Quasars with redshifts lower than z_min will be discarded. "
+            "**Type: float**"),
+        "z max": (
+            "Maximum redshift. Quasars with redshifts higher than or equal to z_max will be "
+            "discarded. **Type: float**"),
+    })
 
 defaults = update_default_options(
     defaults, {

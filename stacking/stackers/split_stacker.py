@@ -31,10 +31,32 @@ VALID_SPLIT_TYPES = [
     "AND"
 ]
 
-accepted_options = update_accepted_options(accepted_options, [
-    "catalogue HDU name or number", "specid name", "split catalogue name",
-    "split on", "split cuts", "split type"
-])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "catalogue HDU name or number": (
+            "Name or number of the HDU in `split_catalogue_name` that contains "
+            "the actual catalogue to split. **Type: str**"),
+        "specid name":
+            "Name of the column containing the identifier SPECID. **Type: str**",
+        "split catalogue name":
+            "Filename of the catalogue to be split. **Type: str**",
+        "split on": (
+            "List of column name(s) to be split. If more than one column is given, "
+            "then they should be separated by comma (,), semicolon (;), or a white "
+            "space**Type: str**"),
+        "split cuts": (
+            "List of intervals to perform the splits. Splitting variables are delimited "
+            "by a semicolon (;), a comma (,) or a white space. Cuts sets should be "
+            "delimited by the character ';'. Cut values within a given set should be "
+            "delimited by commas and/or whitespaces) **Type: str**"),
+        "split type": (
+            "If 'OR', then the split will be performed independently in the different "
+            "variables (a spectrum can enter multiple splits). If 'AND', the split will "
+            "be performed using all the different variables (a spectrum can enter at "
+            "most one split). **Type: str**"),
+    })
 defaults = update_default_options(defaults, {
     "split type": "OR",
     "catalogue HDU name or number": "CATALOG",
@@ -63,7 +85,7 @@ class SplitStacker(Stacker):
     (see Stacker in stacking/stacker.py)
 
     catalogue_hdu_name_or_number: str
-    Name of the HDU in `split_catalogue_name` that contains the actual catalogue
+    Name or number of the HDU in `split_catalogue_name` that contains the actual catalogue
     to split
 
     logger: logging.Logger

@@ -15,7 +15,7 @@ from stacking.normalizer import Normalizer
 from stacking.reader import Reader
 from stacking.rebin import Rebin
 from stacking.stacker import Stacker
-from stacking.utils import class_from_string, attribute_from_string
+from stacking.utils import class_from_string, attribute_from_string, update_accepted_options
 from stacking.writer import Writer
 
 try:
@@ -25,12 +25,36 @@ try:
 except InvalidGitRepositoryError:  # pragma: no cover
     GIT_HASH = "not known"
 
-accepted_general_options = [
-    "overwrite", "logging level console", "logging level file", "log",
-    "output directory", "num processors", "run type"
-]
+ACCEPTED_RUN_TYPES = ["normal", "merge norm factors", "merge stack"]
 
-accepted_section_options = ["type"]
+accepted_general_options = {
+    # option: description
+    "overwrite":
+        "This variable specifies where to save the results. **Type: str**",
+    "logging level console": (
+        "This variable controls console messages. Must be one of CRITICAL, ERROR, "
+        "WARNING_OK, WARNING, INFO, PROGRESS, DEBUG, NOTSET **Type: str**"),
+    "logging level file": (
+        "This variable controls log messages. Must be one of CRITICAL, ERROR, "
+        "WARNING_OK, WARNING, INFO, PROGRESS, DEBUG, NOTSET. Ignored if `log` is "
+        "`None` **Type: str**"),
+    "log":
+        "If a log file is passed, print messages also there **Type: str**",
+    "output directory":
+        "This variable specifies where to save the results. **Type: str**",
+    "num processors": (
+        "Number of processors to be used for multiprocessed tasks (e.g. data i/o, "
+        "expected flux). 0 for using half the processes available on the machine "
+        "(subprocess will take its default value). **Type: int or None**"),
+    "run type":
+        "Run type. Must be one of '" + "' '".join(ACCEPTED_RUN_TYPES) +
+        "'. **Type: str**",
+}
+
+accepted_section_options = {
+    # option: description
+    "type": "Class to be loaded. **Type: str**",
+}
 
 default_config = {
     "general": {
@@ -218,12 +242,14 @@ class Config:
                 "pattern.")
 
         # check that arguments are valid
-        accepted_options += accepted_section_options.copy()
+        accepted_options = update_accepted_options(
+            accepted_options, accepted_section_options.copy())
         for key in section:
             if key not in accepted_options:
                 raise ConfigError(
                     f"Unrecognised option in section [{section_name}]. "
-                    f"Found: '{key}'. Accepted options are {accepted_options}")
+                    f"Found: '{key}'. Accepted options are {list(accepted_options.keys())}"
+                )
 
         # add num processors if necesssary
         if "num processors" in accepted_options and "num processors" not in section:
@@ -271,7 +297,7 @@ class Config:
             if key not in accepted_general_options:
                 raise ConfigError("Unrecognised option in section [general]. "
                                   f"Found: '{key}'. Accepted options are "
-                                  f"{accepted_general_options}")
+                                  f"{list(accepted_general_options.keys())}")
 
         self.output_directory = section.get("output directory")
         if self.output_directory is None:

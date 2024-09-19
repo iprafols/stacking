@@ -2,7 +2,7 @@
 
 from stacking.errors import NormalizerError
 
-accepted_options = []
+accepted_options = {}
 required_options = []
 defaults = {}
 

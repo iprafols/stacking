@@ -6,9 +6,19 @@ import numpy as np
 from stacking.errors import RebinError
 from stacking.spectrum import Spectrum
 
-accepted_options = [
-    "max wavelength", "min wavelength", "step type", "step wavelength"
-]
+accepted_options = {
+    # option: description
+    "max wavelength":
+        "Maximum wavelength of the common wavelength grid. **Type: float**",
+    "min wavelength":
+        "Minimum wavelength of the common wavelength grid. **Type: float**",
+    "step type": (
+        "Type of step in the common grid. 'lin' means the common grid is equally "
+        "spaced in wavelength. 'log' means it is equally spaced in the logarithm "
+        "of the wavelength. **Type: string**"),
+    "step wavelength":
+        "Step in the common grid. **Type: float**",
+}
 required_options = [
     "max wavelength", "min wavelength", "step type", "step wavelength"
 ]

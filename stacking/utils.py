@@ -121,12 +121,13 @@ def update_accepted_options(accepted_options, new_options, remove=False):
     """
     if remove:
         accepted_options = accepted_options.copy()
-        for item in new_options:
-            if item in accepted_options:
-                accepted_options.remove(item)
+        for key in new_options:
+            if key in accepted_options:
+                del accepted_options[key]
     else:
-        accepted_options = sorted(list(set(accepted_options + new_options)))
-
+        accepted_options = accepted_options.copy()
+        for key, value in new_options.items():
+            accepted_options[key] = value
     return accepted_options
 
 

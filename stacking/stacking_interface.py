@@ -3,12 +3,10 @@ import logging
 import multiprocessing
 import time
 
-from stacking.config import Config
+from stacking.config import Config, ACCEPTED_RUN_TYPES
 from stacking.errors import StackingError
 from stacking.rebin import Rebin
 from stacking.spectrum import Spectrum
-
-ACCEPTED_RUN_TYPES = ["normal", "merge norm factors", "merge stack"]
 
 
 class StackingInterface:

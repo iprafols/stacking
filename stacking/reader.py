@@ -2,7 +2,10 @@
 
 from stacking.errors import ReaderError
 
-accepted_options = ["input directory"]
+accepted_options = {
+    # option: description
+    "input directory": "Directory containing the spectra. **Type: str**",
+}
 required_options = ["input directory"]
 defaults = {}
 

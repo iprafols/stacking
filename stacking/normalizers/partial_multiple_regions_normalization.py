@@ -12,9 +12,13 @@ from stacking.normalizers.multiple_regions_normalization import (  # pylint: dis
 
 from stacking.utils import update_accepted_options, update_default_options
 
-accepted_options = update_accepted_options(accepted_options, [
-    "compute correction factors flag",
-])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "compute correction factors flag":
+            "If True, compute the correction factors. **Type: bool**",
+    })
 accepted_options = update_accepted_options(accepted_options, [
     "load norm factors from",
 ],

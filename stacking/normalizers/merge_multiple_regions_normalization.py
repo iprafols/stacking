@@ -15,8 +15,15 @@ from stacking.normalizers.multiple_regions_normalization_utils import (
 from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
-accepted_options = update_accepted_options(accepted_options,
-                                           ["folders list", "save on list"])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "folders list":
+            "List of folders where the partial runs are stored. **Type: str**",
+        "save on list":
+            "If True, save the normalization factors on the list of folders. **Type: bool**"
+    })
 accepted_options = update_accepted_options(accepted_options, [
     "load norm factors from",
 ],
@@ -52,9 +59,14 @@ class MergeMultipleRegionsNormalization(MultipleRegionsNormalization):
     ----------
     (see MultipleRegionsNormalization in stacking/normalizers/multiple_regions_normalization.py)
 
+    folders_list: list of str
+    List of folders where the partial runs are stored
+
     logger: logging.Logger
     Logger object
 
+    save_on_list: bool
+    If True, save the normalization factors on the list of folders
     """
 
     def __init__(self, config):

@@ -8,8 +8,16 @@ from stacking.stackers.merge_stacker_utils import load_stacks
 from stacking.utils import (update_accepted_options, update_default_options,
                             update_required_options)
 
-accepted_options = update_accepted_options(accepted_options,
-                                           ["hdu name", "stack list"])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "hdu name": (
+            "Name of the HDU to containing the spectra to load. Should be a valid "
+            "HDU in each of the files in stack_list. **Type: str**"),
+        "stack list":
+            "List of files containing the individual stacks to be merged. **Type: str**",
+    })
 defaults = update_default_options(defaults, {
     "hdu name": "STACK",
 })
@@ -28,6 +36,10 @@ class MergeStacker(Stacker):
     Attributes
     ----------
     (see Stacker in stacking/stacker.py)
+
+    hdu_name: str
+    Name of the HDU to containing the spectra to load. Should be a valid HDU in each of 
+    the files in stack_list
 
     stack_list: list of str
     List of files containing the individual stacks to be merged

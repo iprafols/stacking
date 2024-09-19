@@ -10,7 +10,13 @@ from stacking.stacker import (  # pylint: disable=unused-import
     required_options)
 from stacking.utils import update_accepted_options, update_default_options
 
-accepted_options = update_accepted_options(accepted_options, ["weighted"])
+accepted_options = update_accepted_options(
+    accepted_options,
+    {
+        # option: description
+        "weighted": ("If True, then compute the weighted median. Otherwise, "
+                     "compute the regular median. **Type: bool**"),
+    })
 defaults = update_default_options(defaults, {"weighted": False})
 
 ASSOCIATED_WRITER = "StandardWriter"
