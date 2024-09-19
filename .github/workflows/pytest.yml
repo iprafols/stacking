@@ -7,6 +7,8 @@ on:
     paths-ignore:
       - '**/*.md'
   pull_request:
+    branches:
+      - main
     paths-ignore:
       - '**/*.md'
   merge_group:
@@ -61,6 +63,6 @@ jobs:
 
     - name: Coveralls --service=github-actions
       env:
-          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: coveralls
