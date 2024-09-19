@@ -59,8 +59,8 @@ jobs:
         name: test_results_v${{ matrix.python-version }}
         path: /home/runner/work/stacking/stacking/stacking/tests/results
 
-    - name: Coveralls
+    - name: Coveralls --service=github-actions
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: coveralls
