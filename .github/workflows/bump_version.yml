@@ -44,6 +44,7 @@ jobs:
       run: echo "No version bump requested"
       
     - name: Push changes
+      if: ${{ always() && !contains(github.event.head_commit.message, '[no bump]') }}
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.PAT_IPR_TOKEN_ACTION }}
