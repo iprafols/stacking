@@ -6,6 +6,9 @@ on:
       - main
     paths-ignore:
       - '**/*.md'
+    # Skip the workflow if the commit message contains '[skip ci]'
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
 
 jobs:
   bump_version:
@@ -49,4 +52,4 @@ jobs:
       with:
         github_token: ${{ secrets.PAT_IPR_TOKEN_ACTION }}
         tags: true
-        commit_message: "Bump version [no bump]"
+        commit_message: "Bump version [skip bump]"
