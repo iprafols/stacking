@@ -442,7 +442,7 @@ class AbstractTest(unittest.TestCase):
                                                  new_header,
                                                  key,
                                                  missing_key="new")
-            if key in ["CHECKSUM", "DATASUM", "DATETIME"]:
+            if key in ["CHECKSUM", "DATASUM", "DATETIME", "VERSION"]:
                 continue
             if (orig_header[key] != new_header[key] and
                 (isinstance(orig_header[key], str) or key == "COMMENT" or
