@@ -1,2 +1,2 @@
 """ Package version number """
-__version__ = '0.1.34'
+__version__ = '0.1.35'
