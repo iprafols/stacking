@@ -1,17 +1,12 @@
 name: Bump Version
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/*.md'
-    # Skip the workflow if the commit message contains '[skip ci]'
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-
+  pull_request:
+    types: [closed]
 
 jobs:
   bump_version:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -31,23 +26,23 @@ jobs:
       run: pip install bump2version
             
     - name: Increase patch
-      if: ${{ always() && (!contains(github.event.head_commit.message, '[bump major]')) && (!contains(github.event.head_commit.message, '[bump minor]')) && (!contains(github.event.head_commit.message, '[no bump]')) }}
+      if: ${{ always() && !contains(github.event.pull_request.labels.*.name, '[bump major]') && !contains(github.event.pull_request.labels.*.name, '[bump minor]') && !contains(github.event.pull_request.labels.*.name, '[no bump]') }}
       run: bump2version patch --verbose
       
     - name: Bump major version
-      if: ${{ always() && contains(github.event.head_commit.message, '[bump major]') }}
+      if: ${{ always() && contains(github.event.pull_request.labels.*.name, '[bump major]') }}
       run: bump2version major --verbose --tag
       
     - name: Bump minor version
-      if: ${{ always() && contains(github.event.head_commit.message, '[bump minor]') }}
+      if: ${{ always() && contains(github.event.pull_request.labels.*.name, '[bump minor]') }}
       run: bump2version minor --verbose --tag
       
     - name: No version bump
-      if: ${{ always() && contains(github.event.head_commit.message, '[no bump]') }}
+      if: ${{ always() && contains(github.event.pull_request.labels.*.name, '[no bump]') }}
       run: echo "No version bump requested"
       
     - name: Push changes
-      if: ${{ always() && !contains(github.event.head_commit.message, '[no bump]') }}
+      if: ${{ always() && !contains(github.event.pull_request.labels.*.name, '[no bump]') }}
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.PAT_IPR_TOKEN_ACTION }}
