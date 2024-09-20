@@ -29,7 +29,7 @@ jobs:
             
     - name: Increase patch
       if: ${{ always() && (!contains(github.event.head_commit.message, '[bump major]')) && (!contains(github.event.head_commit.message, '[bump minor]')) && (!contains(github.event.head_commit.message, '[no bump]')) }}
-      run: bump2version patch --verbose --new-version 0.1.1 --current-version 0.1.0
+      run: bump2version patch --verbose
       
     - name: Bump major version
       if: ${{ always() && contains(github.event.head_commit.message, '[bump major]') }}
