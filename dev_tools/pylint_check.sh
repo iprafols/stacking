@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-echo "pylint stacking bin"
-pylint stacking bin
+echo "pylint stacking"
+pylint stacking
