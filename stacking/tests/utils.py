@@ -125,7 +125,7 @@ for spectrum in REBINNED_SPECTRA:
 
 # normalization factors
 NORM_FACTORS = pd.read_csv(f"{THIS_DIR}/data/normalization_factors.txt",
-                           delim_whitespace=True)
+                           sep=r'\s+')
 
 # correction factors
 with open(f"{THIS_DIR}/data/correction_factors.txt", encoding="utf-8") as file:

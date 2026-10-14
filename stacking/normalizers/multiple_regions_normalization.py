@@ -321,14 +321,14 @@ class MultipleRegionsNormalization(Normalizer):
                 " ".join(ACCEPTED_SAVE_FORMATS) +
                 f"'. Specified folder: {folder}")
         if file_format in ["csv", "txt"]:
-            norm_factors = pd.read_csv(filename, delim_whitespace=True)
+            norm_factors = pd.read_csv(filename, sep=r'\s+')
 
             correction_factors_filename = (
                 f"{os.path.expandvars(folder)}correction_factors.{file_format}")
             if os.path.exists(correction_factors_filename):
                 correction_factors = pd.read_csv(
                     correction_factors_filename,
-                    delim_whitespace=True)["correction_factor"].values
+                    sep=r'\s+')["correction_factor"].values
             else:
                 raise NormalizerError(
                     f"Unable to find file correction_factors.{file_format}. "
