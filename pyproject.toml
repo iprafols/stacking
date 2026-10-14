@@ -16,7 +16,14 @@ requires-python = ">=3.13"
 "run_stacking.py" = "stacking.scripts.run_stacking:main"
 
 [tool.setuptools]
-packages = ["stacking", "stacking.scripts"]
+packages = [
+     "stacking",
+     "stacking.normalizers",
+     "stacking.readers",
+     "stacking.scripts",
+     "stacking.stackers",
+     "stacking.writers",
+ ]
 package-dir = {"" = "."}
 
 [tool.setuptools.dynamic]
