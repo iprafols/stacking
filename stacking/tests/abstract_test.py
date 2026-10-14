@@ -158,7 +158,7 @@ class AbstractTest(unittest.TestCase):
         New file
         """
         orig_df = pd.read_csv(orig_file, sep=r'\s+')
-        new_df = pd.read_csv(orig_file, sep=r'\s+')
+        new_df = pd.read_csv(new_file, sep=r'\s+')
 
         self.compare_df(orig_df, new_df, orig_file=orig_file, new_file=new_file)
 
