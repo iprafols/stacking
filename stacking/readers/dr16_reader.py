@@ -482,7 +482,7 @@ class Dr16Reader(Reader):
                               f"reading file {self.spall}. IOError "
                               f"message: {str(error)}") from error
 
-        keep_rows = np.in1d(catalogue["THING_ID"], self.catalogue["THING_ID"])
+        keep_rows = np.isin(catalogue["THING_ID"], self.catalogue["THING_ID"])
         self.logger.progress("Found %d spectra with required THING_ID",
                              np.sum(keep_rows))
         keep_rows &= catalogue["PLATEQUALITY"] == "good"

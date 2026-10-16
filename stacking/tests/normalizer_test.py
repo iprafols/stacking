@@ -24,7 +24,7 @@ os.environ["THIS_DIR"] = THIS_DIR
 MULTIPLE_REGIONS_NORMALIZATION_KWARGS = {
     "log directory": f"{THIS_DIR}/results/",
     "num processors": 1,
-    "intervals": "4400 - 4600, 4600 - 4800",
+    "intervals": "1300 - 1500, 2000 - 2600, 4400 - 4800",
     "main interval": 1,
 }
 
@@ -80,7 +80,10 @@ class NormalizerTest(AbstractTest):
         self.assertTrue(isinstance(normalizer.norm_factors, pd.DataFrame))
 
         # save results
-        normalizer.norm_factors.to_csv(out_file, sep=" ", index=False)
+        normalizer.norm_factors.to_csv(out_file,
+                                       sep=" ",
+                                       na_rep="nan",
+                                       index=False)
 
         # compare against expectations
         self.compare_ascii_numeric(test_file, out_file)
@@ -107,11 +110,15 @@ class NormalizerTest(AbstractTest):
     def test_multiple_regions_normalization(self):
         """Test the class MultipleRegionsNormalization"""
         test_dir = f"{THIS_DIR}/data/multiple_regions_normalization/"
-        out_dir = f"{THIS_DIR}/results/multiple_regions_normalization/"
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
 
         for num_processors in [0, 1, 2]:
+            out_dir = (
+                f"{THIS_DIR}/results/"
+                f"multiple_regions_normalization_num_processors_{num_processors}/"
+            )
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+
             spectra = [copy(spectrum) for spectrum in REBINNED_SPECTRA]
 
             normalizer_kwargs = MULTIPLE_REGIONS_NORMALIZATION_KWARGS.copy()
@@ -147,8 +154,9 @@ class NormalizerTest(AbstractTest):
             self.assertTrue(normalizer.save_format == "fits.gz")
             self.compare_fits(f"{test_dir}normalization_factors.fits.gz",
                               f"{out_dir}normalization_factors.fits.gz")
-            self.compare_ascii_numeric(f"{test_dir}normalized_fluxes.txt",
-                                       f"{out_dir}normalized_fluxes.txt")
+            self.compare_ascii_numeric(
+                f"{test_dir}normalized_fluxes.txt",
+                f"{out_dir}normalized_fluxes_num_processors.txt")
 
     def test_multiple_regions_normalization_compute_correction_factors(self):
         """Test method compute_correction_factors from MultipleRegionsNormalization"""
@@ -195,7 +203,7 @@ class NormalizerTest(AbstractTest):
 
     def test_multiple_regions_normalization_compute_norm_factors(self):
         """Test method compute_norm_factors from MultipleRegionsNormalization"""
-        test_file = f"{THIS_DIR}/data/multiple_regions_normalization_compute_norm_factors.txt"
+        test_file = f"{THIS_DIR}/data/normalization_factors.txt"
 
         # case 1: compute norm factors
         out_file = f"{THIS_DIR}/results/multiple_regions_normalization_compute_norm_factors.txt"
@@ -244,7 +252,7 @@ class NormalizerTest(AbstractTest):
         expected_message = (
             "Invalid value for 'main interval'. Selected interval "
             "999 as main interval, but I only read "
-            "2 intervals (keep in mind the zero-based "
+            "3 intervals (keep in mind the zero-based "
             "indexing in python)")
         self.run_multiple_regions_normalization_with_errors(
             normalizer_kwargs, expected_message)
@@ -325,9 +333,14 @@ class NormalizerTest(AbstractTest):
              f"{THIS_DIR}"),
         ]
         for folder, expected_message in zip(folders, expected_error_messages):
+            print("folder:", folder)
+            print("expected_message:", expected_message)
             if expected_message is None:
                 norm_factors, correction_factors = normalizer.load_norm_factors(
                     folder)
+                print("folder:", folder)
+                print("norm_factors:", norm_factors)
+                print("correction_factors:", correction_factors)
                 self.compare_df(NORM_FACTORS, norm_factors)
                 if CORRECTION_FACTORS.size != correction_factors.size:
                     highlight_print()

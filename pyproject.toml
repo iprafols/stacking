@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=84.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stacking"
+dynamic = ["version", "dependencies"]
+description = "Stack spectra"
+authors = [
+    { name="Ignasi Pérez-Ràfols", email="iprafols@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.13"
+
+[project.scripts]
+"run_stacking.py" = "stacking.scripts.run_stacking:main"
+
+[tool.setuptools]
+packages = [
+     "stacking",
+     "stacking.normalizers",
+     "stacking.readers",
+     "stacking.scripts",
+     "stacking.stackers",
+     "stacking.writers",
+ ]
+package-dir = {"" = "."}
+
+[tool.setuptools.dynamic]
+version = {attr = "stacking._version.__version__"}
+dependencies = {file = ["requirements.txt"]}

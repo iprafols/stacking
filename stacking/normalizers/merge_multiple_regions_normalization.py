@@ -189,7 +189,7 @@ class MergeMultipleRegionsNormalization(MultipleRegionsNormalization):
                       "chosen interval"]] = item.apply(
                           select_final_normalisation_factor,
                           axis=1,
-                          args=(self.correction_factors, self.min_nrom_sn),
+                          args=(self.correction_factors, self.min_norm_sn),
                           result_type='expand',
                       )
         super().select_final_normalisation_factor()

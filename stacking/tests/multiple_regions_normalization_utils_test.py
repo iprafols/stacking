@@ -141,20 +141,20 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
         save_norm_factors_ascii(out_file, NORM_FACTORS)
 
         # load output
-        norm_factors = pd.read_csv(out_file, delim_whitespace=True)
+        norm_factors = pd.read_csv(out_file, sep=r'\s+')
 
         # check against expectations
         self.compare_df(NORM_FACTORS, norm_factors)
 
     def test_save_norm_factors_fits(self):
         """Test function save_norm_factors_fits"""
-        out_file = f"{THIS_DIR}/results/save_norm_factors_fits.txt"
-        test_file = f"{THIS_DIR}/data/save_norm_factors_fits.txt"
+        out_file = f"{THIS_DIR}/results/save_norm_factors.fits"
+        test_file = f"{THIS_DIR}/data/save_norm_factors.fits"
 
         save_norm_factors_fits(out_file, NORM_FACTORS, INTERVALS,
                                CORRECTION_FACTORS)
 
-        self.compare_fits(out_file, test_file)
+        self.compare_fits(test_file, out_file)
 
     def test_save_norm_intervals_ascii(self):
         """Test function save_norm_intervals_ascii"""
@@ -181,13 +181,13 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
             "very large S/N requirement": 100,
         }
 
-        for case_name, min_nrom_sn in cases.items():
+        for case_name, min_norm_sn in cases.items():
             results = pd.DataFrame()
             results[["norm factor", "norm S/N",
                      "chosen interval"]] = norm_factors.apply(
                          select_final_normalisation_factor,
                          axis=1,
-                         args=(CORRECTION_FACTORS, min_nrom_sn),
+                         args=(CORRECTION_FACTORS, min_norm_sn),
                          result_type='expand',
                      )
             if case_name == "normal run":

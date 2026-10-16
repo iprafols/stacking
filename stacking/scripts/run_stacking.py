@@ -9,8 +9,28 @@ from stacking.stacking_interface import StackingInterface
 module_logger = logging.getLogger("stacking")
 
 
-def main(args):
-    """Compute the stack of a set of spectra"""
+def main(cmdargs=None):
+    """Compute the stack of a set of spectra
+    
+    Arguments
+    ---------
+    cmdargs: argparse.Namespace
+    Argument parser namespace
+    """
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Compute the stack of a set of spectra")
+
+    parser.add_argument(
+        'config_file',
+        type=str,
+        default=None,
+        help=('Configuration file. To learn about all the available options '
+              'check the configuration tutorial in '
+              'tutorials/configuration_tutorial.ipynb'))
+
+    args = parser.parse_args(cmdargs)
+
     start_time = time.time()
 
     # intitialize StackingInterface instance
@@ -37,19 +57,3 @@ def main(args):
     end_time = time.time()
     module_logger.info("Total time elapsed: %f seconds", end_time - start_time)
     module_logger.info("Done")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Compute the stack of a set of spectra")
-
-    parser.add_argument(
-        'config_file',
-        type=str,
-        default=None,
-        help=('Configuration file. To learn about all the available options '
-              'check the configuration tutorial in '
-              'tutorials/configuration_tutorial.ipynb'))
-
-    main(parser.parse_args())
