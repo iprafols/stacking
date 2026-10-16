@@ -157,13 +157,8 @@ class AbstractTest(unittest.TestCase):
         new_file: str
         New file
         """
-<<<<<<< HEAD
-        orig_df = pd.read_csv(orig_file, sep=r"\s+")
-        new_df = pd.read_csv(new_file, sep=r"\s+")
-=======
         orig_df = pd.read_csv(orig_file, sep=r'\s+')
         new_df = pd.read_csv(new_file, sep=r'\s+')
->>>>>>> main
 
         self.compare_df(orig_df, new_df, orig_file=orig_file, new_file=new_file)
 

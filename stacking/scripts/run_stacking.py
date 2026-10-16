@@ -10,9 +10,6 @@ module_logger = logging.getLogger("stacking")
 
 
 def main(cmdargs=None):
-<<<<<<< HEAD
-    """Compute the stack of a set of spectra"""
-=======
     """Compute the stack of a set of spectra
     
     Arguments
@@ -20,7 +17,6 @@ def main(cmdargs=None):
     cmdargs: argparse.Namespace
     Argument parser namespace
     """
->>>>>>> main
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Compute the stack of a set of spectra")

@@ -154,14 +154,9 @@ class NormalizerTest(AbstractTest):
             self.assertTrue(normalizer.save_format == "fits.gz")
             self.compare_fits(f"{test_dir}normalization_factors.fits.gz",
                               f"{out_dir}normalization_factors.fits.gz")
-<<<<<<< HEAD
-            self.compare_ascii_numeric(f"{test_dir}normalized_fluxes_num_processors_{num_processors}.txt",
-                                        f"{out_dir}normalized_fluxes_num_processors_{num_processors}.txt")
-=======
             self.compare_ascii_numeric(
                 f"{test_dir}normalized_fluxes.txt",
                 f"{out_dir}normalized_fluxes_num_processors.txt")
->>>>>>> main
 
     def test_multiple_regions_normalization_compute_correction_factors(self):
         """Test method compute_correction_factors from MultipleRegionsNormalization"""

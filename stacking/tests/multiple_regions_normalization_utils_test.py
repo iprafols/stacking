@@ -141,11 +141,7 @@ class MultipleRegionsNormalizationUtilsTest(AbstractTest):
         save_norm_factors_ascii(out_file, NORM_FACTORS)
 
         # load output
-<<<<<<< HEAD
-        norm_factors = pd.read_csv(out_file, sep=r"\s+")
-=======
         norm_factors = pd.read_csv(out_file, sep=r'\s+')
->>>>>>> main
 
         # check against expectations
         self.compare_df(NORM_FACTORS, norm_factors)
