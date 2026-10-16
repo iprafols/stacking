@@ -57,8 +57,3 @@ def main(cmdargs=None):
     end_time = time.time()
     module_logger.info("Total time elapsed: %f seconds", end_time - start_time)
     module_logger.info("Done")
-
-
-if __name__ == "__main__":
-
-    main(parser.parse_args())
