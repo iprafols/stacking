@@ -18,16 +18,16 @@ def main(cmdargs=None):
     Argument parser namespace
     """
     parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Compute the stack of a set of spectra")
-    
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Compute the stack of a set of spectra")
+
     parser.add_argument(
         'config_file',
         type=str,
         default=None,
         help=('Configuration file. To learn about all the available options '
-                'check the configuration tutorial in '
-                'tutorials/configuration_tutorial.ipynb'))
+              'check the configuration tutorial in '
+              'tutorials/configuration_tutorial.ipynb'))
 
     args = parser.parse_args(cmdargs)
 
@@ -60,6 +60,5 @@ def main(cmdargs=None):
 
 
 if __name__ == "__main__":
-    
 
     main(parser.parse_args())

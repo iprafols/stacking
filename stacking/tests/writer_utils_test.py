@@ -106,7 +106,7 @@ class WriterUtilsTest(AbstractTest):
 
         for key in hdu.header:
             self.assertTrue(key in HEADER_KEYS)
-        self.assertTrue(hdu.data.shape == (6989,))
+        self.assertTrue(hdu.data.shape == (7700,))
         self.assertTrue(
             np.allclose(hdu.data["WAVELENGTH"],
                         Spectrum.common_wavelength_grid))
@@ -132,7 +132,7 @@ class WriterUtilsTest(AbstractTest):
         ]
         for key in hdu.header:
             self.assertTrue(key in header_keys)
-        self.assertTrue(hdu.data.shape == (6989,))
+        self.assertTrue(hdu.data.shape == (7700,))
         self.assertTrue(
             np.allclose(hdu.data["WAVELENGTH"],
                         Spectrum.common_wavelength_grid))
@@ -156,7 +156,7 @@ class WriterUtilsTest(AbstractTest):
 
         for key in hdu.header:
             self.assertTrue(key in header_keys)
-        self.assertTrue(hdu.data.shape == (6989,))
+        self.assertTrue(hdu.data.shape == (7700,))
         self.assertTrue(
             np.allclose(hdu.data["WAVELENGTH"],
                         Spectrum.common_wavelength_grid))
@@ -184,7 +184,7 @@ class WriterUtilsTest(AbstractTest):
         ]
         for key in hdu.header:
             self.assertTrue(key in header_keys)
-        self.assertTrue(hdu.data.shape == (6989,))
+        self.assertTrue(hdu.data.shape == (7700,))
         self.assertTrue(
             np.allclose(hdu.data["WAVELENGTH"],
                         Spectrum.common_wavelength_grid))

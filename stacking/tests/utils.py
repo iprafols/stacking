@@ -33,17 +33,18 @@ config.read_dict({
     "reader": {
         "drq catalogue": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
         "input directory": f"{THIS_DIR}/data",
+        "best obs": "False",
     },
     "rebin": {
-        "max wavelength": 4999.1941102499995,
-        "min wavelength": 1000,
-        "step type": "log",
-        "step wavelength": 1e-4,
+        "max wavelength": 8500,
+        "min wavelength": 800,
+        "step type": "lin",
+        "step wavelength": 1,
     },
     "normalizer": {
         "log directory": f"{THIS_DIR}/results/",
         "num processors": 1,
-        "intervals": "4400 - 4600, 4600 - 4800",
+        "intervals": "1300 - 1500, 2000 - 2600, 4400 - 4800",
         "main interval": 1,
     },
     "stacker": {
@@ -105,8 +106,7 @@ for spectrum in SPECTRA:
     assert spectrum.normalized_flux is None
 
 # rebin spectra
-COMMON_WAVELENGTH_GRID = 10**np.linspace(np.log10(1000),
-                                         np.log10(4999.1941102499995), 6989)
+COMMON_WAVELENGTH_GRID = np.linspace(800, 8500, 7700)
 rebin = Rebin(config["rebin"])
 REBINNED_SPECTRA = [rebin(copy(spectrum)) for spectrum in SPECTRA]
 
