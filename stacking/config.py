@@ -64,6 +64,10 @@ default_config = {
         # Numeric value is PROGRESS_LEVEL_NUM defined in utils.py
         "logging level console": "PROGRESS",
         "logging level file": "PROGRESS",
+        # This variable specifies the number of processors to be used for 
+        # multiprocessed tasks (e.g. data i/o, expected flux). If 0, the number 
+        # of processors will be set to half of the available processors 
+        # in the system.
         "num processors": 0,
         "run type": "normal"
     },

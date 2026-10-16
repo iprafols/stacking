@@ -99,12 +99,12 @@ class ReaderTest(AbstractTest):
         in Dr16Reader"""
         options_and_values = [
             ("input directory", f"{THIS_DIR}/data/"),
+            ("skip N first spec", "0"),
             ("best obs", "False"),
             ("drq catalogue",
              f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
             ("keep BAL", "False"),
             ("read mode", "spplate"),
-            ("skip N first spec", "0"),
             ("z max", "10.0"),
             ("z min", "0.0"),
         ]
@@ -237,7 +237,10 @@ class ReaderTest(AbstractTest):
     def test_reader(self):
         """Test the abstract reader"""
         config = ConfigParser()
-        config.read_dict({"reader": {"input directory": f"{THIS_DIR}/data/"}})
+        config.read_dict({"reader": {
+            "input directory": f"{THIS_DIR}/data/", 
+            "skip N first spec": "0",
+        }})
 
         reader = Reader(config["reader"])
 
@@ -255,6 +258,8 @@ class ReaderTest(AbstractTest):
         in Reader"""
         options_and_values = [
             ("input directory", f"{THIS_DIR}/data/"),
+            ("skip N first spec", "0"),
+
         ]
 
         self.check_missing_options(options_and_values, Reader, ReaderError)

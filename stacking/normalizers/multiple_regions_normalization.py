@@ -192,8 +192,12 @@ class MultipleRegionsNormalization(Normalizer):
             raise NormalizerError(
                 "Missing argument 'num processors' required by "
                 "MultipleRegionsNormalization")
+        if self.num_processors < 0:
+            raise NormalizerError(
+                "Invalid value for 'num processors'. Expected a non-negative integer. "
+                f"Found: {self.num_processors}")
         if self.num_processors == 0:
-            self.num_processors = multiprocessing.cpu_count() // 2
+            self.num_processors = max(1, multiprocessing.cpu_count() // 2)
 
         self.save_format = config.get("save format")
         if self.save_format is None:
@@ -321,14 +325,14 @@ class MultipleRegionsNormalization(Normalizer):
                 " ".join(ACCEPTED_SAVE_FORMATS) +
                 f"'. Specified folder: {folder}")
         if file_format in ["csv", "txt"]:
-            norm_factors = pd.read_csv(filename, delim_whitespace=True)
+            norm_factors = pd.read_csv(filename, sep=r"\s+")
 
             correction_factors_filename = (
                 f"{os.path.expandvars(folder)}correction_factors.{file_format}")
             if os.path.exists(correction_factors_filename):
                 correction_factors = pd.read_csv(
                     correction_factors_filename,
-                    delim_whitespace=True)["correction_factor"].values
+                    sep=r"\s+")["correction_factor"].values
             else:
                 raise NormalizerError(
                     f"Unable to find file correction_factors.{file_format}. "

@@ -30,15 +30,9 @@ accepted_options = update_accepted_options(
         "max Balnicity Index": (
             "Maximum value allowed for the Balnicity Index to keep the quasar. None for "
             "no maximum. **Type: float or None**"),
-        "max num spec": (
-            "Maximum number of spectra to load. None for no maximum. Multiple spectra "
-            "comming from the same line of sight are not counted here. **Type: int or None**"
-        ),
         "read mode": (
             "Reading mode. Currently supported reading modes are 'spplate' and 'spec'. "
             "**Type: str**"),
-        "skip N first spec":
-            "Skip the N first spectra in the catalogue. **Type: int**",
         "spAll":
             "Path to the spAll file required for multiple observations. **Type: str**",
         "z min": (
@@ -54,7 +48,6 @@ defaults = update_default_options(
         "best obs": False,
         "keep BAL": False,
         "read mode": "spplate",
-        "skip N first spec": 0,
         "z max": 10.0,
         "z min": 0.0,
     })
@@ -110,9 +103,6 @@ class Dr16Reader(Reader):
 
     read_mode: str
     Reading mode. Currently supported reading modes are "spplate" and "spec"
-
-    skip_n_first_spec: int
-    Skip the N first spectra in the catalogue
 
     spall: str
     Path to the spAll file required for multiple observations
@@ -175,8 +165,6 @@ class Dr16Reader(Reader):
                 "Missing argument 'best obs' required by Dr16Reader")
 
         self.max_balnicity_index = config.getfloat("max Balnicity Index")
-
-        self.max_num_spec = config.getint("max num spec")
 
         self.drq_filename = config.get("drq catalogue")
         if self.drq_filename is None:
@@ -482,7 +470,7 @@ class Dr16Reader(Reader):
                               f"reading file {self.spall}. IOError "
                               f"message: {str(error)}") from error
 
-        keep_rows = np.in1d(catalogue["THING_ID"], self.catalogue["THING_ID"])
+        keep_rows = np.isin(catalogue["THING_ID"], self.catalogue["THING_ID"])
         self.logger.progress("Found %d spectra with required THING_ID",
                              np.sum(keep_rows))
         keep_rows &= catalogue["PLATEQUALITY"] == "good"
@@ -524,28 +512,3 @@ class Dr16Reader(Reader):
         self.catalogue = join(catalogue[select_cols],
                               self.catalogue[select_cols_drq],
                               join_type="left")
-
-    def trim_catalogue(self):
-        """Trim the catalogue by removing the first N rows and limiting its
-        size to M entries
-
-        N is stored in self.skip_n_first_spec and M is stored in self.max_num_spec
-        If self.max_num_spec is None, then do not limit by size
-        """
-        if self.max_num_spec is None and self.skip_n_first_spec > 0:
-            self.logger.progress(
-                f"Dropping first {self.skip_n_first_spec} objects in the catalogue"
-            )
-            self.catalogue = self.catalogue[self.skip_n_first_spec:]
-        else:
-            if self.skip_n_first_spec > 0:
-                self.logger.progress(
-                    f"Dropping first {self.skip_n_first_spec} objects in the catalogue\n"
-                    f"Cutting at {self.max_num_spec} objects in the catalogue")
-                self.catalogue = self.catalogue[self.skip_n_first_spec:self.
-                                                skip_n_first_spec +
-                                                self.max_num_spec]
-            else:
-                self.logger.progress(
-                    f"Cutting at {self.max_num_spec} objects in the catalogue")
-                self.catalogue = self.catalogue[:self.max_num_spec]
