@@ -161,6 +161,7 @@ cython_debug/
 
 # OS folder related files
 **/.DS_Store
+**/.vscode
 
 # Package specific ignores
 stacking/tests/results

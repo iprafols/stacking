@@ -192,8 +192,12 @@ class MultipleRegionsNormalization(Normalizer):
             raise NormalizerError(
                 "Missing argument 'num processors' required by "
                 "MultipleRegionsNormalization")
+        if self.num_processors < 0:
+            raise NormalizerError(
+                "Invalid value for 'num processors'. Expected a non-negative integer. "
+                f"Found: {self.num_processors}")
         if self.num_processors == 0:
-            self.num_processors = multiprocessing.cpu_count() // 2
+            self.num_processors = max(1, multiprocessing.cpu_count() // 2)
 
         self.save_format = config.get("save format")
         if self.save_format is None:
