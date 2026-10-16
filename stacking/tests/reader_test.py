@@ -199,30 +199,6 @@ class ReaderTest(AbstractTest):
         reader_kwargs.update({"mode": "spplate"})
         self.run_dr16_reader_without_errors(reader_kwargs, 93, 92, "spplate")
 
-    def test_dr16_reader_trim_catalogue(self):
-        """Check the catalogue trimming function from Dr16Reader"""
-        # trim only at the end
-        reader_kwargs = DR16_READER_KWARGS.copy()
-        reader_kwargs.update({
-            "max num spec": "5",
-        })
-        self.run_dr16_reader_without_errors(reader_kwargs, 8, 8, "spplate")
-
-        # trim only at the beginning
-        reader_kwargs = DR16_READER_KWARGS.copy()
-        reader_kwargs.update({
-            "skip N first spec": "5",
-        })
-        self.run_dr16_reader_without_errors(reader_kwargs, 85, 84, "spplate")
-
-        # trim at the beginning and at the end
-        reader_kwargs = DR16_READER_KWARGS.copy()
-        reader_kwargs.update({
-            "skip N first spec": "5",
-            "max num spec": "3",
-        })
-        self.run_dr16_reader_without_errors(reader_kwargs, 5, 5, "spplate")
-
     def test_dr16_reader_unsupported_reading_mode(self):
         """Check that Dr16Reader raises errors when the reading mode is not
         supported"""
@@ -263,6 +239,32 @@ class ReaderTest(AbstractTest):
         ]
 
         self.check_missing_options(options_and_values, Reader, ReaderError)
+
+    def test_reader_trim_catalogue(self):
+        """Check the catalogue trimming function from Reader
+        We use Dr16Reader to initialize class instance since Reader is an abstract class
+        """
+        # trim only at the end
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({
+            "max num spec": "5",
+        })
+        self.run_dr16_reader_without_errors(reader_kwargs, 8, 8, "spplate")
+
+        # trim only at the beginning
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({
+            "skip N first spec": "5",
+        })
+        self.run_dr16_reader_without_errors(reader_kwargs, 85, 84, "spplate")
+
+        # trim at the beginning and at the end
+        reader_kwargs = DR16_READER_KWARGS.copy()
+        reader_kwargs.update({
+            "skip N first spec": "5",
+            "max num spec": "3",
+        })
+        self.run_dr16_reader_without_errors(reader_kwargs, 5, 5, "spplate")
 
 
 def create_dr16_reader_config(reader_kwargs):
