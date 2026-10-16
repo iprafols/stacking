@@ -157,7 +157,7 @@ class NormalizerTest(AbstractTest):
                               f"{out_dir}normalization_factors.fits.gz")
             self.compare_ascii_numeric(
                 f"{test_dir}normalized_fluxes.txt",
-                f"{out_dir}normalized_fluxes_num_processors.txt")
+                f"{out_dir}normalized_fluxes_num_processors_{num_processors}.txt")
 
     def test_multiple_regions_normalization_compute_correction_factors(self):
         """Test method compute_correction_factors from MultipleRegionsNormalization"""
