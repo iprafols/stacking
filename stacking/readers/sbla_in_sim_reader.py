@@ -193,7 +193,8 @@ class SblaInSimReader(Reader):
         self.logger.progress("Reading SBLA catalogue from %s",
                              self.sbla_filename)
         catalogue = Table.read(self.sbla_filename)
-        catalogue.rename_columns(catalogue.colnames, [col.upper() for col in catalogue.colnames])
+        catalogue.rename_columns(catalogue.colnames,
+                                 [col.upper() for col in catalogue.colnames])
 
         keep_columns = ['NAME', 'GROUP', 'Z', "VEL_SBLA", "NOISE"]
         # Redshift
@@ -205,27 +206,28 @@ class SblaInSimReader(Reader):
         # Noise
         if 'NOISE' not in catalogue.colnames:
             self.logger.warning(
-                "Column 'NOISE' not found in SBLA Catalogue. Assuming all spectra have noise")
+                "Column 'NOISE' not found in SBLA Catalogue. Assuming all spectra have noise"
+            )
             catalogue['NOISE'] = np.ones(len(catalogue), dtype=bool)
         else:
-            catalogue['NOISE'] = [str(val).strip().lower() == 'true' for val in catalogue['NOISE']]
+            catalogue['NOISE'] = [
+                str(val).strip().lower() == 'true' for val in catalogue['NOISE']
+            ]
 
         ## Sanity checks
         keep_rows = np.ones(len(catalogue), dtype=bool)
-        self.logger.progress("start : nb object in cat = %d",
-                             np.sum(keep_rows))
+        self.logger.progress("start : nb object in cat = %d", np.sum(keep_rows))
 
         keep_rows &= catalogue['Z'] >= self.z_min
-        self.logger.progress("and z >= %.2f: nb object in cat = %d",
-                             self.z_min, np.sum(keep_rows))
+        self.logger.progress("and z >= %.2f: nb object in cat = %d", self.z_min,
+                             np.sum(keep_rows))
         keep_rows &= catalogue['Z'] < self.z_max
-        self.logger.progress("and z < %.2f: nb object in cat = %d",
-                             self.z_max, np.sum(keep_rows))
+        self.logger.progress("and z < %.2f: nb object in cat = %d", self.z_max,
+                             np.sum(keep_rows))
 
         keep_rows &= np.isclose(catalogue['VEL_SBLA'], self.vel_sbla)
-        self.logger.progress(
-            "and vel_sbla == %.0f: nb object in cat = %d",
-            self.vel_sbla, np.sum(keep_rows))
+        self.logger.progress("and vel_sbla == %.0f: nb object in cat = %d",
+                             self.vel_sbla, np.sum(keep_rows))
 
         catalogue.keep_columns(keep_columns)
         catalogue = catalogue[keep_rows]

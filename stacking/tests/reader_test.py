@@ -49,7 +49,8 @@ class ReaderTest(AbstractTest):
     test_reader_missing_options
     """
 
-    def run_reader_with_errors(self, reader_class, reader_kwargs, defaults, expected_message):
+    def run_reader_with_errors(self, reader_class, reader_kwargs, defaults,
+                               expected_message):
         """Check behaviour of the selected reader when errors are expected
 
         Arguments
@@ -73,8 +74,13 @@ class ReaderTest(AbstractTest):
             reader.read_data()
         self.compare_error_message(context_manager, expected_message)
 
-    def run_reader_without_errors(self, reader_class, reader_kwargs, defaults, size_catalogue,
-                                       num_spectra, mode=None):
+    def run_reader_without_errors(self,
+                                  reader_class,
+                                  reader_kwargs,
+                                  defaults,
+                                  size_catalogue,
+                                  num_spectra,
+                                  mode=None):
         """Check behaviour of the selected reader when no errors are expected
 
         Arguments
@@ -115,7 +121,8 @@ class ReaderTest(AbstractTest):
         """Check the best_obs mode"""
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"best obs": "True"})
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 79, 79, "spplate")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 79, 79, "spplate")
 
     def test_dr16_reader_missing_options(self):
         """Check that errors are raised when required options are missing
@@ -144,7 +151,8 @@ class ReaderTest(AbstractTest):
         })
         expected_message = (
             "No spectra were read, check the logs for more details")
-        self.run_reader_with_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expected_message)
+        self.run_reader_with_errors(Dr16Reader, reader_kwargs,
+                                    defaults_dr16_reader, expected_message)
 
     def test_dr16_reader_read_drq_issues(self):
         """Check that errors are raised when there are issues loading the
@@ -176,10 +184,13 @@ class ReaderTest(AbstractTest):
             if "bi_civ" in drq_catalogue:
                 reader_kwargs.update({"max balnicity index": 0.5})
             if isinstance(expectation, int):
-                self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expectation,
-                                                    expectation, "spplate")
+                self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                               defaults_dr16_reader,
+                                               expectation, expectation,
+                                               "spplate")
             else:
-                self.run_reader_with_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expectation)
+                self.run_reader_with_errors(Dr16Reader, reader_kwargs,
+                                            defaults_dr16_reader, expectation)
 
     def test_dr16_reader_spall_issues(self):
         """Check that errors are raised when there are issues with the
@@ -194,7 +205,8 @@ class ReaderTest(AbstractTest):
             reader_kwargs = DR16_READER_KWARGS.copy()
             reader_kwargs.update({"input directory": input_directory})
             expected_message = "Missing argument 'spAll' required by Dr16Reader"
-            self.run_reader_with_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expected_message)
+            self.run_reader_with_errors(Dr16Reader, reader_kwargs,
+                                        defaults_dr16_reader, expected_message)
 
         # specifying non-exitant file
         reader_kwargs = DR16_READER_KWARGS.copy()
@@ -203,24 +215,27 @@ class ReaderTest(AbstractTest):
             "Error in reading spAll catalogue. Error "
             "reading file missing.fits.gz. IOError "
             "message: [Errno 2] No such file or directory: 'missing.fits.gz'")
-        self.run_reader_with_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expected_message)
+        self.run_reader_with_errors(Dr16Reader, reader_kwargs,
+                                    defaults_dr16_reader, expected_message)
 
     def test_dr16_reader_spec(self):
         """Test SdssData when run in spec mode"""
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"read mode": "spec"})
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 93, 78, "spec")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 93, 78, "spec")
 
     def test_dr16_reader_spplate(self):
         """Tests Dr16Reader when run in spplate mode"""
         # using default  value for 'mode'
-        self.run_reader_without_errors(Dr16Reader, DR16_READER_KWARGS, defaults_dr16_reader, 93, 92,
-                                            "spplate")
+        self.run_reader_without_errors(Dr16Reader, DR16_READER_KWARGS,
+                                       defaults_dr16_reader, 93, 92, "spplate")
 
         # specifying 'mode'
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({"mode": "spplate"})
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 93, 92, "spplate")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 93, 92, "spplate")
 
     def test_dr16_reader_unsupported_reading_mode(self):
         """Check that Dr16Reader raises errors when the reading mode is not
@@ -231,15 +246,18 @@ class ReaderTest(AbstractTest):
             "Error reading data in Dr16Reader. Read mode unsupported is not "
             "supported. Supported reading modes are " +
             " ".join(SUPPORTED_READING_MODES))
-        self.run_reader_with_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, expected_message)
+        self.run_reader_with_errors(Dr16Reader, reader_kwargs,
+                                    defaults_dr16_reader, expected_message)
 
     def test_reader(self):
         """Test the abstract reader"""
         config = ConfigParser()
-        config.read_dict({"reader": {
-            "input directory": f"{THIS_DIR}/data/", 
-            "skip N first spec": "0",
-        }})
+        config.read_dict({
+            "reader": {
+                "input directory": f"{THIS_DIR}/data/",
+                "skip N first spec": "0",
+            }
+        })
 
         reader = Reader(config["reader"])
 
@@ -258,7 +276,6 @@ class ReaderTest(AbstractTest):
         options_and_values = [
             ("input directory", f"{THIS_DIR}/data/"),
             ("skip N first spec", "0"),
-
         ]
 
         self.check_missing_options(options_and_values, Reader, ReaderError)
@@ -272,14 +289,16 @@ class ReaderTest(AbstractTest):
         reader_kwargs.update({
             "max num spec": "5",
         })
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 8, 8, "spplate")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 8, 8, "spplate")
 
         # trim only at the beginning
         reader_kwargs = DR16_READER_KWARGS.copy()
         reader_kwargs.update({
             "skip N first spec": "5",
         })
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 85, 84, "spplate")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 85, 84, "spplate")
 
         # trim at the beginning and at the end
         reader_kwargs = DR16_READER_KWARGS.copy()
@@ -287,12 +306,14 @@ class ReaderTest(AbstractTest):
             "skip N first spec": "5",
             "max num spec": "3",
         })
-        self.run_reader_without_errors(Dr16Reader, reader_kwargs, defaults_dr16_reader, 5, 5, "spplate")
+        self.run_reader_without_errors(Dr16Reader, reader_kwargs,
+                                       defaults_dr16_reader, 5, 5, "spplate")
 
     def test_sbla_in_sim_reader(self):
         """Test SblaInSimReader"""
-        self.run_reader_without_errors(
-            SblaInSimReader, SBLA_IN_SIM_READER_KWARGS, defaults_sbla_in_sim_reader, 3, 2)
+        self.run_reader_without_errors(SblaInSimReader,
+                                       SBLA_IN_SIM_READER_KWARGS,
+                                       defaults_sbla_in_sim_reader, 3, 2)
 
     def test_sbla_in_sim_reader_missing_options(self):
         """Check that errors are raised when required options are missing
@@ -302,14 +323,14 @@ class ReaderTest(AbstractTest):
             ("skip N first spec", "0"),
             ("num processors", "0"),
             ("sbla catalogue",
-                f"{THIS_DIR}/data/sblas_in_sim_catalogue.fits.gz"),
+             f"{THIS_DIR}/data/sblas_in_sim_catalogue.fits.gz"),
             ("vel sbla", "452.0"),
             ("z max", "10.0"),
             ("z min", "0.0"),
         ]
 
-        self.check_missing_options(options_and_values, SblaInSimReader, ReaderError,
-                                    Reader)
+        self.check_missing_options(options_and_values, SblaInSimReader,
+                                   ReaderError, Reader)
 
     def test_sbla_in_sim_reader_no_spectra(self):
         """Check that errors are raised when no spectra are found"""
@@ -319,7 +340,9 @@ class ReaderTest(AbstractTest):
         })
         expected_message = (
             "No spectra were read, check the logs for more details")
-        self.run_reader_with_errors(SblaInSimReader, reader_kwargs, defaults_sbla_in_sim_reader, expected_message) 
+        self.run_reader_with_errors(SblaInSimReader, reader_kwargs,
+                                    defaults_sbla_in_sim_reader,
+                                    expected_message)
 
     def test__sbla_in_sim_reader_read_catalogue_issues(self):
         """Check that errors are raised when there are issues loading the
@@ -330,15 +353,19 @@ class ReaderTest(AbstractTest):
         ]
         expectations = [
             ("Error in reading SBLA Catalogue. No valid column for "
-            f"redshift found in {sbla_in_sim_catalogues[0]}"),
+             f"redshift found in {sbla_in_sim_catalogues[0]}"),
         ]
 
-        for sbla_in_sim_catalogue, expectation in zip(sbla_in_sim_catalogues, expectations):
+        for sbla_in_sim_catalogue, expectation in zip(sbla_in_sim_catalogues,
+                                                      expectations):
             reader_kwargs = SBLA_IN_SIM_READER_KWARGS.copy()
             reader_kwargs.update({
                 "sbla catalogue": sbla_in_sim_catalogue,
             })
-            self.run_reader_with_errors(SblaInSimReader, reader_kwargs, defaults_sbla_in_sim_reader, expectation)  
+            self.run_reader_with_errors(SblaInSimReader, reader_kwargs,
+                                        defaults_sbla_in_sim_reader,
+                                        expectation)
+
 
 def create_reader_config(reader_kwargs, defaults):
     """Create a configuration instance to run a Reader class. 
