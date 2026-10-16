@@ -8,15 +8,11 @@ Package to perform spectral stacking
 ## Installation
 It is recommended to use a clean environment:
 ```
-conda create -n my_stacking_env python==version
+conda create -n my_stacking_env python==VERSION
 conda activate my_stacking_env
 ```
 If you already have an environment, you just need to activate it.
 After you have the environment, you can install stacking with:
-```
-pip install stacking
-```
-If you are a developer or want the most recent version of stacking, you can download and install it manually:
 ```
 git clone https://github.com/iprafols/stacking.git
 cd stacking

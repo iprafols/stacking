@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=84.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,7 +16,14 @@ requires-python = ">=3.13"
 "run_stacking.py" = "stacking.scripts.run_stacking:main"
 
 [tool.setuptools]
-packages = ["stacking", "stacking.scripts"]
+packages = [
+     "stacking",
+     "stacking.normalizers",
+     "stacking.readers",
+     "stacking.scripts",
+     "stacking.stackers",
+     "stacking.writers",
+ ]
 package-dir = {"" = "."}
 
 [tool.setuptools.dynamic]

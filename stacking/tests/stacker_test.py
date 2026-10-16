@@ -46,7 +46,7 @@ SPLIT_STACKER_KWARGS = {
     "split catalogue name": f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz",
     "split on": "Z",
     "split type": "OR",
-    "split cuts": "[1.1 1.2 1.3]",
+    "split cuts": "[1.0 1.5 2.0 2.5 3.0]",
 }
 
 SPLIT_STACKER_OPTIONS_AND_VALUES = [
@@ -56,7 +56,7 @@ SPLIT_STACKER_OPTIONS_AND_VALUES = [
      f"{THIS_DIR}/data/drq_catalogue_plate3655.fits.gz"),
     ("split on", "Z"),
     ("split type", "OR"),
-    ("split cuts", "[1.1 1.2 1.3]"),
+    ("split cuts", "[1.0 1.5 2.0 2.5 3.0]"),
 ]
 
 
@@ -628,7 +628,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         config = create_split_stacker_config(SPLIT_STACKER_KWARGS)
         stacker = SplitStacker(config["stacker"])
         expected_message = (
-            "I expected 2 stackers but found 0. Make sure the member 'stackers' is "
+            "I expected 4 stackers but found 0. Make sure the member 'stackers' is "
             "properly intialized in the child class")
         with self.assertRaises(StackerError) as context_manager:
             stacker.stack(NORMALIZED_SPECTRA)
@@ -639,33 +639,41 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         test_file = f"{THIS_DIR}/data/split_stacking_or.txt"
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
         split_stacker_kwargs.update({
-            "split cuts": "[1.0 1.5 2.0]",
+            "split cuts": "[1.0 1.5 2.0 2.5 3.0]",
             "sigma_I": 0.05,
         })
         config = create_split_stacker_config(split_stacker_kwargs)
         stacker = SplitMeanStacker(config["stacker"])
         stacker.stack(NORMALIZED_SPECTRA)
-        self.assertTrue(len(stacker.stackers) == 2)
+        self.assertTrue(len(stacker.stackers) == 4)
         self.assertTrue(stacker.stacked_flux is not None)
         self.assertEqual(stacker.stacked_flux.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
-        self.assertEqual(stacker.stacked_flux.shape[1], 2)
+        self.assertEqual(stacker.stacked_flux.shape[1], 4)
         self.assertTrue(stacker.stacked_weight is not None)
         self.assertEqual(stacker.stacked_weight.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
-        self.assertEqual(stacker.stacked_weight.shape[1], 2)
+        self.assertEqual(stacker.stacked_weight.shape[1], 4)
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
             results.write(
-                "# wavelength stacked_flux1 total_weight1 stacked_flux2 total_weight2\n"
+                "# wavelength stacked_flux1 total_weight1 stacked_flux2 "
+                "total_weight2 stacked_flux3 total_weight3 stacked_flux4 total_weight4 \n"
             )
-            for wavelength, stacked_flux1, stacked_weight1, stacked_flux2, stacked_weight2 in zip(
-                    COMMON_WAVELENGTH_GRID, stacker.stacked_flux[0],
-                    stacker.stacked_weight[0], stacker.stacked_flux[1],
-                    stacker.stacked_weight[1]):
+
+            for (wavelength, stacked_flux1, stacked_weight1, stacked_flux2,
+                 stacked_weight2, stacked_flux3, stacked_weight3,
+                 stacked_flux4, stacked_weight4) in zip(
+                     COMMON_WAVELENGTH_GRID, stacker.stacked_flux[:, 0],
+                     stacker.stacked_weight[:, 0], stacker.stacked_flux[:, 1],
+                     stacker.stacked_weight[:, 1], stacker.stacked_flux[:, 2],
+                     stacker.stacked_weight[:, 2], stacker.stacked_flux[:, 3],
+                     stacker.stacked_weight[:, 3]):
                 results.write(f"{wavelength} {stacked_flux1} {stacked_weight1} "
-                              f"{stacked_flux2} {stacked_weight2}\n")
+                              f"{stacked_flux2} {stacked_weight2} "
+                              f"{stacked_flux3} {stacked_weight3} "
+                              f"{stacked_flux4} {stacked_weight4}\n")
 
         # compare with test
         self.compare_ascii_numeric(test_file, out_file)
@@ -676,33 +684,40 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         split_stacker_kwargs = SPLIT_STACKER_KWARGS.copy()
         split_stacker_kwargs.update({
             "split type": "AND",
-            "split cuts": "[1.0 1.5 2.0]",
+            "split cuts": "[1.0 1.5 2.0 2.5 3.0]",
             "sigma_I": 0.05,
         })
         config = create_split_stacker_config(split_stacker_kwargs)
         stacker = SplitMeanStacker(config["stacker"])
         stacker.stack(NORMALIZED_SPECTRA)
-        self.assertTrue(len(stacker.stackers) == 2)
+        self.assertTrue(len(stacker.stackers) == 4)
         self.assertTrue(stacker.stacked_flux is not None)
         self.assertEqual(stacker.stacked_flux.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
-        self.assertEqual(stacker.stacked_flux.shape[1], 2)
+        self.assertEqual(stacker.stacked_flux.shape[1], 4)
         self.assertTrue(stacker.stacked_weight is not None)
         self.assertEqual(stacker.stacked_weight.shape[0],
                          COMMON_WAVELENGTH_GRID.size)
-        self.assertEqual(stacker.stacked_weight.shape[1], 2)
+        self.assertEqual(stacker.stacked_weight.shape[1], 4)
 
         # save results
         with open(out_file, "w", encoding="utf-8") as results:
             results.write(
-                "# wavelength stacked_flux1 total_weight1 stacked_flux2 total_weight2\n"
+                "# wavelength stacked_flux1 total_weight1 stacked_flux2 "
+                "total_weight2 stacked_flux3 total_weight3 stacked_flux4 total_weight4\n"
             )
-            for wavelength, stacked_flux1, stacked_weight1, stacked_flux2, stacked_weight2 in zip(
-                    COMMON_WAVELENGTH_GRID, stacker.stacked_flux[0],
-                    stacker.stacked_weight[0], stacker.stacked_flux[1],
-                    stacker.stacked_weight[1]):
+            for (wavelength, stacked_flux1, stacked_weight1, stacked_flux2,
+                 stacked_weight2, stacked_flux3, stacked_weight3,
+                 stacked_flux4, stacked_weight4) in zip(
+                     COMMON_WAVELENGTH_GRID, stacker.stacked_flux[:, 0],
+                     stacker.stacked_weight[:, 0], stacker.stacked_flux[:, 1],
+                     stacker.stacked_weight[:, 1], stacker.stacked_flux[:, 2],
+                     stacker.stacked_weight[:, 2], stacker.stacked_flux[:, 3],
+                     stacker.stacked_weight[:, 3]):
                 results.write(f"{wavelength} {stacked_flux1} {stacked_weight1} "
-                              f"{stacked_flux2} {stacked_weight2}\n")
+                              f"{stacked_flux2} {stacked_weight2} "
+                              f"{stacked_flux3} {stacked_weight3} "
+                              f"{stacked_flux4} {stacked_weight4}\n")
 
         # compare with test
         self.compare_ascii_numeric(test_file, out_file)
@@ -747,7 +762,7 @@ class StackerTest(AbstractTest):  # pylint: disable=too-many-public-methods
         # case 2: error in size
         expected_message = (
             "Invalid array when attempting to set the stack error. Shapes do not match. "
-            "Expected (6989,). Found (10,)")
+            "Expected (7700,). Found (10,)")
         with self.assertRaises(StackerError) as context_manager:
             stacker.set_stacked_error(np.arange(10))
         self.compare_error_message(context_manager, expected_message)

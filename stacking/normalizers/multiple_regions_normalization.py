@@ -178,14 +178,14 @@ class MultipleRegionsNormalization(Normalizer):
                 f"{len(self.intervals)} intervals (keep in mind the zero-based "
                 "indexing in python)")
 
-        self.min_nrom_sn = config.getfloat("min norm sn")
-        if self.min_nrom_sn is None:
+        self.min_norm_sn = config.getfloat("min norm sn")
+        if self.min_norm_sn is None:
             raise NormalizerError("Missing argument 'min norm sn' required by "
                                   "MultipleRegionsNormalization")
-        if self.min_nrom_sn < 0:
+        if self.min_norm_sn < 0:
             raise NormalizerError(
                 "Invalid value for 'min norm sn'. Expected a positive number. "
-                f"Found: {self.min_nrom_sn}")
+                f"Found: {self.min_norm_sn}")
 
         self.num_processors = config.getint("num processors")
         if self.num_processors is None:
@@ -325,14 +325,18 @@ class MultipleRegionsNormalization(Normalizer):
                 " ".join(ACCEPTED_SAVE_FORMATS) +
                 f"'. Specified folder: {folder}")
         if file_format in ["csv", "txt"]:
-            norm_factors = pd.read_csv(filename, sep=r"\s+")
+            norm_factors = pd.read_csv(filename, sep=r'\s+')
 
             correction_factors_filename = (
                 f"{os.path.expandvars(folder)}correction_factors.{file_format}")
             if os.path.exists(correction_factors_filename):
                 correction_factors = pd.read_csv(
                     correction_factors_filename,
-                    sep=r"\s+")["correction_factor"].values
+                    sep=r'\s+',
+                    comment="#",
+                    header=None,
+                    names=["interval",
+                           "correction_factor"])["correction_factor"].values
             else:
                 raise NormalizerError(
                     f"Unable to find file correction_factors.{file_format}. "
@@ -431,6 +435,6 @@ class MultipleRegionsNormalization(Normalizer):
                            "chosen interval"]] = self.norm_factors.apply(
                                select_final_normalisation_factor,
                                axis=1,
-                               args=(self.correction_factors, self.min_nrom_sn),
+                               args=(self.correction_factors, self.min_norm_sn),
                                result_type='expand',
                            )

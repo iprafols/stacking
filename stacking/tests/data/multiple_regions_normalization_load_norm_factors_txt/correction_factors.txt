@@ -1,3 +1,4 @@
-interval correction_factor
-0 0.9195906745771542
-1 1.000000
+# interval correction_factor
+0 0.5497918128967285
+1 1.0
+2 2.4878695011138916
