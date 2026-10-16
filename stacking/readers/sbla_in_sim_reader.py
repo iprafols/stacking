@@ -128,11 +128,6 @@ class SblaInSimReader(Reader):
         ReaderError upon missing required variables
         ReaderError if the reading mode is not supported
         """
-        self.sbla_filename = config.get("sbla catalogue")
-        if self.sbla_filename is None:
-            raise ReaderError(
-                "Missing argument 'sbla catalogue' required by SblaInSimReader")
-
         self.num_processors = config.getint("num processors")
         if self.num_processors is None:
             raise ReaderError(
@@ -143,6 +138,11 @@ class SblaInSimReader(Reader):
                 f"Found: {self.num_processors}")
         if self.num_processors == 0:
             self.num_processors = max(1, multiprocessing.cpu_count() // 2)
+
+        self.sbla_filename = config.get("sbla catalogue")
+        if self.sbla_filename is None:
+            raise ReaderError(
+                "Missing argument 'sbla catalogue' required by SblaInSimReader")
 
         self.vel_sbla = config.getfloat("vel sbla")
         if self.vel_sbla is None:
@@ -189,12 +189,11 @@ class SblaInSimReader(Reader):
         -----
         ReaderError when no valid column for redshift is found when reading
         the catalogue
-        ReaderError when 'BI max' is passed but HDU does not contain BI_CIV
-        field
         """
         self.logger.progress("Reading SBLA catalogue from %s",
                              self.sbla_filename)
         catalogue = Table.read(self.sbla_filename)
+        catalogue.rename_columns(catalogue.colnames, [col.upper() for col in catalogue.colnames])
 
         keep_columns = ['NAME', 'GROUP', 'Z', "VEL_SBLA", "NOISE"]
         # Redshift
@@ -202,6 +201,14 @@ class SblaInSimReader(Reader):
             raise ReaderError(
                 "Error in reading SBLA Catalogue. No valid column for "
                 f"redshift found in {self.sbla_filename}")
+
+        # Noise
+        if 'NOISE' not in catalogue.colnames:
+            self.logger.warning(
+                "Column 'NOISE' not found in SBLA Catalogue. Assuming all spectra have noise")
+            catalogue['NOISE'] = np.ones(len(catalogue), dtype=bool)
+        else:
+            catalogue['NOISE'] = [str(val).strip().lower() == 'true' for val in catalogue['NOISE']]
 
         ## Sanity checks
         keep_rows = np.ones(len(catalogue), dtype=bool)
@@ -217,7 +224,7 @@ class SblaInSimReader(Reader):
 
         keep_rows &= np.isclose(catalogue['VEL_SBLA'], self.vel_sbla)
         self.logger.progress(
-            "and ve_sbla == %.0f: nb object in cat = %d",
+            "and vel_sbla == %.0f: nb object in cat = %d",
             self.vel_sbla, np.sum(keep_rows))
 
         catalogue.keep_columns(keep_columns)
