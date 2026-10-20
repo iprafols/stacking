@@ -40,7 +40,7 @@ defaults = update_default_options(defaults, {
 
 required_options = update_required_options(required_options, [
     "sbla catalogue",
-    "sbla vel",
+    "vel sbla",
 ])
 
 SUPPORTED_READING_MODES = ["spplate", "spec"]
